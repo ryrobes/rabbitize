@@ -1,10 +1,39 @@
- # Rabbitize (🐰👀)
+# Rabbitize (🐰👀)
 
-**SEE what your browser automation is doing.** A REST API that turns Playwright into an observable, stateful service perfect for AI agents, visual testing, and anyone who needs to automate the web. On top of that, most focus only on developers, leading to inherent complexity instead of "GSD" practicality.
+**SEE what your browser automation is doing.**
+
+*Turn Playwright into a live, stateful REST service - recording video, screenshots, and DOM snapshots for every step—so humans and AI agents can SEE automation, not just hope it worked.
+
+A REST API that turns Playwright into an observable, stateful service perfect for AI agents, visual testing, and anyone who needs to automate the web. On top of that, most focus only on developers, leading to inherent complexity instead of "GSD" practicality.
+
+# Rabbitize 🐰👀
+> **See every click.  Debug every pixel.**
+> A REST wrapper around Playwright that records video, screenshots, and metrics for each action, giving humans *and AI agents* full visual context.
+
+[![CI](https://...)](…) [![npm](https://...)](…) [![license](https://...)](…)
+
+```bash
+# Quick start
+npm install rabbitize
+npx rabbitize --url https://example.com --flow-builder
+```
+
+
+
+## Why Rabbitize?
+- Visual by default – video + before/after screenshots for every command.
+- Stateful sessions – keep browsers warm between API calls.
+- AI-ready – deterministic file paths for screenshots & DOM dumps.
+- Human-like coordinates – real mouse movement, not synthetic DOM clicks.
+- Click-to-code Flow Builder – non-devs can point-and-automate.
+
+**SOME KIND OF VIDEO** (2-4MB mp4)
 
 ## The Problem
 
-Traditional browser automation is blind. You write scripts, run them, and hope they work. When they fail, you're left guessing why.
+1 - Traditional browser automation is blind. You write scripts, run them, and hope they work. When they fail, you're left guessing why.
+
+2 - These tools are often geared toward developers and have a high bar for entry for people just looking to locally automate some workflow.
 
 ## The Solution
 
@@ -141,6 +170,7 @@ await fetch('/execute', {
 ## What You Get
 
 Every session creates:
+
 ```
 rabbitize-runs/
 └── session-id/
