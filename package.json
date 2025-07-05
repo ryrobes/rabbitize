@@ -1,10 +1,10 @@
 {
   "name": "rabbitize",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Transform visual UI interactions into automated processes",
   "main": "src/index.js",
   "bin": {
-    "rabbitize": "./src/index.js"
+    "rabbitize": "src/index.js"
   },
   "scripts": {
     "start": "node src/index.js",
@@ -27,7 +27,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ryrobes/rabbitize.git"
+    "url": "git+https://github.com/ryrobes/rabbitize.git"
   },
   "bugs": {
     "url": "https://github.com/ryrobes/rabbitize/issues"

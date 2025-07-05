@@ -15,6 +15,16 @@ rabbitize-runs/
 recordings/
 screenshots/
 
+resources/Screenshot*
+recon
+rabbitize-runs
+stats-tick.json
+
+README2.md
+README3.md
+README.md.3
+
+
 # CI/CD
 .github/
 .gitlab-ci.yml
