@@ -1,0 +1,34 @@
+# Test files
+**/*.test.js
+**/*.spec.js
+coverage/
+.nyc_output/
+
+# Development files
+.env
+.env.*
+*.log
+.DS_Store
+
+# Output directories
+rabbitize-runs/
+recordings/
+screenshots/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation source files
+docs/drafts/
+
+# Development configs
+.eslintrc*
+jest.config.js
+.prettierrc*
+
+# Any local development files
+*.local
+.vscode/
+.idea/

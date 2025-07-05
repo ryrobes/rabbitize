@@ -1,0 +1,100 @@
+<svg width="70" height="70" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark background -->
+  <rect width="70" height="70" fill="#000" />
+  
+  <style>
+    @keyframes glitch1 {
+      0%, 100% { opacity: 0; transform: translateX(0); }
+      10% { opacity: 1; transform: translateX(2px); }
+      20% { opacity: 1; transform: translateX(-2px); }
+      30% { opacity: 0.5; transform: translateX(1px); }
+      40% { opacity: 0; }
+    }
+    
+    @keyframes glitch2 {
+      0%, 100% { opacity: 0; transform: translateY(0); }
+      25% { opacity: 1; transform: translateY(-2px); }
+      35% { opacity: 0.8; transform: translateY(2px); }
+      45% { opacity: 0; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    
+    @keyframes blockFall {
+      0% { transform: translateY(-70px); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(70px); opacity: 0; }
+    }
+    
+    .block {
+      fill: #0ff;
+      filter: drop-shadow(0 0 4px #0ff);
+    }
+    
+    .block-glitch {
+      fill: #0ff;
+      mix-blend-mode: screen;
+    }
+    
+    .grid-line {
+      stroke: #0ff;
+      stroke-width: 0.5;
+      opacity: 0.2;
+    }
+  </style>
+  
+  <!-- Background grid -->
+  <g class="grid">
+    <line class="grid-line" x1="0" y1="10" x2="70" y2="10" />
+    <line class="grid-line" x1="0" y1="20" x2="70" y2="20" />
+    <line class="grid-line" x1="0" y1="30" x2="70" y2="30" />
+    <line class="grid-line" x1="0" y1="40" x2="70" y2="40" />
+    <line class="grid-line" x1="0" y1="50" x2="70" y2="50" />
+    <line class="grid-line" x1="0" y1="60" x2="70" y2="60" />
+    
+    <line class="grid-line" x1="10" y1="0" x2="10" y2="70" />
+    <line class="grid-line" x1="20" y1="0" x2="20" y2="70" />
+    <line class="grid-line" x1="30" y1="0" x2="30" y2="70" />
+    <line class="grid-line" x1="40" y1="0" x2="40" y2="70" />
+    <line class="grid-line" x1="50" y1="0" x2="50" y2="70" />
+    <line class="grid-line" x1="60" y1="0" x2="60" y2="70" />
+  </g>
+  
+  <!-- Main blocks -->
+  <g>
+    <!-- Center block - always visible, pulsing -->
+    <rect class="block" x="30" y="30" width="10" height="10" style="animation: pulse 2s ease-in-out infinite;" />
+    
+    <!-- Falling blocks -->
+    <rect class="block" x="20" y="0" width="10" height="10" style="animation: blockFall 3s ease-in-out infinite;" />
+    <rect class="block" x="40" y="0" width="10" height="10" style="animation: blockFall 3s ease-in-out infinite 0.5s;" />
+    <rect class="block" x="30" y="0" width="10" height="10" style="animation: blockFall 3s ease-in-out infinite 1s;" />
+    <rect class="block" x="10" y="0" width="10" height="10" style="animation: blockFall 3s ease-in-out infinite 1.5s;" />
+    <rect class="block" x="50" y="0" width="10" height="10" style="animation: blockFall 3s ease-in-out infinite 2s;" />
+    
+    <!-- Static blocks forming pattern -->
+    <rect class="block" x="20" y="40" width="10" height="10" style="opacity: 0.6;" />
+    <rect class="block" x="40" y="40" width="10" height="10" style="opacity: 0.6;" />
+    <rect class="block" x="30" y="50" width="10" height="10" style="opacity: 0.4;" />
+    
+    <!-- Glitch effect blocks -->
+    <rect class="block-glitch" x="30" y="30" width="10" height="10" style="animation: glitch1 4s infinite;" />
+    <rect class="block-glitch" x="30" y="30" width="10" height="10" style="animation: glitch2 4s infinite 0.1s;" />
+  </g>
+  
+  <!-- Scanline effect -->
+  <rect x="0" y="0" width="70" height="2" fill="#0ff" opacity="0.5">
+    <animate attributeName="y" 
+             values="0;70;0" 
+             dur="4s" 
+             repeatCount="indefinite" />
+    <animate attributeName="opacity" 
+             values="0.5;0.2;0.5" 
+             dur="4s" 
+             repeatCount="indefinite" />
+  </rect>
+</svg>
