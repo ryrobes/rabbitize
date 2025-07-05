@@ -5024,25 +5024,25 @@ const domMarkdown = await this.page.evaluate(() => {
           await this.firestore.addMetrics(metrics);
 
           // POST metrics to local endpoint
-          try {
-            await fetch('http://localhost:8899/api/worker-stats', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                'client-id': this.clientId,
-                'test-id': this.testId,
-                'stats-map': metrics
-              })
-            }).catch(error => {
-              // Silently handle endpoint errors - don't want to spam logs
-              //console.debug('Failed to post metrics:', error);
-            });
-          } catch (error) {
-            // Silently handle endpoint errors - don't want to spam logs
-            //console.debug('Failed to post metrics:', error);
-          }
+          // try {
+          //   await fetch('http://localhost:8899/api/worker-stats', {
+          //     method: 'POST',
+          //     headers: {
+          //       'Content-Type': 'application/json',
+          //     },
+          //     body: JSON.stringify({
+          //       'client-id': this.clientId,
+          //       'test-id': this.testId,
+          //       'stats-map': metrics
+          //     })
+          //   }).catch(error => {
+          //     // Silently handle endpoint errors - don't want to spam logs
+          //     //console.debug('Failed to post metrics:', error);
+          //   });
+          // } catch (error) {
+          //   // Silently handle endpoint errors - don't want to spam logs
+          //   //console.debug('Failed to post metrics:', error);
+          // }
         } catch (error) {
           console.debug('Failed to collect metrics:', error);
         }

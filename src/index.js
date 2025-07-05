@@ -508,10 +508,11 @@ async function main() {
         });
 
         // Log streaming endpoints when session starts
+        const serverHost = os.hostname();
         logger.log(chalk.bold.cyan('\n📹 Live Stream Available:'));
-        logger.log(chalk.cyan(`  Direct: http://localhost:${argv.port}/stream/${actualClientId}/${actualTestId}/${actualSessionId}`));
-        logger.log(chalk.cyan(`  Viewer: http://localhost:${argv.port}/stream-viewer/${actualClientId}/${actualTestId}/${actualSessionId}`));
-        logger.log(chalk.cyan(`  All Sessions: http://localhost:${argv.port}/streaming`));
+        logger.log(chalk.cyan(`  Direct: http://${serverHost}:${argv.port}/stream/${actualClientId}/${actualTestId}/${actualSessionId}`));
+        logger.log(chalk.cyan(`  Viewer: http://${serverHost}:${argv.port}/stream-viewer/${actualClientId}/${actualTestId}/${actualSessionId}`));
+        logger.log(chalk.cyan(`  All Sessions: http://${serverHost}:${argv.port}/streaming`));
 
         // If a command was provided, queue it after initialization
         if (command) {
@@ -1581,6 +1582,11 @@ async function main() {
       }
     });
 
+    // Root redirect to streaming dashboard
+    app.get('/', (req, res) => {
+      res.redirect('/streaming');
+    });
+
     // Streaming dashboard - shows all active sessions
     app.get('/streaming', async (req, res) => {
 
@@ -1779,7 +1785,7 @@ async function main() {
 
         // Check if this is an external session with a different port
         let streamPort = argv.port; // Default to current process port
-        let streamHost = 'localhost';
+        let streamHost = req.get('host') ? req.get('host').split(':')[0] : os.hostname();
 
         // Check session state for external port info
         if (sessionState && sessionState.isExternal && sessionState.port) {
@@ -2215,7 +2221,7 @@ async function findAvailablePort(startPort) {
 }
 
 // Helper function to wait for a port to be ready
-async function waitForPort(port, timeout = 10000) {
+async function waitForPort(port, timeout = 10000, host = os.hostname()) {
   const startTime = Date.now();
   const http = require('http');
 
@@ -2223,7 +2229,7 @@ async function waitForPort(port, timeout = 10000) {
     try {
       // Try to make an HTTP request to /status endpoint
       const response = await new Promise((resolve, reject) => {
-        const req = http.get(`http://localhost:${port}/status`, { timeout: 1000 }, (res) => {
+        const req = http.get(`http://${host}:${port}/status`, { timeout: 1000 }, (res) => {
           resolve(res);
         });
 

@@ -4,6 +4,8 @@
     <title>RABBITIZE /// STREAMING DASHBOARD</title>
     <link rel="stylesheet" href="/resources/streaming/cyberpunk.css">
     <link rel="icon" type="image/x-icon" href="/resources/streaming/favicon.png">
+    <!-- Monaco Editor for syntax highlighting in modals -->
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
 </head>
 <body>
     <div class="container">
@@ -186,7 +188,7 @@
                     </div>
                     <div class="actions">
                         ${session.status === 'active' ? `
-                            <a href="${session.isExternal && session.port ? `http://localhost:${session.port}` : ''}/stream/${session.clientId}/${session.testId}/${session.sessionId}"
+                            <a href="${session.isExternal && session.port ? `http://${window.location.hostname}:${session.port}` : ''}/stream/${session.clientId}/${session.testId}/${session.sessionId}"
                                class="action-link" target="_blank">
                                 [ DIRECT STREAM ]
                             </a>
@@ -751,16 +753,22 @@
 
                         <div class="command-section">
                             <h4>CLI BATCH MODE</h4>
-                            <pre class="command-box"><code>${cliCommand}</code></pre>
-                            <button class="copy-btn" onclick="copyToClipboard(this.previousElementSibling.textContent)">[ COPY ]</button>
+                            <div id="cli-editor" style="height: 200px; border: 1px solid #0ff;"></div>
+                            <button class="copy-btn" onclick="copyCommandContent('cli')">[ COPY ]</button>
                         </div>
 
-                        <div class="command-section">
+                        <div class="command-section" style="margin-top: 20px;">
                             <h4>CURL SEQUENCE</h4>
-                            <pre class="command-box"><code>${curlCommands}</code></pre>
-                            <button class="copy-btn" onclick="copyToClipboard(this.previousElementSibling.textContent)">[ COPY ]</button>
+                            <div id="curl-editor" style="height: 300px; border: 1px solid #0ff;"></div>
+                            <button class="copy-btn" onclick="copyCommandContent('curl')">[ COPY ]</button>
                         </div>
                     `;
+                    
+                    // Store commands for Monaco initialization
+                    window.pendingCommands = {
+                        cli: cliCommand,
+                        curl: curlCommands
+                    };
                 } else {
                     content += `<p style="text-align: center; opacity: 0.6;">No commands found for this session</p>`;
                 }
@@ -769,6 +777,47 @@
 
                 document.getElementById('modal-body').innerHTML = content;
                 modal.style.display = 'block';
+                
+                // Initialize Monaco editors if we have commands
+                if (window.pendingCommands) {
+                    initializeMonaco(() => {
+                        // Create CLI editor
+                        if (document.getElementById('cli-editor')) {
+                            cliEditor = monaco.editor.create(document.getElementById('cli-editor'), {
+                                value: window.pendingCommands.cli,
+                                language: 'shell',
+                                theme: 'cyberpunk-dark',
+                                readOnly: true,
+                                minimap: { enabled: false },
+                                scrollBeyondLastLine: false,
+                                renderLineHighlight: 'none',
+                                lineNumbers: 'off',
+                                glyphMargin: false,
+                                folding: false,
+                                automaticLayout: true,
+                                wordWrap: 'on'
+                            });
+                        }
+                        
+                        // Create cURL editor
+                        if (document.getElementById('curl-editor')) {
+                            curlEditor = monaco.editor.create(document.getElementById('curl-editor'), {
+                                value: window.pendingCommands.curl,
+                                language: 'shell',
+                                theme: 'cyberpunk-dark',
+                                readOnly: true,
+                                minimap: { enabled: false },
+                                scrollBeyondLastLine: false,
+                                renderLineHighlight: 'none',
+                                lineNumbers: 'off',
+                                glyphMargin: false,
+                                folding: false,
+                                automaticLayout: true,
+                                wordWrap: 'on'
+                            });
+                        }
+                    });
+                }
 
             } catch (error) {
                 console.error('Failed to load session details:', error);
@@ -787,7 +836,7 @@
   --test-id "${details.testId}" \\
   --exit-on-end true \\
   --process-video true \\
-  --batch-url "${details.initialUrl || 'https://example.com'}" \\
+  --batch-url "${details.initialUrl || 'https://ryrob.es'}" \\
   --batch-commands='[
 ${commands}
   ]'`;
@@ -798,19 +847,19 @@ ${commands}
             let commands = [];
 
             // Start command
-            commands.push(`curl -s -X POST http://localhost:3000/start \\
+            commands.push(`curl -s -X POST http://${window.location.hostname}:${window.location.port}/start \\
   -H "Content-Type: application/json" \\
-  -d '{"url": "${details.initialUrl || 'https://example.com'}"}' | jq`);
+  -d '{"url": "${details.initialUrl || 'https://ryrob.es'}"}' | jq`);
 
             // Execute commands
             details.commands.forEach(cmd => {
-                commands.push(`curl -s -X POST http://localhost:3000/execute \\
+                commands.push(`curl -s -X POST http://${window.location.hostname}:${window.location.port}/execute \\
   -H "Content-Type: application/json" \\
   -d '{"command": ${JSON.stringify(cmd)}}' | jq`);
             });
 
             // End command
-            commands.push(`curl -s -X POST http://localhost:3000/end | jq`);
+            commands.push(`curl -s -X POST http://${window.location.hostname}:${window.location.port}/end | jq`);
 
             return commands.join('\n');
         }
@@ -821,7 +870,43 @@ ${commands}
             if (modal) {
                 modal.style.display = 'none';
             }
+            
+            // Dispose Monaco editors
+            if (cliEditor) {
+                cliEditor.dispose();
+                cliEditor = null;
+            }
+            if (curlEditor) {
+                curlEditor.dispose();
+                curlEditor = null;
+            }
+            window.pendingCommands = null;
         }
+        
+        // Copy command content from Monaco editor
+        function copyCommandContent(type) {
+            let text = '';
+            if (type === 'cli' && cliEditor) {
+                text = cliEditor.getValue();
+            } else if (type === 'curl' && curlEditor) {
+                text = curlEditor.getValue();
+            }
+            
+            if (text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    // Visual feedback
+                    event.target.textContent = '[ COPIED! ]';
+                    setTimeout(() => {
+                        event.target.textContent = '[ COPY ]';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+            }
+        }
+        
+        // Make copy function globally accessible
+        window.copyCommandContent = copyCommandContent;
 
         // Copy to clipboard
         function copyToClipboard(text) {
@@ -1371,7 +1456,7 @@ ${commands}
                                     <span>${orphan.clientId}/${orphan.testId}/${orphan.sessionId}</span>
                                 </div>
                                 <div class="orphan-actions">
-                                    <a href="http://localhost:${orphan.port}/streaming" target="_blank" class="action-btn">
+                                    <a href="http://${window.location.hostname}:${orphan.port}/streaming" target="_blank" class="action-btn">
                                         [ OPEN ]
                                     </a>
                                 </div>
@@ -1409,6 +1494,49 @@ ${commands}
         window.terminateProcess = terminateProcess;
         window.scanForOrphans = scanForOrphans;
     </script>
+    
+    <!-- Monaco Editor Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <script>
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+        
+        // Initialize Monaco when needed
+        let monacoReady = false;
+        let cliEditor, curlEditor;
+        
+        function initializeMonaco(callback) {
+            if (monacoReady) {
+                callback();
+                return;
+            }
+            
+            require(['vs/editor/editor.main'], function() {
+                // Define cyberpunk theme
+                monaco.editor.defineTheme('cyberpunk-dark', {
+                    base: 'vs-dark',
+                    inherit: true,
+                    rules: [
+                        { token: 'comment', foreground: '888888' },
+                        { token: 'string', foreground: '00ffff' },
+                        { token: 'keyword', foreground: 'ffff00' },
+                        { token: 'number', foreground: 'ff00ff' }
+                    ],
+                    colors: {
+                        'editor.background': '#0a0a0a',
+                        'editor.foreground': '#ffffff',
+                        'editor.lineHighlightBackground': '#1a1a1a',
+                        'editorCursor.foreground': '#00ffff',
+                        'editor.selectionBackground': '#00ffff33'
+                    }
+                });
+                monaco.editor.setTheme('cyberpunk-dark');
+                
+                monacoReady = true;
+                callback();
+            });
+        }
+    </script>
+    
     <script src="/resources/streaming/dock.js"></script>
 </body>
 </html>

@@ -149,7 +149,7 @@
                     </div>
                     <div class="actions">
                         ${session.status === 'active' ? `
-                            <a href="${session.isExternal && session.port ? `http://localhost:${session.port}` : ''}/stream/${session.clientId}/${session.testId}/${session.sessionId}"
+                            <a href="${session.isExternal && session.port ? `http://${window.location.hostname}:${session.port}` : ''}/stream/${session.clientId}/${session.testId}/${session.sessionId}"
                                class="action-link" target="_blank">
                                 [ DIRECT STREAM ]
                             </a>

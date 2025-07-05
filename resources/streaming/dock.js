@@ -91,7 +91,7 @@
                         ${clientId} / ${testId}
                     </div>
                     <div class="dock-preview-image">
-                        <img src="${sessionData?.isExternal && sessionData?.port ? `http://localhost:${sessionData.port}` : ''}/stream/${clientId}/${testId}/${sessionId}?cid=hover-${Date.now()}-${Math.random().toString(36).substr(2, 5)}"
+                        <img src="${sessionData?.isExternal && sessionData?.port ? `http://${window.location.hostname}:${sessionData.port}` : ''}/stream/${clientId}/${testId}/${sessionId}?cid=hover-${Date.now()}-${Math.random().toString(36).substr(2, 5)}"
                              alt="Live preview"
                              onerror="this.src='/rabbitize-runs/${clientId}/${testId}/${sessionId}/latest.jpg'; this.onerror=null;">
                     </div>

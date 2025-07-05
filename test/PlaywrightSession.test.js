@@ -44,7 +44,7 @@ jest.mock('playwright', () => ({
             click: jest.fn().mockResolvedValue(null)
           },
           on: jest.fn(),
-          url: jest.fn().mockResolvedValue('https://example.com'),
+          url: jest.fn().mockResolvedValue('https://ryrob.es'),
           title: jest.fn().mockResolvedValue('Test Page'),
           screenshot: jest.fn().mockResolvedValue(null)
         })
@@ -159,7 +159,7 @@ describe('Batch Command Execution', () => {
     // Start session
     await request(app)
       .post('/start')
-      .send({ url: 'https://example.com' })
+      .send({ url: 'https://ryrob.es' })
       .expect(200);
 
     // Execute batch of commands
@@ -211,7 +211,7 @@ describe('Batch Command Execution', () => {
     // Start session
     await request(app)
       .post('/start')
-      .send({ url: 'https://example.com' })
+      .send({ url: 'https://ryrob.es' })
       .expect(200);
 
     // Execute batch with invalid command
@@ -236,7 +236,7 @@ describe('Batch Command Execution', () => {
     // Start session
     await request(app)
       .post('/start')
-      .send({ url: 'https://example.com' })
+      .send({ url: 'https://ryrob.es' })
       .expect(200);
 
     // Execute single command

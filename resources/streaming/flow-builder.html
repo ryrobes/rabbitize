@@ -207,7 +207,7 @@
     <script>
         // Configuration
         const PORT = {{PORT}};
-        const FLOW_TEST_ID = '{{FLOW_TEST_ID}}';
+        let FLOW_TEST_ID = '{{FLOW_TEST_ID}}';
         const CLIENT_ID = 'flow-builder';
 
         // State
@@ -237,9 +237,239 @@
             setupEventListeners();
             updateUI();
             initializeMonacoEditor();
+            // Delay session check to ensure Monaco is ready
+            setTimeout(() => {
+                checkForExistingSession();
+            }, 500);
+        });
+        
+        // Listen for storage changes from other tabs
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY) {
+                if (e.newValue && !sessionActive) {
+                    // Another tab started a session
+                    const otherTabState = JSON.parse(e.newValue);
+                    if (otherTabState.sessionActive) {
+                        console.log('Flow Builder session started in another tab');
+                    }
+                } else if (!e.newValue && sessionActive) {
+                    // Another tab cleared the session
+                    console.log('Session was ended in another tab');
+                }
+            }
         });
 
         // Note: We don't need cleanup on unload - spawned processes handle their own lifecycle
+
+        // State Management Functions
+        const STORAGE_KEY = 'rabbitize-flow-builder-state';
+        
+        function saveFlowBuilderState() {
+            if (!sessionActive) {
+                console.log('Not saving state - session not active');
+                return;
+            }
+            
+            // Extract just the commands from the history (not the wrapper objects)
+            const commands = commandHistory
+                .filter(item => item.command && (item.command.url || Array.isArray(item.command)))
+                .map(item => {
+                    if (item.command.url) {
+                        return [":navigate", item.command.url];
+                    }
+                    return item.command;
+                });
+            
+            const state = {
+                sessionActive,
+                sessionId,
+                sessionPort,
+                spawnedSessionId,
+                url: urlInput.value,
+                lastCoordinates,
+                commands, // Save clean command array
+                editorContent: editor ? editor.getValue() : null,
+                timestamp: Date.now(),
+                clientId: CLIENT_ID,
+                testId: FLOW_TEST_ID
+            };
+            
+            console.log('Saving Flow Builder state:', {
+                sessionPort: state.sessionPort,
+                commandCount: commands.length,
+                url: state.url
+            });
+            
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                console.log('State saved successfully');
+            } catch (error) {
+                console.error('Failed to save Flow Builder state:', error);
+            }
+        }
+        
+        function loadFlowBuilderState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) return null;
+                
+                const state = JSON.parse(saved);
+                
+                // Check if state is too old (>1 hour)
+                if (Date.now() - state.timestamp > 3600000) {
+                    clearFlowBuilderState();
+                    return null;
+                }
+                
+                return state;
+            } catch (error) {
+                console.error('Failed to load Flow Builder state:', error);
+                return null;
+            }
+        }
+        
+        function clearFlowBuilderState() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (error) {
+                console.error('Failed to clear Flow Builder state:', error);
+            }
+        }
+        
+        async function checkForExistingSession() {
+            console.log('Checking for existing Flow Builder session...');
+            const savedState = loadFlowBuilderState();
+            console.log('Loaded state:', savedState);
+            
+            if (!savedState || !savedState.sessionActive) {
+                console.log('No active session found in localStorage');
+                return;
+            }
+            
+            // Check if the saved session is still valid by attempting to reach it
+            try {
+                console.log(`Checking if session on port ${savedState.sessionPort} is still active...`);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 1000);
+                
+                const response = await fetch(`http://${window.location.hostname}:${savedState.sessionPort}/status`, {
+                    method: 'GET',
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    // Session is still active, silently reconnect
+                    console.log('Session is still active! Reconnecting...');
+                    await reconnectToSession(savedState);
+                } else {
+                    // Session is not responding, clear state
+                    console.log('Session not responding, clearing state');
+                    clearFlowBuilderState();
+                }
+            } catch (error) {
+                // Session is not reachable, clear state silently
+                console.log('Error checking session:', error.message);
+                clearFlowBuilderState();
+            }
+        }
+        
+        async function reconnectToSession(savedState) {
+            try {
+                console.log('Starting reconnection process...');
+                
+                // Restore the original test ID!
+                if (savedState.testId) {
+                    FLOW_TEST_ID = savedState.testId;
+                    console.log('Restored original test ID:', FLOW_TEST_ID);
+                }
+                
+                // Restore state variables
+                sessionActive = true;
+                sessionId = savedState.sessionId;
+                sessionPort = savedState.sessionPort;
+                spawnedSessionId = savedState.spawnedSessionId;
+                lastCoordinates = savedState.lastCoordinates || { x: 0, y: 0 };
+                streamConnected = false; // Will be set to true when stream connects
+                
+                // Rebuild command history from saved commands
+                commandHistory = [];
+                if (savedState.commands && Array.isArray(savedState.commands)) {
+                    // Add navigate command first if it exists
+                    const navigateCmd = savedState.commands.find(cmd => cmd[0] === ':navigate');
+                    if (navigateCmd) {
+                        commandHistory.push({
+                            type: 'start',
+                            command: { url: navigateCmd[1] },
+                            timestamp: savedState.timestamp
+                        });
+                    }
+                    
+                    // Add all other commands
+                    savedState.commands.forEach(cmd => {
+                        if (cmd[0] !== ':navigate') {
+                            commandHistory.push({
+                                type: cmd[0].replace(':', ''),
+                                command: cmd,
+                                timestamp: savedState.timestamp
+                            });
+                        }
+                    });
+                }
+                
+                // Restore UI
+                urlInput.value = savedState.url;
+                urlInput.disabled = true;
+                
+                // Restore editor content - use saved commands
+                if (savedState.commands) {
+                    const jsonContent = JSON.stringify(savedState.commands, null, 2);
+                    // Wait for editor to be ready
+                    const setEditorContent = () => {
+                        if (editor) {
+                            editor.setValue(jsonContent);
+                        } else {
+                            // Try again in 100ms
+                            setTimeout(setEditorContent, 100);
+                        }
+                    };
+                    setEditorContent();
+                }
+                
+                // Update UI first
+                updateUI();
+                
+                // Reconnect to stream with a small delay to ensure process is ready
+                setTimeout(() => {
+                    connectToStream();
+                }, 500);
+                
+                // Update coordinates display if we have saved coordinates
+                if (lastCoordinates.x !== 0 || lastCoordinates.y !== 0) {
+                    coordinatesDisplay.textContent = `X: ${lastCoordinates.x}, Y: ${lastCoordinates.y}`;
+                    // Show position marker if we have coordinates
+                    positionMarker.style.display = 'block';
+                }
+                
+                console.log('Successfully reconnected to Flow Builder session');
+                console.log('Session port:', sessionPort);
+                console.log('Session ID:', sessionId);
+                console.log('Spawned Session ID:', spawnedSessionId);
+                console.log('Restored', commandHistory.length, 'commands');
+            } catch (error) {
+                console.error('Failed to reconnect to session:', error);
+                clearFlowBuilderState();
+                
+                // Reset to clean state
+                sessionActive = false;
+                sessionId = null;
+                sessionPort = PORT;
+                spawnedSessionId = null;
+                urlInput.disabled = false;
+                updateUI();
+            }
+        }
 
         // Event Listeners
         function setupEventListeners() {
@@ -322,12 +552,28 @@
                 url = 'https://' + url;
                 urlInput.value = url;
             }
+            
+            // Check if there's an existing session and clean it up silently
+            const existingState = loadFlowBuilderState();
+            if (existingState && existingState.sessionActive) {
+                // Try to end the existing session
+                try {
+                    await fetch(`http://${window.location.hostname}:${existingState.sessionPort}/end`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                } catch (error) {
+                    console.error('Failed to end existing session:', error);
+                }
+                
+                clearFlowBuilderState();
+            }
 
             try {
                 // Note: We don't kill existing sessions - they'll clean themselves up
 
                 // Spawn a new isolated session
-                const response = await fetch(`http://localhost:${PORT}/spawn-session`, {
+                const response = await fetch(`http://${window.location.hostname}:${PORT}/spawn-session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -347,7 +593,7 @@
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 // Now start the session on the spawned process
-                const startResponse = await fetch(`http://localhost:${sessionPort}/start`, {
+                const startResponse = await fetch(`http://${window.location.hostname}:${sessionPort}/start`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -372,6 +618,9 @@
                 // Update UI
                 updateUI();
                 urlInput.disabled = true;
+                
+                // Save state after successful session start
+                saveFlowBuilderState();
 
             } catch (error) {
                 console.error('Failed to start session:', error);
@@ -384,7 +633,7 @@
 
             try {
                 // End the session on the spawned process
-                await fetch(`http://localhost:${sessionPort}/end`, {
+                await fetch(`http://${window.location.hostname}:${sessionPort}/end`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -405,6 +654,9 @@
                 urlInput.value = '';
 
                 updateUI();
+                
+                // Clear saved state
+                clearFlowBuilderState();
 
                 // Redirect to dashboard after ending session
                 setTimeout(() => {
@@ -419,13 +671,38 @@
 
         // Stream Connection
         function connectToStream() {
-            if (!sessionActive || !sessionId) return;
+            if (!sessionActive || !sessionId) {
+                console.log('Cannot connect to stream - no active session');
+                return;
+            }
 
-            const streamUrl = `http://localhost:${sessionPort}/stream/${CLIENT_ID}/${FLOW_TEST_ID}/${sessionId}?cid=flow-builder-${Date.now()}`;
+            console.log(`Connecting to stream on port ${sessionPort}...`);
+            
+            // Force a fresh connection with unique ID and timestamp
+            const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            const streamUrl = `http://${window.location.hostname}:${sessionPort}/stream/${CLIENT_ID}/${FLOW_TEST_ID}/${sessionId}?cid=flow-builder-${uniqueId}&t=${Date.now()}`;
 
+            // Clear any existing stream first
+            if (browserStream.src) {
+                console.log('Clearing existing stream...');
+                browserStream.src = '';
+            }
+            
+            // Immediately show stream elements for reconnection
+            browserStream.style.display = 'block';
+            viewportPlaceholder.style.display = 'none';
+            clickOverlay.style.display = 'block';
+            
+            // Set new stream URL
+            console.log('Setting stream URL:', streamUrl);
             browserStream.src = streamUrl;
-            browserStream.onload = () => {
+            
+            // Also handle the 'load' event for mJPEG streams
+            const handleStreamReady = () => {
                 streamConnected = true;
+                console.log('Stream connected successfully');
+                
+                // Make sure stream is visible
                 browserStream.style.display = 'block';
                 viewportPlaceholder.style.display = 'none';
                 clickOverlay.style.display = 'block';
@@ -437,9 +714,24 @@
 
                 updateUI();
             };
+            
+            browserStream.onload = handleStreamReady;
+            
+            // For mJPEG streams, the load event might not fire, so also check after a delay
+            setTimeout(() => {
+                if (!streamConnected && browserStream.src && browserStream.naturalWidth > 0) {
+                    console.log('Stream appears ready (naturalWidth check)');
+                    handleStreamReady();
+                }
+            }, 1000);
 
-            browserStream.onerror = () => {
-                console.error('Failed to connect to stream');
+            browserStream.onerror = (e) => {
+                console.error('Stream error:', e);
+                console.error('Failed to connect to stream, retrying...');
+                // Hide elements on error
+                browserStream.style.display = 'none';
+                viewportPlaceholder.style.display = 'flex';
+                clickOverlay.style.display = 'none';
                 setTimeout(connectToStream, 1000); // Retry
             };
         }
@@ -488,15 +780,24 @@
         }
 
         function getActualCoordinates(clickX, clickY, displayWidth, displayHeight) {
+            // Prevent division by zero
+            if (!displayWidth || !displayHeight || displayWidth === 0 || displayHeight === 0) {
+                return { x: 0, y: 0 };
+            }
+            
             const actualWidth = 1920;
             const actualHeight = 1080;
 
             const scaleX = actualWidth / displayWidth;
             const scaleY = actualHeight / displayHeight;
 
+            // Ensure finite values
+            const x = Math.round(clickX * scaleX);
+            const y = Math.round(clickY * scaleY);
+            
             return {
-                x: Math.round(clickX * scaleX),
-                y: Math.round(clickY * scaleY)
+                x: isFinite(x) ? x : 0,
+                y: isFinite(y) ? y : 0
             };
         }
 
@@ -506,6 +807,12 @@
 
         // Resize overlay to match stream
         function resizeOverlay() {
+            // Make sure browserStream has dimensions before calculating
+            if (!browserStream || browserStream.width === 0 || browserStream.height === 0) {
+                console.log('Browser stream not ready for resize');
+                return;
+            }
+            
             const imgRect = browserStream.getBoundingClientRect();
             const parentRect = browserStream.parentElement.getBoundingClientRect();
 
@@ -519,8 +826,10 @@
             if (positionMarker.style.display === 'block' && lastCoordinates.x !== 0) {
                 const scaleX = imgRect.width / 1920;
                 const scaleY = imgRect.height / 1080;
-                positionMarker.style.left = (lastCoordinates.x * scaleX) + 'px';
-                positionMarker.style.top = (lastCoordinates.y * scaleY) + 'px';
+                if (isFinite(scaleX) && isFinite(scaleY)) {
+                    positionMarker.style.left = (lastCoordinates.x * scaleX) + 'px';
+                    positionMarker.style.top = (lastCoordinates.y * scaleY) + 'px';
+                }
             }
         }
 
@@ -775,7 +1084,7 @@
             try {
                 // Execute all commands
                 for (const command of commands) {
-                    const response = await fetch(`http://localhost:${sessionPort}/execute`, {
+                    const response = await fetch(`http://${window.location.hostname}:${sessionPort}/execute`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ command })
@@ -834,8 +1143,8 @@
                     inherit: true,
                     rules: [
                         { token: 'comment', foreground: '888888' },
-                        { token: 'string', foreground: '0ff' },
-                        { token: 'keyword', foreground: 'ff0' }
+                        { token: 'string', foreground: '00ffff' },
+                        { token: 'keyword', foreground: 'ffff00' }
                     ],
                     colors: {
                         'editor.background': '#0a0a0a',
@@ -884,6 +1193,9 @@
                 const lastLine = editor.getModel().getLineCount();
                 editor.revealLine(lastLine);
             }
+            
+            // Save state after adding to history
+            saveFlowBuilderState();
         }
 
         function formatCommandForEditor(type, command) {
@@ -904,7 +1216,7 @@
                 try {
                     // End any active session first
                     if (sessionActive) {
-                        await fetch(`http://localhost:${sessionPort}/end`, {
+                        await fetch(`http://${window.location.hostname}:${sessionPort}/end`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' }
                         }).catch(() => {}); // Ignore errors, just try to end it
@@ -941,6 +1253,9 @@
                     // Update UI state
                     updateUI();
                     updateEditorStatus('Flow Builder reset');
+                    
+                    // Clear saved state since we reset everything
+                    clearFlowBuilderState();
 
                 } catch (error) {
                     console.error('Error during reset:', error);
@@ -994,7 +1309,7 @@
                         continue; // Skip navigate as session already started with URL
                     }
 
-                    const response = await fetch(`http://localhost:${sessionPort}/execute`, {
+                    const response = await fetch(`http://${window.location.hostname}:${sessionPort}/execute`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ command })
@@ -1072,19 +1387,19 @@
             const commands = getCommandsFromEditor();
             if (!commands) return;
 
-            const curls = [`curl -X POST http://localhost:${PORT}/start \\
+            const curls = [`curl -X POST http://${window.location.hostname}:${PORT}/start \\
   -H "Content-Type: application/json" \\
   -d '{"url": "${urlInput.value}", "clientId": "${CLIENT_ID}", "testId": "${FLOW_TEST_ID}"}'`];
 
             commands.forEach(command => {
                 if (command[0] !== ':navigate') {  // Skip navigate as it's already in start
-                    curls.push(`curl -X POST http://localhost:${PORT}/execute \\
+                    curls.push(`curl -X POST http://${window.location.hostname}:${PORT}/execute \\
   -H "Content-Type: application/json" \\
   -d '{"command": ${JSON.stringify(command)}}'`);
                 }
             });
 
-            curls.push(`curl -X POST http://localhost:${PORT}/end`);
+            curls.push(`curl -X POST http://${window.location.hostname}:${PORT}/end`);
 
             navigator.clipboard.writeText(curls.join('\n\n')).then(() => {
                 updateEditorStatus('cURL commands copied!');
@@ -1122,6 +1437,8 @@
             // Navigation buttons
             document.getElementById('back-btn').disabled = !sessionActive;
             document.getElementById('forward-btn').disabled = !sessionActive;
+            
+            console.log('UI Updated - sessionActive:', sessionActive, 'streamConnected:', streamConnected);
         }
     </script>
 </body>
