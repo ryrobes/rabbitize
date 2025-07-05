@@ -1,6 +1,4 @@
- # Rabbitize
- ## ('🐰👀')
-
+ # Rabbitize (🐰👀)
 
 **SEE what your browser automation is doing.** A REST API that turns Playwright into an observable, stateful service perfect for AI agents, visual testing, and anyone who needs to automate the web. On top of that, most focus only on developers, leading to inherent complexity instead of "GSD" practicality.
 
@@ -173,11 +171,12 @@ Watch automations run live at `http://localhost:3000/streaming`:
 
 ## Why
 
-  You want to SEE your automation work
-  You need to maintain state between actions
-  You're building an AI that browses the web
-  You want automation without coding
-  You need (a boatload of) forensic debugging data
+- You want to SEE your automation work
+- You need to maintain state between actions
+- You're building an AI that browses the web
+- You want automation without coding
+- You need (a boatload of) forensic debugging data
+
 
 ## License
 
