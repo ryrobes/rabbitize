@@ -171,15 +171,13 @@ Real coordinates. Real mouse movement. Real results.
 
 Watch automations run live at `http://localhost:3000/streaming`:
 
-![Dashboard Preview](docs/dashboard.png)
-
 ## Why
 
-✅ You want to SEE your automation work
-✅ You need to maintain state between actions
-✅ You're building an AI that browses the web
-✅ You want automation without coding
-✅ You need (a boatload of) forensic debugging data
+  You want to SEE your automation work
+  You need to maintain state between actions
+  You're building an AI that browses the web
+  You want automation without coding
+  You need (a boatload of) forensic debugging data
 
 ## License
 
