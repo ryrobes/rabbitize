@@ -1,6 +1,6 @@
 {
   "name": "rabbitize",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Transform visual UI interactions into automated processes",
   "main": "src/index.js",
   "bin": {

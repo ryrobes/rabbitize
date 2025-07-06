@@ -406,6 +406,15 @@ TOOLS = [
                 },
             },
             {
+                "name": "keypress",
+                "description": "Type text into focused element (works best one key at a time)",
+                "parameters": {
+                    "type": "object",
+                    "properties": {"x": {"type": "string", "description": "character(s) to enter into focused element"}},
+                    "required": ["x"],
+                },
+            },
+            {
                 "name": "scroll_wheel_down",
                 "description": "Scroll down by 200 pixels",
                 "parameters": {
@@ -1583,6 +1592,7 @@ def send_command(rabbitize_url: str, session_id: str, tool_name: str, args: dict
         "move_mouse": [":move-mouse", ":to", args.get("x"), args.get("y")],
         "click_hold": [":click-hold"],
         "click_release": [":click-release"],
+        "keypress": [":keypress", args.get("x")],
         "scroll_wheel_up": [":scroll-wheel-up", args.get("x")],
         "scroll_wheel_down": [":scroll-wheel-down", args.get("x")],
         "report_done": ["report_done"],
