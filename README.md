@@ -24,7 +24,7 @@ npx rabbitize # start server for interactive sessions
 - Click-to-code Flow Builder – non-devs can point-and-automate.
 - Declarative - just some simple JSON
 
-**SOME KIND OF VIDEO** (2-4MB mp4)
+![video](https://github.com/user-attachments/assets/5f7ff405-1c11-48f6-810f-78aa8b73bf91)
 
 ## The Problem
 
