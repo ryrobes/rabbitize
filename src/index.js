@@ -21,13 +21,13 @@ const argv = yargs(hideBin(process.argv))
     alias: 'c',
     type: 'string',
     description: 'Client ID',
-    demandOption: true
+    default: 'interactive'
   })
   .option('test-id', {
     alias: 't',
     type: 'string',
     description: 'Test ID',
-    demandOption: true
+    default: 'interactive'
   })
   .option('hostname', {
     alias: 'h',
@@ -92,7 +92,7 @@ const argv = yargs(hideBin(process.argv))
     alias: 'sd',
     type: 'boolean',
     description: 'Enable stability detection between commands',
-    default: true
+    default: false
   })
   .option('stability-wait', {
     type: 'number',

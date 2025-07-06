@@ -4,22 +4,19 @@
 
 *Turn Playwright into a live, stateful REST service - recording video, screenshots, and DOM snapshots for every step—so humans and AI agents can SEE automation, not just hope it worked.
 
-A REST API that turns Playwright into an observable, stateful service perfect for AI agents, visual testing, and anyone who needs to automate the web. On top of that, most focus only on developers, leading to inherent complexity instead of "GSD" practicality.
+![playwright rabbit masks](https://raw.githubusercontent.com/ryrobes/rabbitize/refs/heads/main/resources/streaming/images/rabbitize-masks.png "Rabbitize + Playwright")
 
-# Rabbitize 🐰👀
-> **See every click.  Debug every pixel.**
-> A REST wrapper around Playwright that records video, screenshots, and metrics for each action, giving humans *and AI agents* full visual context.
+> A REST API for Playwright that records video, screenshots, and metrics for each step, giving humans *and AI agents* full visual context.
 
-[![CI](https://...)](…) [![npm](https://...)](…) [![license](https://...)](…)
+[![CI](https://github.com/ryrobes/rabbitize/workflows/CI/badge.svg)](https://github.com/ryrobes/rabbitize/actions) [![npm](https://img.shields.io/npm/v/rabbitize.svg)](https://www.npmjs.com/package/rabbitize) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ```bash
 # Quick start
 npm install rabbitize
 sudo npx playwright install-deps # required for PW to work
 npx rabbitize # for an interactive session
+# http://localhost:3037
 ```
-
-
 
 ## Why Rabbitize?
 - Visual by default – video + before/after screenshots for every command.
@@ -27,6 +24,7 @@ npx rabbitize # for an interactive session
 - AI-ready – deterministic file paths for screenshots & DOM dumps.
 - Human-like coordinates – real mouse movement, not synthetic DOM clicks.
 - Click-to-code Flow Builder – non-devs can point-and-automate.
+- Declarative - just some simple JSON
 
 **SOME KIND OF VIDEO** (2-4MB mp4)
 
