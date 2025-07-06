@@ -4,232 +4,6 @@
     <title>{{CLIENT_ID}}/{{TEST_ID}} - RABBITIZE SESSION</title>
     <link rel="stylesheet" href="/resources/streaming/cyberpunk.css">
     <link rel="icon" type="image/x-icon" href="/resources/streaming/favicon.png">
-    <style>
-        .back-link {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            color: #0ff;
-            text-decoration: none;
-            padding: 10px 20px;
-            border: 1px solid #0ff;
-            background: rgba(0, 0, 0, 0.8);
-            transition: all 0.3s ease;
-            z-index: 100;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .back-link:hover {
-            background: #0ff;
-            color: #000;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-        }
-
-        .single-session-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 80px 20px 40px;
-        }
-
-        /* AI Monologue Panel Styles */
-        .ai-monologue-panel {
-            display: none;
-            margin: 20px 0;
-            border: 1px solid #0ff;
-            background: rgba(0, 0, 0, 0.9);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .ai-monologue-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #0ff, transparent);
-            animation: scan-line 3s linear infinite;
-        }
-
-        @keyframes scan-line {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .ai-monologue-header {
-            background: linear-gradient(90deg, #000 0%, #0ff 50%, #000 100%);
-            background-size: 200% 100%;
-            animation: gradient-shift 3s ease infinite;
-            padding: 10px 20px;
-            border-bottom: 1px solid #0ff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        @keyframes gradient-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .ai-monologue-title {
-            color: #000;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 14px;
-        }
-
-        .ai-monologue-status {
-            color: #000;
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        .ai-monologue-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1px;
-            background: #0ff;
-            border-top: 1px solid #0ff;
-        }
-
-        .ai-message-box {
-            background: #000;
-            padding: 20px;
-            min-height: 200px;
-            position: relative;
-            overflow: auto;
-            max-height: 400px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .ai-message-box.user {
-            border-right: 1px solid #0ff;
-        }
-
-        .ai-message-label {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.5;
-        }
-
-        .ai-message-label.user {
-            color: #ff0;
-        }
-
-        .ai-message-label.model {
-            color: #0f0;
-        }
-
-        .ai-message-content {
-            margin-top: 30px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        .ai-message-content .function-call {
-            display: inline-block;
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid #0ff;
-            padding: 2px 6px;
-            margin: 2px 0;
-            font-size: 12px;
-            color: #0ff;
-        }
-
-        .ai-message-timestamp {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            font-size: 10px;
-            opacity: 0.4;
-        }
-
-        .ai-message-metadata {
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(0, 255, 255, 0.05);
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            font-size: 11px;
-            color: #0ff;
-        }
-
-        .ai-metadata-container {
-            margin-top: auto;
-            padding-top: 10px;
-            border-top: 1px solid rgba(0, 255, 255, 0.2);
-            min-height: 0;
-        }
-
-        .ai-metadata-table {
-            width: 100%;
-            font-size: 9px;
-            color: #0ff;
-            opacity: 0.7;
-            border-collapse: collapse;
-            margin-top: 5px;
-        }
-
-        .ai-metadata-table td {
-            padding: 1px 4px;
-            border: 1px solid rgba(0, 255, 255, 0.1);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 150px;
-        }
-
-        .ai-metadata-table td:first-child {
-            font-weight: bold;
-            text-align: right;
-            width: 30%;
-            color: #ff0;
-            opacity: 0.8;
-        }
-
-        .ai-message-image {
-            margin: 10px 0;
-            max-width: 100%;
-            border: 1px solid #0ff;
-            display: block;
-        }
-
-        /* Pulsing effect for new messages */
-        @keyframes message-pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        .ai-message-box.updating {
-            animation: message-pulse 0.5s ease-in-out;
-        }
-
-        /* No data state */
-        .ai-no-data {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
-            color: #666;
-            font-style: italic;
-            text-align: center;
-        }
-    </style>
 </head>
 <body>
     <a href="/streaming" class="back-link">[ ← BACK TO ALL SESSIONS ]</a>
@@ -427,6 +201,10 @@
                             <div class="ai-monologue-header">
                                 <div class="ai-monologue-title">AI INNER MONOLOGUE</div>
                                 <div class="ai-monologue-status" id="ai-monologue-status">CHECKING...</div>
+                            </div>
+                            <div id="ai-objective-container" class="ai-objective-container" style="display: none;">
+                                <div class="ai-objective-label">🎯 CURRENT OBJECTIVE</div>
+                                <div id="ai-objective-text" class="ai-objective-text"></div>
                             </div>
                             <div class="ai-monologue-content">
                                 <div class="ai-message-box user">
@@ -1154,6 +932,23 @@ ${commands}
         let feedbackPollInterval = null;
         let lastRefreshTime = 0;
 
+        async function checkAndLoadObjective() {
+            try {
+                const response = await fetch(`/api/session/${clientId}/${testId}/${sessionId}/feedback?operator=objective`);
+                const data = await response.json();
+
+                if (data.exists && data.latestUser) {
+                    const objective = data.latestUser.payload.objective;
+                    if (objective) {
+                        document.getElementById('ai-objective-text').textContent = objective;
+                        document.getElementById('ai-objective-container').style.display = 'block';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load objective:', error);
+            }
+        }
+
         async function checkAndLoadFeedback() {
             try {
                 const response = await fetch(`/api/session/${clientId}/${testId}/${sessionId}/feedback?operator=actor`);
@@ -1172,7 +967,7 @@ ${commands}
                     if (data.latestUser && data.latestUser.timestamp !== lastUserMessageTimestamp) {
                         lastUserMessageTimestamp = data.latestUser.timestamp;
                         updateUserMessage(data.latestUser);
-                        
+
                         // Trigger partial refresh to update thumbnails/storyboard (with debounce)
                         const now = Date.now();
                         if (now - lastRefreshTime > 2000) {
@@ -1185,7 +980,7 @@ ${commands}
                     if (data.latestModel && data.latestModel.timestamp !== lastModelMessageTimestamp) {
                         lastModelMessageTimestamp = data.latestModel.timestamp;
                         updateModelMessage(data.latestModel);
-                        
+
                         // Trigger partial refresh to update thumbnails/storyboard (with debounce)
                         const now = Date.now();
                         if (now - lastRefreshTime > 2000) {
@@ -1213,22 +1008,27 @@ ${commands}
                 parts.forEach(part => {
                     if (part.text) {
                         let text = part.text;
-                        
+
                         // For user messages, remove the repetitive parts
                         if (isUserMessage) {
-                            // First, remove the coordinate reminder and replace with paragraph breaks
+                            // First, add paragraph break before "Since you executed"
+                            if (text.includes('Since you executed')) {
+                                text = text.replace('Since you executed', '\n\nSince you executed');
+                            }
+
+                            // Remove the coordinate reminder and replace with paragraph breaks
                             const coordReminder = 'Remember that x is HORIZONTAL (left to right, 0-1920) and y is VERTICAL (top to bottom, 0-1080).';
                             if (text.includes(coordReminder)) {
                                 text = text.replace(coordReminder, '\n\n');
                             }
-                            
+
                             // Then, remove everything from "What do you see" onwards
                             const cutoffIndex = text.indexOf('What do you see');
                             if (cutoffIndex !== -1) {
                                 text = text.substring(0, cutoffIndex).trim();
                             }
                         }
-                        
+
                         content += text + '\n\n';
                     }
                     if (part.functionCall) {
@@ -1342,14 +1142,18 @@ ${commands}
             if (previousStatus === 'active') {
                 // Start polling if not already
                 if (!feedbackPollInterval) {
+                    checkAndLoadObjective(); // Load objective once
                     checkAndLoadFeedback(); // Initial load
                     feedbackPollInterval = setInterval(checkAndLoadFeedback, 1000); // Poll every second
+                    objectiveInterval = setInterval(checkAndLoadObjective, 5000);
                 }
             } else {
                 // Stop polling if session is not active
                 if (feedbackPollInterval) {
                     clearInterval(feedbackPollInterval);
                     feedbackPollInterval = null;
+                    clearInterval(objectiveInterval);
+                    objectiveInterval = null;
                 }
             }
         };

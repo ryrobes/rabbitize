@@ -279,7 +279,7 @@ progress, and potential reasons for the timeout. Be clear and concise."""
             "temperature": 0.4,  # Slightly higher for more descriptive summary
             "topP": 0.95,
             "topK": 40,
-            "maxOutputTokens": 400, # Allow a decent length for the summary
+            "maxOutputTokens": 10150, # Allow a decent length for the summary
             "stopSequences": []
         }
     }
@@ -435,6 +435,7 @@ if not api_key:
 logger.success(f"✅ API key loaded (partial): {api_key[:4]}...{api_key[-4:]}")
 #GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key={api_key}"
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-06-05:generateContent?key={api_key}"
+GEMINI_API_FLASH_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key={api_key}"
 #GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
 
 # --- Pydantic Model for Task Request ---
@@ -982,7 +983,7 @@ def log_agent_thinking_event(
         log_entry["metadata"] = metadata
 
     # Local logging with potentially nested structure (good for detailed local inspection)
-    logger.info("🤔 [AGENT_THINKING_EVENT]", log_entry)
+    # logger.info("🤔 [AGENT_THINKING_EVENT]", log_entry)
 
     # --- Remote Logging to DuckDB endpoint ---
     remote_log_url = "https://ducksub.grinx.ai/api/save-parquet/recon_gossip"
@@ -1192,7 +1193,7 @@ def save_to_gcs(client_id: str, test_id: str, path: str, data, content_type: str
         # Continue with GCS save even if local save fails
 
     # Save to GCS if initialized
-    if not gcs_initialized or gcs_client is None:
+    if True: #not gcs_initialized or gcs_client is None:
         logger.warning("GCS not initialized, only saved locally")
         return True, local_full_path  # Return local path if GCS not available
 
@@ -1425,7 +1426,7 @@ def prune_history(history, max_items=5):
     logger.info(f"🧹 Pruned screenshots from {entries_pruned} history entries, freed ~{screenshot_bytes_removed/1024:.1f}KB while preserving text context")
     return history
 
-def start_session(rabbitize_url: str, target_url: str, max_retries: int = 3) -> str:
+def start_session(rabbitize_url: str, target_url: str, max_retries: int, objective: str, client_id: str, test_id: str) -> str:
     """Start a browser session via the Rabbitize API using /start endpoint.
 
     Returns:
@@ -1447,6 +1448,12 @@ def start_session(rabbitize_url: str, target_url: str, max_retries: int = 3) -> 
 
             logger.success(f"🚀 Session started successfully",
                          {"payload": payload, "session_id": session_id})
+            remote_log_url = ''
+            log_payload = dict()
+            log_payload['objective'] = objective
+            _send_log_to_remote(log_payload, remote_log_url, f"other_llm_current_user_message for {client_id or 'N/A'}/{test_id or 'N/A'}",
+                    client_id=client_id, test_id=test_id, session_id=session_id, rabbitize_url=rabbitize_url, operator='objective')
+
             return session_id
         except Exception as e:
             retries += 1
@@ -1534,7 +1541,7 @@ def get_dom_coordinates(rabbitize_runs_dir: str, client_id: str, test_id: str, s
         Dictionary containing DOM coordinates data or empty dict if not available
     """
     # Use latest.json for DOM coordinates as discussed
-    file_path = os.path.join(rabbitize_runs_dir, client_id, test_id, "latest.json")
+    file_path = os.path.join(rabbitize_runs_dir, client_id, test_id, session_id, "latest.json")
 
     retries = 0
     start_time = time.time()
@@ -1965,7 +1972,7 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             "temperature": 0.1,
             "topP": 0.95,
             "topK": 40,
-            "maxOutputTokens": 100,
+            "maxOutputTokens": 10150,
             "stopSequences": []
         }
     }
@@ -1987,7 +1994,7 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             operator="validator"
         )
 
-        response = requests.post(GEMINI_API_URL, json=payload, headers={"Content-Type": "application/json"}, timeout=30)
+        response = requests.post(GEMINI_API_FLASH_URL, json=payload, headers={"Content-Type": "application/json"}, timeout=30)
         response.raise_for_status()
         result = response.json()
 
@@ -2034,7 +2041,7 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
         logger.info(f"Progress assessment: making_progress={is_making_progress}, visual_change={has_visual_change}, distance={hash_distance}")
 
         # Send the screenshot comparison to Firebase if we have client and test IDs
-        if firebase_initialized and last_command:
+        if False: #firebase_initialized and last_command:
             try:
                 # Extract client_id and test_id from the context if present
                 client_id = None
@@ -2075,7 +2082,7 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
                 logger.error(f"Failed to send screenshot comparison to Firebase: {e}")
 
         # Send the screenshot comparison to Firebase if we have client and test IDs
-        if firebase_initialized and client_id and test_id and step is not None:
+        if False: #firebase_initialized and client_id and test_id and step is not None:
             try:
                 # Update the step with the screenshot comparison data
                 step_ref = db.reference(f"recon/{client_id}/{test_id}/steps/{step}")
@@ -2690,7 +2697,7 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
                 "temperature": current_temp,
                 "topP": 0.95,
                 "topK": 40,
-                "maxOutputTokens": 800,
+                "maxOutputTokens": 10150,
                 "stopSequences": []
             }
         }
@@ -2725,7 +2732,8 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
         try:
             # Use the timeout-protected API call function
             try:
-                result = call_gemini_api(payload, timeout=15)
+                result = call_gemini_api(payload, timeout=25)
+                logger.info(str(result))
 
                 # Log thinking event after API call (success)
                 log_agent_thinking_event(
@@ -3200,7 +3208,7 @@ def coordinate_correction_helper(
             "temperature": 0.1,
             "topP": 0.95,
             "topK": 40,
-            "maxOutputTokens": 150,
+            "maxOutputTokens": 10150,
             "stopSequences": []
         }
     }
@@ -4331,7 +4339,7 @@ async def start_task(task: TaskRequest):
 
     try:
         # Start session and get the sessionId from the response
-        session_id = start_session(rabbitize_url, target_url)
+        session_id = start_session(rabbitize_url, target_url, 3, objective, client_id, test_id)
         logger.info(f"Using session_id: {session_id}")
         history = []
         stuck_counter = 0
@@ -4339,7 +4347,7 @@ async def start_task(task: TaskRequest):
         last_cursor_position = (960, 540)  # Default to center of screen
 
         # Initialize task in Firebase
-        if firebase_initialized:
+        if False: # firebase_initialized:
             # Clear any existing data for this task first
             clear_firebase_data(client_id, test_id)
 
@@ -4411,7 +4419,7 @@ async def start_task(task: TaskRequest):
                     end_session(rabbitize_url, session_id)
 
                     # Update task status to failed
-                    if firebase_initialized:
+                    if False: # firebase_initialized:
                         update_task_status(client_id, test_id, "failed", {
                             "error": "Failed to obtain a valid screenshot after multiple attempts",
                             "steps_completed": step
@@ -4518,7 +4526,7 @@ async def start_task(task: TaskRequest):
                             history[-1]["feedback"] += f" [Corrected from ({cursor_position[0]}, {cursor_position[1]}) to ({corrected_x}, {corrected_y})]"
 
                             # Record in Firebase that a correction occurred (if enabled)
-                            if firebase_initialized:
+                            if False: # firebase_initialized:
                                 correction_data = {
                                     "correction": {
                                         "original_coordinates": {"x": cursor_position[0], "y": cursor_position[1]},
@@ -4559,7 +4567,7 @@ async def start_task(task: TaskRequest):
                     end_session(rabbitize_url, session_id)
 
                     # Save final step to Firebase
-                    if firebase_initialized:
+                    if False: # firebase_initialized:
                         firebase_data = {
                             "command": {
                                 "tool_name": tool_name,
@@ -4598,7 +4606,7 @@ async def start_task(task: TaskRequest):
                     history = prune_history(history, max_items=5)
 
                 # Save step data to Firebase
-                if firebase_initialized:
+                if False: # firebase_initialized:
                     # Determine if we have screenshot comparison data for the previous step
                     comparison_data = None
                     if len(history) >= 2 and "changes_description" in history[-2]:
@@ -4730,7 +4738,7 @@ async def start_task(task: TaskRequest):
                 end_session(rabbitize_url, session_id)
 
                 # Save error state to Firebase
-                if firebase_initialized:
+                if False: # firebase_initialized:
                     firebase_data = {
                         "error": str(e),
                         "step_number": step,
@@ -4768,7 +4776,7 @@ async def start_task(task: TaskRequest):
             logger.info(f"No history to generate timeout summary for {client_id}/{test_id}.")
 
         # Save timeout state to Firebase
-        if firebase_initialized:
+        if False: # firebase_initialized:
             firebase_data = {
                 "step_number": max_steps, # Representing the final state/summary step
                 "is_final": True,
@@ -4798,7 +4806,7 @@ async def start_task(task: TaskRequest):
             pass
 
         # Record error in Firebase
-        if firebase_initialized:
+        if False: # firebase_initialized:
             try:
                 # Update task status to error
                 update_task_status(client_id, test_id, "error", {
@@ -4832,7 +4840,7 @@ async def debug_cors_test():
 
         # Try to write to Firebase if initialized
         firebase_test_result = "not attempted"
-        if firebase_initialized:
+        if False: # firebase_initialized:
             try:
                 test_ref = db.reference("recon/cors-test")
                 test_ref.set({

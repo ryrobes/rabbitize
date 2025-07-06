@@ -1,5 +1,11 @@
 /* Flow Builder Specific Styles */
 
+/* Placeholder Logo */
+.placeholder-logo {
+    opacity: 0.3;
+    height: 200px;
+}
+
 .flow-builder-container {
     display: flex;
     flex-direction: column;
