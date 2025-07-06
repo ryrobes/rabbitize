@@ -39,7 +39,7 @@ const argv = yargs(hideBin(process.argv))
     alias: 'p',
     type: 'number',
     description: 'Port number',
-    default: 3000
+    default: 3037
   })
   .option('show-overlay', {
     alias: 'o',

@@ -60,8 +60,8 @@ class SimpleLogger {
         let sessionStatus = 'active';
         if (global.currentPlaywrightSession.isFullyComplete || phase === 'complete' || phase === 'completed') {
           sessionStatus = 'finished';
-        } else if (!global.currentPlaywrightSession.browser && phase !== 'ending_session' && 
-                   !phase.includes('converting') && !phase.includes('processing') && 
+        } else if (!global.currentPlaywrightSession.browser && phase !== 'ending_session' &&
+                   !phase.includes('converting') && !phase.includes('processing') &&
                    !phase.includes('creating') && !phase.includes('detecting') &&
                    !phase.includes('uploading')) {
           // Only mark as finished if browser is closed AND we're not in a processing phase
@@ -85,7 +85,7 @@ class SimpleLogger {
           testId: this.testId,
           sessionId: this._sessionId,
           initialUrl: global.currentPlaywrightSession.initialUrl || null,
-          port: global.argv?.port || 3000,
+          port: global.argv?.port || 3037,
           totalCommands: global.currentPlaywrightSession.totalCommands || 0
         };
 
