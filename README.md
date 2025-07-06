@@ -2,19 +2,17 @@
 
 **Point. Click. Rabbitize.**
 
-*Turn Playwright into a live, stateful REST service - recording video, screenshots, and DOM snapshots for every step—so humans and AI agents can SEE automation, not just hope it worked.
+*Turn Playwright into a live, stateful REST service - recording video, screenshots, and DOM snapshots for every step—so humans and AI agents can SEE automation, not just hope it worked.*
 
 ![playwright rabbit masks](https://raw.githubusercontent.com/ryrobes/rabbitize/refs/heads/main/resources/streaming/images/rabbitize-masks.png "Rabbitize + Playwright")
-
-> A REST API for Playwright that records video, screenshots, and metrics for each step, giving humans *and AI agents* full visual context.
 
 [![CI](https://github.com/ryrobes/rabbitize/actions/workflows/node.js.yml/badge.svg)](https://github.com/ryrobes/rabbitize/actions) [![npm](https://img.shields.io/npm/v/rabbitize.svg)](https://www.npmjs.com/package/rabbitize) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ```bash
-# Quick start
+#
 npm install rabbitize
 sudo npx playwright install-deps # required for PW to work
-npx rabbitize # for an interactive session
+npx rabbitize # start server for interactive sessions
 # http://localhost:3037
 ```
 
@@ -40,7 +38,7 @@ Rabbitize changes browser automation from a black box into a visual feedback loo
 
 ```bash
 # Send a command
-curl -X POST localhost:3000/execute -d '{"command": [":click", ".button"]}'
+curl -X POST localhost:3037/execute -d '{"command": [":move-mouse", ":to", 240, 1230]}'
 
 # Get instant visual feedback
 ls rabbitize-runs/session/screenshots/
@@ -55,28 +53,28 @@ Every action generates screenshots, videos, a markdown'd DOM, and performance da
 
 ### For Everyone: Flow Builder & Browser
 Point, click, and create automations without writing code:
-1. Open `http://localhost:3000/flow-builder`
+1. Open `http://localhost:3037/flow-builder`
 2. Click around any website
 3. Watch your automation build itself
-4. Export as cURL, CLI, or schedule with cron
-5. Browse all your historical data collected via the UI or your harddrive (no weird formats)
+4. End the session (saves)
+4. Export as cURL, CLI, schedule with cron, or go to the Dashboard and re-run it with a single click
+5. Browse historical data collected via the UI or your harddrive (no weird formats)
 
 ### For Developers: REST API
 Perfect for AI agents and complex integrations:
 ```python
 # Start session
-response = requests.post("http://localhost:3000/start",
-                       json={"url": "https://example.com"})
+response = requests.post("http://localhost:3000/start", json={"url": "https://example.com"})
 
 # AI analyzes screenshot, decides next action
-response = requests.post("http://localhost:3000/execute",
-                       json={"command": [":click", ":at", 400, 300]})
+response = requests.post("http://localhost:3000/execute", json={"command": [":click", ":at", 400, 300]})
 
 # Session maintains state, ready for next command when you are
+# or script CURL commands!
 ```
 
 ```bash
-# or run the whole thing in one shot (once your commands are nailed down, just run it)
+# or run the whole thing in one shot (once your commands are nailed down, just run it - process will end on completion)
 node src/index.js \
   --stability-detection false \
   --exit-on-end true \
@@ -111,40 +109,12 @@ node src/index.js \
 - **Visual feedback** - See every action happen in real(ish)-time
 - **No hidden shortcuts** - If a human can't do it, neither should your tests
 
-## Comparison
-
-| Feature | Rabbitize | Playwright Test | Puppeteer | Selenium |
-|---------|-----------|-----------------|-----------|----------|
-| REST API | ✅ Native | ❌ Code only | ❌ Code only | ❌ Code only |
-| Visual Feedback | ✅ Built-in | 🟡 Screenshots | 🟡 Screenshots | 🟡 Screenshots |
-| Live Monitoring | ✅ Dashboard | ❌ Terminal | ❌ Terminal | ❌ Terminal |
-| Click-to-Code | ✅ Flow Builder | 🟡 Codegen | ❌ None | ❌ None |
-| AI-Friendly | ✅ Designed for | 🟡 Possible | 🟡 Possible | 🟡 Possible |
-| Command Replay | ✅ Multiple formats | ❌ Code only | ❌ Code only | ❌ Code only |
-| **Real Mouse Movement** | ✅ Always | ❌ DOM shortcuts | ❌ DOM shortcuts | ❌ DOM shortcuts |
-| **Coordinate-Based** | ✅ Primary | 🟡 Secondary | 🟡 Secondary | 🟡 Secondary |
-| **Visual Testing** | ✅ Natural | 🟡 Add-ons | 🟡 Add-ons | 🟡 Add-ons |
-| **Human-Like Actions** | ✅ Default | ❌ Synthetic | ❌ Synthetic | ❌ Synthetic |
-
 ## Real-World Use Cases
 
 - **QA Engineers**: Record bugs with visual proof, no coding required
 - **AI Developers**: Build web agents that can see and react
 - **Business Users**: Automate daily tasks by showing, not coding
 - **DevOps**: Monitor sites with video evidence of failures
-
-## Quick Start
-
-```bash
-# Install and run
-git clone https://github.com/yourusername/rabbitize.git
-cd rabbitize
-npm install
-npm start
-
-# Open Flow Builder
-# Visit http://localhost:3000/flow-builder
-```
 
 ## Example: AI Web Agent
 
@@ -164,9 +134,11 @@ await fetch('/execute', {
 });
 
 // 4. New screenshot appears, AI continues...
+
+// OR scripted as a "tool" for an LLM to use
 ```
 
-## What You Get
+## Boatloads of data at every step
 
 Every session creates:
 
@@ -184,7 +156,7 @@ rabbitize-runs/
 ## Commands Are Simple
 
 ```json
-[":navigate", "https://example.com"]
+[":navigate", "https://rvbbit.com"]
 [":move-mouse", ":to", 150, 200]
 [":click"]
 [":type", "Hello World"]
@@ -192,20 +164,11 @@ rabbitize-runs/
 [":wait", 2]
 ```
 
-Real coordinates. Real mouse movement. Real results.
+## Real coordinates. Real mouse movement. Real results. No javascript required.
 
 ## Dashboard
 
-Watch automations run live at `http://localhost:3000/streaming`:
-
-## Why
-
-- You want to SEE your automation work
-- You need to maintain state between actions
-- You're building an AI that browses the web
-- You want automation without coding
-- You need (a boatload of) forensic debugging data
-
+Watch automations run live at `http://localhost:3037`:
 
 ## License
 
