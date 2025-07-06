@@ -3986,6 +3986,8 @@ const domMarkdown = await this.page.evaluate(() => {
 
               // Create small cover GIF
               const webmPath = path.join(this.videoPath, 'session.webm');
+              const coverGifPath = path.join(this.videoPath, 'cover.gif');
+              
               try {
                 this.firebase.log('Creating small cover GIF...');
 
@@ -4000,8 +4002,6 @@ const domMarkdown = await this.page.evaluate(() => {
                 } catch (webmError) {
                   throw new Error(`Source webm file unavailable: ${webmError.message}`);
                 }
-
-                const coverGifPath = path.join(this.videoPath, 'cover.gif');
 
                 // Execute ffmpeg with more detailed logging
                 this.firebase.log(`Running ffmpeg command to generate cover.gif`);
