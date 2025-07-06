@@ -3985,9 +3985,9 @@ const domMarkdown = await this.page.evaluate(() => {
               }
 
               // Create small cover GIF
+              const webmPath = path.join(this.videoPath, 'session.webm');
               try {
                 this.firebase.log('Creating small cover GIF...');
-                const webmPath = path.join(this.videoPath, 'session.webm');
 
                 // Verify source webm file exists first
                 try {

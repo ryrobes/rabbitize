@@ -28,9 +28,8 @@ npx rabbitize # start server for interactive sessions
 
 ## The Problem
 
-1 - Traditional browser automation is blind. You write scripts, run them, and hope they work. When they fail, you're left guessing why.
-
-2 - These tools are often geared toward developers and have a high bar for entry for people just looking to locally automate some workflow.
+1. Traditional browser automation is blind. You write scripts, run them, and hope they work. When they fail, you're left guessing why.
+2. These tools are often geared toward developers and have a high bar for entry for people just looking to locally automate some workflow.
 
 ## The Solution
 
