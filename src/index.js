@@ -1298,6 +1298,66 @@ async function main() {
       res.json(sessions);
     });
 
+    // API endpoint to get latest feedback data for AI monologue
+    app.get('/api/session/:clientId/:testId/:sessionId/feedback', async (req, res) => {
+      try {
+        const { clientId, testId, sessionId } = req.params;
+        const operator = req.query.operator || 'actor';
+        
+        // Construct path to feedback file
+        const feedbackPath = path.join(
+          process.cwd(),
+          'rabbitize-runs',
+          clientId,
+          testId,
+          sessionId,
+          `feedback_${operator}.json`
+        );
+        
+        // Check if file exists
+        if (!fs.existsSync(feedbackPath)) {
+          return res.json({
+            exists: false,
+            latestUser: null,
+            latestModel: null
+          });
+        }
+        
+        // Read and parse feedback file
+        const feedbackData = JSON.parse(await fsPromises.readFile(feedbackPath, 'utf8'));
+        
+        // Split into user and model messages
+        const userMessages = [];
+        const modelMessages = [];
+        
+        feedbackData.forEach(entry => {
+          if (entry.payload && entry.payload.event_type) {
+            if (entry.payload.event_type === 'llm_current_user_message') {
+              userMessages.push(entry);
+            } else if (entry.payload.event_type === 'llm_model_response_message') {
+              modelMessages.push(entry);
+            }
+          }
+        });
+        
+        // Get the latest from each category
+        const latestUser = userMessages.length > 0 ? userMessages[userMessages.length - 1] : null;
+        const latestModel = modelMessages.length > 0 ? modelMessages[modelMessages.length - 1] : null;
+        
+        res.json({
+          exists: true,
+          latestUser,
+          latestModel,
+          totalUserMessages: userMessages.length,
+          totalModelMessages: modelMessages.length
+        });
+        
+      } catch (error) {
+        logger.error('Error fetching feedback:', error);
+        res.status(500).json({ error: 'Failed to fetch feedback data' });
+      }
+    });
+
     // API endpoint to re-run a session
     app.post('/api/rerun', async (req, res) => {
       logger.log('Received re-run request:', JSON.stringify(req.body));

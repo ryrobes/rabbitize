@@ -17,6 +17,7 @@ import threading
 from concurrent.futures import ThreadPoolExecutor  # Add proper import
 from fastapi.middleware.cors import CORSMiddleware  # Import CORS middleware
 from typing import Optional, List, Dict, Tuple, Any
+import hashlib
 
 # Import Rich for beautiful console output
 from rich.console import Console
@@ -76,12 +77,12 @@ class RichLogger:
     def __init__(self, name: str):
         self.logger = logging.getLogger(name)
         self.console = console
-        
+
     def _format_json(self, data: dict) -> Syntax:
         """Format JSON data with syntax highlighting"""
         json_str = json.dumps(data, indent=2, default=str)
         return Syntax(json_str, "json", theme="monokai", line_numbers=False)
-    
+
     def _log_with_style(self, level: str, message: str, data: dict = None, style: str = None):
         """Log with enhanced formatting"""
         if data and isinstance(data, dict):
@@ -90,19 +91,19 @@ class RichLogger:
             self.console.print(self._format_json(data))
         else:
             getattr(self.logger, level)(f"[{style or level}]{message}[/{style or level}]")
-    
+
     def info(self, message: str, data: dict = None):
         if data:
             self._log_with_style("info", message, data)
         else:
             self.logger.info(f"[info]{message}[/info]")
-    
+
     def warning(self, message: str, data: dict = None):
         if data:
             self._log_with_style("warning", message, data)
         else:
             self.logger.warning(f"[warning]{message}[/warning]")
-    
+
     def error(self, message: str, data: dict = None, exc_info: bool = False):
         if exc_info:
             self.logger.error(f"[error]{message}[/error]", exc_info=True)
@@ -110,26 +111,26 @@ class RichLogger:
             self._log_with_style("error", message, data)
         else:
             self.logger.error(f"[error]{message}[/error]")
-    
+
     def debug(self, message: str, data: dict = None):
         if data:
             self._log_with_style("debug", message, data)
         else:
             self.logger.debug(f"[debug]{message}[/debug]")
-    
+
     def critical(self, message: str, data: dict = None):
         if data:
             self._log_with_style("critical", message, data)
         else:
             self.logger.critical(f"[critical]{message}[/critical]")
-    
+
     def success(self, message: str, data: dict = None):
         """Custom success level logging"""
         if data:
             self._log_with_style("info", message, data, style="success")
         else:
             self.logger.info(f"[success]{message}[/success]")
-    
+
     def api_call(self, message: str, endpoint: str = None, payload: dict = None, response: dict = None):
         """Special logging for API calls"""
         self.console.print(f"[api_call]🌐 API Call: {message}[/api_call]")
@@ -224,7 +225,7 @@ except Exception as e:
     logger.error(f"Failed to initialize Firebase: {e}", exc_info=True)
     firebase_initialized = False
 
-def generate_timeout_summary(objective: str, history: list, client_id: str, test_id: str) -> str:
+def generate_timeout_summary(objective: str, history: list, client_id: str, test_id: str, session_id: str = None, rabbitize_url: str = None) -> str:
     """
     Generate a summary of the session when it times out.
     """
@@ -284,8 +285,8 @@ progress, and potential reasons for the timeout. Be clear and concise."""
     }
 
     try:
-        logger.api_call(f"Requesting timeout summary for {client_id}/{test_id}", 
-                       endpoint="Gemini API", 
+        logger.api_call(f"Requesting timeout summary for {client_id}/{test_id}",
+                       endpoint="Gemini API",
                        payload={"objective": objective, "history_length": len(history)})
         # Log thinking event before API call
         log_agent_thinking_event(
@@ -295,6 +296,8 @@ progress, and potential reasons for the timeout. Be clear and concise."""
             test_id=test_id,
             prompt_data=payload,
             metadata={"objective": objective},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
             operator="summarizer"
         )
 
@@ -315,10 +318,12 @@ progress, and potential reasons for the timeout. Be clear and concise."""
                         test_id=test_id,
                         response_data=response, # Log the full successful response
                         metadata={"objective": objective, "summary_generated": summary_text},
+                        session_id=session_id,
+                        rabbitize_url=rabbitize_url,
                         operator="summarizer"
                     )
                     return summary_text
-        logger.warning(f"⚠️ Failed to generate a valid summary from Gemini API for {client_id}/{test_id}", 
+        logger.warning(f"⚠️ Failed to generate a valid summary from Gemini API for {client_id}/{test_id}",
                       {"response": response})
         # Log thinking event after API call (failure to generate summary)
         log_agent_thinking_event(
@@ -328,6 +333,8 @@ progress, and potential reasons for the timeout. Be clear and concise."""
             test_id=test_id,
             response_data=response, # Log the problematic response
             metadata={"objective": objective, "reason": "Failed to extract valid summary text"},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
             operator="summarizer"
         )
         return "Automated summary generation failed. The session ended due to reaching the step limit. Please review the raw history if available."
@@ -341,6 +348,8 @@ progress, and potential reasons for the timeout. Be clear and concise."""
             test_id=test_id,
             response_data={"error": str(e), "traceback": traceback.format_exc()},
             metadata={"objective": objective},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
             operator="summarizer"
         )
         return f"Error during automated summary generation: {str(e)}. The session ended due to the step limit."
@@ -424,8 +433,8 @@ if not api_key:
     logger.critical("❌ GEMINI_API_KEY environment variable is not set")
     raise RuntimeError("GEMINI_API_KEY is required")
 logger.success(f"✅ API key loaded (partial): {api_key[:4]}...{api_key[-4:]}")
-GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key={api_key}"
-#GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-05-06:generateContent?key={api_key}"
+#GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key={api_key}"
+GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-06-05:generateContent?key={api_key}"
 #GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
 
 # --- Pydantic Model for Task Request ---
@@ -464,6 +473,373 @@ def with_timeout(func, args=(), kwargs=None, timeout_duration=10, default=None):
 
     return result[0]
 
+def process_payload_for_size_limits(log_payload: Dict, client_id: str = None, test_id: str = None, session_id: str = None) -> Dict:
+    """
+    Process a log payload to extract and save large base64 images to local files,
+    replacing them with file references to reduce payload size.
+
+    Args:
+        log_payload: The original payload dictionary
+        client_id: Client ID for organizing saved files
+        test_id: Test ID for organizing saved files
+        session_id: Session ID for organizing saved files
+
+    Returns:
+        Dict: Processed payload with base64 images replaced by file references
+    """
+    import os
+    import base64
+    import hashlib
+    import re
+    import json
+    from copy import deepcopy
+
+    # Create a deep copy to avoid modifying the original payload
+    processed_payload = deepcopy(log_payload)
+
+    # Create the image_payloads directory if it doesn't exist
+    image_dir = "image_payloads"
+    if not os.path.exists(image_dir):
+        os.makedirs(image_dir)
+        logger.info(f"Created directory: {image_dir}")
+
+    # Track statistics
+    images_processed = 0
+    bytes_saved = 0
+
+    def is_base64_image(value: str) -> bool:
+        """Check if a string looks like base64 encoded image data."""
+        if not isinstance(value, str):
+            return False
+
+        # Much more aggressive - catch any moderately large string
+        if len(value) < 200:  # Much lower threshold
+            return False
+
+        # Check for common base64 image prefixes (most reliable method)
+        image_prefixes = [
+            '/9j/',  # JPEG
+            'iVBORw0KGgoAAAANSUhEUgAA',  # PNG
+            'R0lGODlhAQABAIAAAAAAAP',  # GIF
+            'UklGRg==',  # WebP
+            'data:image/',  # Data URL prefix
+        ]
+
+        # If it starts with a known image prefix, it's definitely an image
+        for prefix in image_prefixes:
+            if value.startswith(prefix):
+                logger.info(f"🎯 Detected base64 image by prefix: {prefix}")
+                return True
+
+        # VERY aggressive base64 detection for any substantial string
+        try:
+            # Remove any whitespace
+            clean_value = value.replace(' ', '').replace('\n', '').replace('\r', '').replace('\t', '')
+
+                        # If it's a reasonably long string, check if it might be base64
+            if len(clean_value) > 1000:  # Increased threshold to reduce false positives
+                # Check if it contains mostly base64 characters (allow some flexibility)
+                base64_chars = set('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=')
+                value_chars = set(clean_value)
+                base64_ratio = len(value_chars.intersection(base64_chars)) / len(value_chars) if value_chars else 0
+
+                # More strict requirements to avoid false positives
+                if base64_ratio > 0.95 and len(clean_value) > 5000:  # 95% base64 chars and substantial length
+                    # Additional checks to avoid text being detected as base64
+                    # Check if it looks like readable text (lots of spaces, common words)
+                    if ' ' in value and any(word in value.lower() for word in ['the', 'and', 'you', 'that', 'with', 'this', 'screen', 'click', 'move']):
+                        logger.info(f"🚫 Skipping text-like string: {len(value)} chars, ratio: {base64_ratio:.2f}")
+                        return False
+
+                    # Try to decode a portion to verify it's valid base64
+                    try:
+                        # Clean and pad the test chunk
+                        test_chunk = clean_value[:min(1000, len(clean_value))]
+                        missing_padding = len(test_chunk) % 4
+                        if missing_padding:
+                            test_chunk += '=' * (4 - missing_padding)
+
+                        decoded = base64.b64decode(test_chunk)
+                        # If we can decode it and it's substantial, treat as base64
+                        if len(decoded) > 100:  # Reasonable threshold
+                            logger.info(f"🎯 Detected base64 by pattern analysis: {len(value)} chars, {base64_ratio:.2f} ratio")
+                            return True
+                    except Exception:
+                        pass
+
+                # Last resort: if it's very long and looks base64-ish, treat it as such
+                # But be more conservative to avoid false positives with JSON
+                if len(clean_value) > 20000:  # Only very long strings
+                    base64_pattern = re.compile(r'^[A-Za-z0-9+/]*={0,2}$')
+                    if base64_pattern.match(clean_value[:1000]):  # Test first 1000 chars
+                        # Additional check: make sure it doesn't look like JSON
+                        if not (value.lstrip().startswith(('[', '{')) and value.rstrip().endswith((']', '}'))):
+                            logger.info(f"🎯 Detected large base64-like string: {len(value)} chars")
+                            return True
+
+        except Exception:
+            pass
+
+        return False
+
+    def process_json_for_base64(obj, path: str = "") -> any:
+        """Recursively process parsed JSON to find and replace base64 images."""
+        nonlocal images_processed, bytes_saved
+
+        if isinstance(obj, dict):
+            result = {}
+            for key, value in obj.items():
+                current_path = f"{path}.{key}" if path else key
+
+                # Look for common base64 image locations
+                if key == "data" and isinstance(value, str) and len(value) > 200:
+                    # This is likely base64 image data in inlineData.data
+                    if is_base64_image(value):
+                        logger.info(f"🖼️  Found base64 image in JSON at {current_path} ({len(value)} chars)")
+                        result[key] = save_base64_image(value, f"json_{key}")
+                        continue
+
+                # Recursively process nested structures
+                if isinstance(value, (dict, list)):
+                    result[key] = process_json_for_base64(value, current_path)
+                elif isinstance(value, str) and is_base64_image(value):
+                    logger.info(f"🖼️  Found base64 image in JSON at {current_path} ({len(value)} chars)")
+                    result[key] = save_base64_image(value, f"json_{key}")
+                else:
+                    result[key] = value
+            return result
+
+        elif isinstance(obj, list):
+            result = []
+            for i, value in enumerate(obj):
+                current_path = f"{path}[{i}]"
+
+                if isinstance(value, (dict, list)):
+                    result.append(process_json_for_base64(value, current_path))
+                elif isinstance(value, str) and is_base64_image(value):
+                    logger.info(f"🖼️  Found base64 image in JSON at {current_path} ({len(value)} chars)")
+                    result.append(save_base64_image(value, f"json_list_{i}"))
+                else:
+                    result.append(value)
+            return result
+
+        else:
+            # Primitive value, return as-is
+            return obj
+
+    def save_base64_image(base64_data: str, context_key: str = "unknown") -> str:
+        """Save base64 image data to a file and return the file reference."""
+        nonlocal images_processed, bytes_saved
+
+        try:
+            # Handle data URLs (e.g., data:image/jpeg;base64,...)
+            actual_base64_data = base64_data
+            if base64_data.startswith('data:'):
+                try:
+                    # Split data URL to get just the base64 part
+                    parts = base64_data.split(',', 1)
+                    if len(parts) == 2:
+                        actual_base64_data = parts[1]
+                        logger.info(f"Extracted base64 from data URL: {parts[0]}")
+                except Exception:
+                    logger.warning("Failed to parse data URL, using original data")
+
+            # Clean and validate base64 data
+            clean_base64 = actual_base64_data.strip()
+
+            # Remove any whitespace or newlines
+            clean_base64 = ''.join(clean_base64.split())
+
+            # Add proper padding if needed
+            missing_padding = len(clean_base64) % 4
+            if missing_padding:
+                clean_base64 += '=' * (4 - missing_padding)
+                logger.info(f"Added {4 - missing_padding} padding characters to base64")
+
+            # Validate it looks like base64 before attempting decode
+            if not re.match(r'^[A-Za-z0-9+/]*={0,2}$', clean_base64):
+                logger.error(f"String doesn't look like valid base64: {actual_base64_data[:50]}...")
+                return f"[INVALID_BASE64: {len(base64_data)} chars]"
+
+            # Decode the base64 data
+            image_bytes = base64.b64decode(clean_base64)
+
+            # Create a hash of the image data for the filename
+            image_hash = hashlib.md5(image_bytes).hexdigest()[:12]
+
+            # Create a meaningful filename
+            timestamp = int(time.time())
+            filename_parts = [f"img_{timestamp}_{image_hash}"]
+
+            # Add context information if available
+            if client_id:
+                filename_parts.append(f"client_{client_id}")
+            if test_id:
+                filename_parts.append(f"test_{test_id}")
+            if session_id:
+                filename_parts.append(f"session_{session_id}")
+            if context_key != "unknown":
+                filename_parts.append(f"key_{context_key}")
+
+            # Enhanced image format detection
+            extension = 'bin'  # Default
+            mime_type = 'application/octet-stream'  # Default
+
+            # Check magic bytes for format detection
+            if len(image_bytes) >= 3 and image_bytes[:3] == b'\xff\xd8\xff':
+                extension = 'jpg'
+                mime_type = 'image/jpeg'
+            elif len(image_bytes) >= 8 and image_bytes[:8] == b'\x89PNG\r\n\x1a\n':
+                extension = 'png'
+                mime_type = 'image/png'
+            elif len(image_bytes) >= 6 and (image_bytes[:6] == b'GIF87a' or image_bytes[:6] == b'GIF89a'):
+                extension = 'gif'
+                mime_type = 'image/gif'
+            elif len(image_bytes) >= 12 and image_bytes[:4] == b'RIFF' and image_bytes[8:12] == b'WEBP':
+                extension = 'webp'
+                mime_type = 'image/webp'
+            elif len(image_bytes) >= 2 and image_bytes[:2] == b'BM':
+                extension = 'bmp'
+                mime_type = 'image/bmp'
+            elif len(image_bytes) >= 10 and image_bytes[6:10] in [b'JFIF', b'Exif']:
+                extension = 'jpg'
+                mime_type = 'image/jpeg'
+            else:
+                # Try to detect from original data URL if available
+                if base64_data.startswith('data:image/'):
+                    try:
+                        mime_part = base64_data.split(';')[0].replace('data:', '')
+                        if 'jpeg' in mime_part or 'jpg' in mime_part:
+                            extension = 'jpg'
+                            mime_type = 'image/jpeg'
+                        elif 'png' in mime_part:
+                            extension = 'png'
+                            mime_type = 'image/png'
+                        elif 'gif' in mime_part:
+                            extension = 'gif'
+                            mime_type = 'image/gif'
+                        elif 'webp' in mime_part:
+                            extension = 'webp'
+                            mime_type = 'image/webp'
+                    except Exception:
+                        pass
+
+            filename = f"{'_'.join(filename_parts)}.{extension}"
+            filepath = os.path.join(image_dir, filename)
+
+            # Save the image with proper binary mode
+            with open(filepath, 'wb') as f:
+                f.write(image_bytes)
+
+            images_processed += 1
+            bytes_saved += len(base64_data)
+
+            logger.info(f"💾 Saved base64 image to {filepath} ({len(image_bytes)} bytes, {mime_type})")
+
+            # Return a simple string reference to keep JSON structure intact
+            return f"[IMAGE_SAVED: {filename}]"
+
+        except Exception as e:
+            logger.error(f"❌ Failed to save base64 image: {e}")
+            # Return a truncated version as fallback
+            return f"[BASE64_IMAGE_SAVE_FAILED: {len(base64_data)} chars, error: {str(e)}]"
+
+    def process_dict(obj: Dict, path: str = "") -> Dict:
+        """Recursively process a dictionary to find and replace base64 images."""
+        result = {}
+
+        for key, value in obj.items():
+            current_path = f"{path}.{key}" if path else key
+
+            # Debug: log large strings to see what we're missing
+            if isinstance(value, str) and len(value) > 1000:
+                preview = value[:100] + "..." if len(value) > 100 else value
+                is_json_like = key.endswith('_json') or (value.lstrip().startswith(('[', '{')) and value.rstrip().endswith((']', '}')))
+                logger.info(f"🔍 Found large string at {current_path}: {len(value)} chars, JSON-like: {is_json_like}, preview: {preview}")
+
+            if isinstance(value, dict):
+                # Recursively process nested dictionaries
+                result[key] = process_dict(value, current_path)
+            elif isinstance(value, list):
+                # Process lists
+                result[key] = process_list(value, current_path)
+            elif isinstance(value, str) and is_base64_image(value):
+                # This looks like a base64 image, save it and replace with reference
+                logger.info(f"🖼️  Found base64 image at {current_path} ({len(value)} chars)")
+                result[key] = save_base64_image(value, key)
+            elif isinstance(value, str) and len(value) > 1000 and key.endswith('_json'):
+                # Special handling for JSON strings that might contain base64 images
+                try:
+                    logger.info(f"🔍 Processing JSON string at {current_path}")
+                    parsed_json = json.loads(value)
+                    processed_json = process_json_for_base64(parsed_json, current_path)
+                    result[key] = json.dumps(processed_json, default=str)
+                    logger.info(f"✅ Processed JSON string at {current_path}")
+                except json.JSONDecodeError:
+                    logger.warning(f"⚠️ Failed to parse JSON at {current_path}, treating as regular string")
+                    if len(value) > 10000:
+                        result[key] = f"[LARGE_STRING_TRUNCATED: {len(value)} chars]"
+                    else:
+                        result[key] = value
+                except Exception as e:
+                    logger.error(f"❌ Error processing JSON at {current_path}: {e}")
+                    if len(value) > 10000:
+                        result[key] = f"[LARGE_STRING_TRUNCATED: {len(value)} chars]"
+                    else:
+                        result[key] = value
+            elif isinstance(value, str) and len(value) > 10000:
+                # Fallback: any very large string gets truncated
+                logger.warning(f"⚠️  Fallback truncation of large string at {current_path} ({len(value)} chars)")
+                result[key] = f"[LARGE_STRING_TRUNCATED: {len(value)} chars]"
+            else:
+                # Keep the value as-is
+                result[key] = value
+
+        return result
+
+    def process_list(obj: list, path: str = "") -> list:
+        """Recursively process a list to find and replace base64 images."""
+        result = []
+
+        for i, value in enumerate(obj):
+            current_path = f"{path}[{i}]"
+
+            # Debug: log large strings to see what we're missing
+            if isinstance(value, str) and len(value) > 1000:
+                preview = value[:100] + "..." if len(value) > 100 else value
+                is_json_like = (value.lstrip().startswith(('[', '{')) and value.rstrip().endswith((']', '}')))
+                logger.info(f"🔍 Found large string at {current_path}: {len(value)} chars, JSON-like: {is_json_like}, preview: {preview}")
+
+            if isinstance(value, dict):
+                result.append(process_dict(value, current_path))
+            elif isinstance(value, list):
+                result.append(process_list(value, current_path))
+            elif isinstance(value, str) and is_base64_image(value):
+                logger.info(f"🖼️  Found base64 image at {current_path} ({len(value)} chars)")
+                result.append(save_base64_image(value, f"index_{i}"))
+            elif isinstance(value, str) and len(value) > 10000:
+                # Fallback: any very large string gets truncated
+                logger.warning(f"⚠️  Fallback truncation of large string at {current_path} ({len(value)} chars)")
+                result.append(f"[LARGE_STRING_TRUNCATED: {len(value)} chars]")
+            else:
+                result.append(value)
+
+        return result
+
+    # Add debugging to see payload structure
+    logger.info(f"🔍 Processing payload with keys: {list(processed_payload.keys()) if isinstance(processed_payload, dict) else type(processed_payload)}")
+
+    # Process the payload
+    processed_payload = process_dict(processed_payload)
+
+    # Log processing statistics
+    if images_processed > 0:
+        logger.success(f"📊 Processed payload: {images_processed} images saved, {bytes_saved} chars removed from payload")
+    else:
+        logger.warning("📊 No base64 images found in payload - check detection logic")
+
+    return processed_payload
+
 def _send_log_to_remote(log_payload: Dict, endpoint_url: str, log_description: str,
                        client_id: str = None, test_id: str = None, session_id: str = None,
                        rabbitize_url: str = None, operator: str = None):
@@ -471,37 +847,81 @@ def _send_log_to_remote(log_payload: Dict, endpoint_url: str, log_description: s
 
     If rabbitize_url and all required IDs are provided, will use the local /feedback endpoint.
     Otherwise falls back to the original remote endpoint.
-    
+
     Args:
         operator: Optional operator name to categorize the feedback (e.g., "actor", "validator", "corrector")
     """
+    # Process the payload to handle large base64 images
+    try:
+        # Calculate original payload size for debugging
+        original_size = len(json.dumps(log_payload, default=str))
+        logger.info(f"🔍 Original payload size: {original_size:,} bytes for {log_description}")
+
+        processed_payload = process_payload_for_size_limits(log_payload, client_id, test_id, session_id)
+
+        # Calculate processed payload size for debugging
+        processed_size = len(json.dumps(processed_payload, default=str))
+        size_reduction = original_size - processed_size
+        logger.info(f"🔍 Processed payload size: {processed_size:,} bytes (reduced by {size_reduction:,} bytes)")
+
+        if processed_size > 100000:  # Still over 100KB limit
+            logger.warning(f"⚠️  Processed payload still large: {processed_size:,} bytes (limit: ~100KB)")
+
+        logger.debug(f"Processed payload for size limits: {log_description}")
+    except Exception as e:
+        logger.error(f"❌ Failed to process payload for size limits: {e}")
+        # Continue with original payload if processing fails
+        processed_payload = log_payload
+
     # Check if we can use the local feedback endpoint
+    if rabbitize_url and client_id and test_id and session_id:
+        logger.debug(f"Sending to local feedback: operator={operator}, client_id={client_id}, test_id={test_id}, session_id={session_id}")
+    else:
+        missing = []
+        if not rabbitize_url: missing.append("rabbitize_url")
+        if not client_id: missing.append("client_id")
+        if not test_id: missing.append("test_id")
+        if not session_id: missing.append("session_id")
+        logger.warning(f"Cannot use local feedback endpoint, missing: {', '.join(missing)}")
+
     if rabbitize_url and client_id and test_id and session_id:
         try:
             feedback_payload = {
                 "client_id": client_id,
                 "test_id": test_id,
                 "session_id": session_id,
-                "payload": log_payload
+                "payload": processed_payload
             }
-            
+
             # Add operator if provided
             if operator:
                 feedback_payload["operator"] = operator
-            
+
             response = requests.post(f"{rabbitize_url}/feedback", json=feedback_payload, timeout=5)
             response.raise_for_status()
-            
+
             filename = f"feedback_{operator}.json" if operator else "feedback_loop.json"
-            logger.success(f"✅ Successfully sent {log_description} to {filename}", 
+            logger.success(f"✅ Successfully sent {log_description} to {filename}",
                          {"status_code": response.status_code, "endpoint": f"{rabbitize_url}/feedback"})
             return  # Success, don't try remote endpoint
+        except requests.exceptions.HTTPError as e:
+            error_detail = {
+                "status_code": e.response.status_code if e.response else None,
+                "response_text": e.response.text if e.response else None,
+                "url": f"{rabbitize_url}/feedback",
+                "payload_keys": list(feedback_payload.keys()),
+                "operator": operator,
+                "client_id": client_id,
+                "test_id": test_id,
+                "session_id": session_id
+            }
+            logger.error(f"❌ HTTP Error sending to feedback endpoint: {e}", error_detail)
         except Exception as e:
             logger.warning(f"⚠️ Failed to send to local feedback endpoint: {e}")
 
     # Original remote endpoint logic
     # try:
-    #     response = requests.post(endpoint_url, json=log_payload, timeout=5)
+    #     response = requests.post(endpoint_url, json=processed_payload, timeout=5)
     #     response.raise_for_status()
     #     logger.debug(f"Successfully sent {log_description} to {endpoint_url}. Status: {response.status_code}")
     # except requests.exceptions.Timeout:
@@ -627,6 +1047,36 @@ def log_agent_thinking_event(
         if metadata: log_payload["metadata_json"] = json.dumps(metadata, default=str)
         _send_log_to_remote(log_payload, remote_log_url, f"llm_error_event ({event_type}) for {client_id or 'N/A'}/{test_id or 'N/A'}",
                            client_id=client_id, test_id=test_id, session_id=session_id, rabbitize_url=rabbitize_url, operator=operator)
+    else:
+        # if isinstance(current_user_turn_message, dict):
+        #     log_payload = {
+        #         **base_log_payload,
+        #         "event_type": "llm_current_user_message",
+        #         "message_role": current_user_turn_message.get("role"),
+        #         "message_parts_json": json.dumps(current_user_turn_message.get("parts"), default=str),
+        #     }
+        #     if metadata: log_payload["metadata_json"] = json.dumps(metadata, default=str)
+        #     operator = str(operator + '_other')
+        #     _send_log_to_remote(log_payload, remote_log_url, f"other ({event_type}) for {client_id or 'N/A'}/{test_id or 'N/A'}",
+        #                     client_id=client_id, test_id=test_id, session_id=session_id, rabbitize_url=rabbitize_url, operator=operator)
+
+        current_prompt_messages = prompt_data.get("contents", [])
+        if current_prompt_messages:
+            # The "current user message" for the prompt is the last one.
+            # This contains the latest screenshot and user instructions.
+            current_user_turn_message = current_prompt_messages[-1]
+            if isinstance(current_user_turn_message, dict):
+                log_payload = {
+                    **base_log_payload,
+                    "event_type": "llm_current_user_message",
+                    "message_role": current_user_turn_message.get("role"),
+                    "message_parts_json": json.dumps(current_user_turn_message.get("parts"), default=str),
+                }
+                operator = str(operator + '_other')
+                if metadata: log_payload["metadata_json"] = json.dumps(metadata, default=str)
+                _send_log_to_remote(log_payload, remote_log_url, f"other_llm_current_user_message for {client_id or 'N/A'}/{test_id or 'N/A'}",
+                                   client_id=client_id, test_id=test_id, session_id=session_id, rabbitize_url=rabbitize_url, operator=operator)
+
 
     # Note: Other event_types are not explicitly sent to the remote `recon_gossip` log with this logic.
     # They are still logged locally by the `logger.info` call at the beginning of this function.
@@ -694,7 +1144,7 @@ def update_task_status(client_id: str, test_id: str, status: str, extra_data: di
 
 def save_to_gcs(client_id: str, test_id: str, path: str, data, content_type: str = None):
     """
-    Save data to Google Cloud Storage.
+    Save data to Google Cloud Storage and locally to assets folder.
 
     Args:
         client_id: The client ID
@@ -706,42 +1156,64 @@ def save_to_gcs(client_id: str, test_id: str, path: str, data, content_type: str
     Returns:
         tuple: (success_bool, public_url or error_message)
     """
+    # Prepare data for saving
+    save_data = None
+    if isinstance(data, bytes):
+        # Binary data (images, etc.)
+        content_type = content_type or "application/octet-stream"
+        save_data = data
+    elif isinstance(data, dict) or isinstance(data, list):
+        # JSON data
+        json_data = json.dumps(data, ensure_ascii=False, default=str)
+        content_type = content_type or "application/json"
+        save_data = json_data.encode('utf-8')
+    elif isinstance(data, str):
+        # String data
+        content_type = content_type or "text/plain"
+        save_data = data.encode('utf-8')
+    else:
+        logger.error(f"Unsupported data type: {type(data)}")
+        return False, f"Unsupported data type: {type(data)}"
+
+    # Save locally to assets folder
+    local_full_path = f"assets/recon/{client_id}/{test_id}/{path}"
+    try:
+        # Create directory structure if it doesn't exist
+        local_dir = os.path.dirname(local_full_path)
+        os.makedirs(local_dir, exist_ok=True)
+
+        # Save the file locally
+        with open(local_full_path, 'wb') as f:
+            f.write(save_data)
+
+        logger.info(f"💾 Saved locally: {local_full_path}")
+    except Exception as e:
+        logger.error(f"❌ Failed to save locally: {e}")
+        # Continue with GCS save even if local save fails
+
+    # Save to GCS if initialized
     if not gcs_initialized or gcs_client is None:
-        logger.warning("GCS not initialized, skipping data storage")
-        return False, "GCS not initialized"
+        logger.warning("GCS not initialized, only saved locally")
+        return True, local_full_path  # Return local path if GCS not available
 
     try:
         bucket = gcs_client.bucket(GCS_BUCKET_NAME)
-        full_path = f"recon/{client_id}/{test_id}/{path}"
-        blob = bucket.blob(full_path)
+        gcs_full_path = f"recon/{client_id}/{test_id}/{path}"
+        blob = bucket.blob(gcs_full_path)
 
-        # Handle different data types
-        if isinstance(data, bytes):
-            # Binary data (images, etc.)
-            content_type = content_type or "application/octet-stream"
-            blob.upload_from_string(data, content_type=content_type)
-        elif isinstance(data, dict) or isinstance(data, list):
-            # JSON data
-            json_data = json.dumps(data, ensure_ascii=False, default=str)
-            content_type = content_type or "application/json"
-            blob.upload_from_string(json_data, content_type=content_type)
-        elif isinstance(data, str):
-            # String data
-            content_type = content_type or "text/plain"
-            blob.upload_from_string(data, content_type=content_type)
-        else:
-            logger.error(f"Unsupported data type for GCS: {type(data)}")
-            return False, f"Unsupported data type: {type(data)}"
+        # Upload to GCS
+        blob.upload_from_string(save_data, content_type=content_type)
 
         # Make the blob publicly readable
         blob.make_public()
 
-        public_url = f"https://storage.googleapis.com/{GCS_BUCKET_NAME}/{full_path}"
-        logger.success(f"☁️ Saved data to GCS and made public: {full_path}")
+        public_url = f"https://storage.googleapis.com/{GCS_BUCKET_NAME}/{gcs_full_path}"
+        logger.success(f"☁️ Saved data to GCS and made public: {gcs_full_path}")
         return True, public_url
     except Exception as e:
         logger.error(f"❌ Failed to save data to GCS: {e}", exc_info=True)
-        return False, str(e)
+        # Even if GCS fails, we have local copy
+        return True, local_full_path
 
 def save_debug_data(client_id: str, test_id: str, step: int, screenshot: bytes, ui_elements: List[Dict],
                     matching_elements: List[Dict] = None, intent: str = None,
@@ -973,7 +1445,7 @@ def start_session(rabbitize_url: str, target_url: str, max_retries: int = 3) -> 
             if not session_id:
                 raise ValueError("No sessionId returned from /start endpoint")
 
-            logger.success(f"🚀 Session started successfully", 
+            logger.success(f"🚀 Session started successfully",
                          {"payload": payload, "session_id": session_id})
             return session_id
         except Exception as e:
@@ -1132,7 +1604,7 @@ def send_command(rabbitize_url: str, session_id: str, tool_name: str, args: dict
             # Updated to use /execute endpoint
             response = requests.post(f"{rabbitize_url}/execute", json=payload, timeout=5)
             response.raise_for_status()
-            logger.success(f"✅ Command sent successfully", 
+            logger.success(f"✅ Command sent successfully",
                          {"command": command, "session_id": session_id})
             return command
         except Exception as e:
@@ -1178,7 +1650,7 @@ def detect_cursor(screenshot: bytes, expected_x: int = None, expected_y: int = N
     Returns:
         tuple: (cursor_color, (x, y)) where cursor_color is 'red', 'green', 'blue', or 'not_found'
     """
-    logger.debug(f"🔍 Starting cursor detection", 
+    logger.debug(f"🔍 Starting cursor detection",
                 {"image_size": f"{len(screenshot)} bytes", "expected_coords": f"({expected_x}, {expected_y})"})
 
     if not screenshot:
@@ -1420,7 +1892,7 @@ def calculate_dynamic_temperature(stuck_counter: int, is_making_progress: bool, 
     # Default to base temperature
     return base_temp
 
-def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, last_command: str = None, agent_explanation: str = None, client_id: str = None, test_id: str = None, step: int = None) -> tuple:
+def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, last_command: str = None, agent_explanation: str = None, client_id: str = None, test_id: str = None, step: int = None, session_id: str = None, rabbitize_url: str = None) -> tuple:
     """Compare two screenshots using Gemini API and return a description of changes and progress assessment.
 
     Returns:
@@ -1498,7 +1970,7 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
         }
     }
 
-    logger.debug("📊 Sending screenshot comparison request to Gemini API", 
+    logger.debug("📊 Sending screenshot comparison request to Gemini API",
                 {"temperature": 0.1, "topP": 0.95, "topK": 40})
     try:
         # Log thinking event before API call
@@ -1510,6 +1982,8 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             step_number=step,    # Note: step might be None here
             prompt_data=payload,
             metadata={"context": "screenshot_comparison"},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
             operator="validator"
         )
 
@@ -1526,6 +2000,8 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             step_number=step,
             response_data=result,
             metadata={"context": "screenshot_comparison"},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
             operator="validator"
         )
 
@@ -1635,6 +2111,8 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             step_number=step,
             response_data={"error": str(e), "status_code": e.response.status_code if e.response else None, "response_text": e.response.text if e.response else None},
             metadata={"context": "screenshot_comparison"},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
             operator="validator"
         )
         return "", False, False
@@ -1649,6 +2127,8 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             step_number=step,
             response_data={"error": str(e), "traceback": traceback.format_exc()},
             metadata={"context": "screenshot_comparison"},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
             operator="validator"
         )
         return "", False, False
@@ -1766,12 +2246,45 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
 
     # Prepare DOM elements information if available
     dom_elements_text = ""
+    clickable_dom_count = 0
     if dom_elements:
         try:
             dom_elements_text = prepare_dom_elements_for_prompt(dom_elements)
-            logger.info(f"Added {dom_elements_text.count('.')} DOM elements to prompt")
+            clickable_dom_count = len(filter_clickable_elements(dom_elements))
+            logger.info(f"Added {clickable_dom_count} interactive DOM elements to prompt")
         except Exception as e:
             logger.error(f"Failed to prepare DOM elements for prompt: {e}")
+
+    # Extract OCR elements ONLY when DOM data is insufficient or agent is stuck
+    # Priority: DOM elements > OCR fallback
+    ocr_elements_text = ""
+    should_run_ocr = (
+        (not dom_elements_text or clickable_dom_count < 3) or  # Insufficient DOM data
+        (stuck_counter > 1)  # Agent is stuck multiple times (more restrictive)
+    )
+
+    if should_run_ocr:
+        try:
+            if screenshot and len(screenshot) > 0:
+                logger.info(f"🔍 Using OCR fallback (DOM elements: {clickable_dom_count}, stuck: {stuck_counter > 1})")
+                # Use timeout to prevent OCR from blocking
+                ui_elements = with_timeout(
+                    extract_ui_elements_with_ocr,
+                    args=(screenshot,),
+                    timeout_duration=3,  # 3 second timeout
+                    default=[]
+                )
+                if ui_elements and len(ui_elements) > 0:
+                    # Generate OCR metadata for the LLM
+                    ocr_elements_text = generate_ui_element_metadata(ui_elements)
+                    logger.info(f"Added {len(ui_elements)} OCR text blocks to prompt")
+                else:
+                    logger.debug("No OCR text blocks extracted from screenshot")
+        except Exception as e:
+            logger.error(f"Failed to extract OCR elements for prompt: {e}")
+            ocr_elements_text = ""
+    else:
+        logger.debug(f"Skipping OCR - sufficient DOM data ({clickable_dom_count} elements) and agent not stuck")
 
     if len(history) >= 1:
         last_hash_str = history[-1].get("screenshot_hash")
@@ -1812,7 +2325,7 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
                 try:
                     compare_result = with_timeout(
                         compare_screenshots,
-                        args=(history[-1].get("screenshot"), screenshot, last_command, prev_agent_explanation, client_id, test_id, step),
+                        args=(history[-1].get("screenshot"), screenshot, last_command, prev_agent_explanation, client_id, test_id, step, session_id, rabbitize_url),
                         timeout_duration=8,
                         default=("Screenshot comparison timed out.", False, False)
                     )
@@ -1911,10 +2424,19 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
             formatted_description = history[-1].get("changes_description", changes_description)
             actions_text += f" Since you executed {last_command}, {formatted_description}"
 
-    # Add DOM elements information to the prompt
+    # Add element information to the prompt - prioritize DOM over OCR
     if dom_elements_text:
-        dom_elements_intro = "\n\nThe page contains these interactive elements you can interact with:\n"
+        dom_elements_intro = f"\n\nThe page contains these {clickable_dom_count} interactive elements you can interact with:\n"
         actions_text += dom_elements_intro + dom_elements_text
+
+        # If we also have OCR data, present it as supplementary
+        if ocr_elements_text:
+            ocr_elements_intro = "\n\nAdditional text elements detected visually (for reference):\n"
+            actions_text += ocr_elements_intro + ocr_elements_text
+    elif ocr_elements_text:
+        # Only OCR data available (fallback mode)
+        ocr_elements_intro = "\n\nText elements detected on the screen (visual detection - DOM data unavailable):\n"
+        actions_text += ocr_elements_intro + ocr_elements_text
 
     # Add DOM markdown content to the prompt (only for current step)
     if dom_markdown and len(dom_markdown.strip()) > 0:
@@ -2002,8 +2524,9 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
            - GREEN DOT = cursor is over a clickable link, button, or element
            - BLUE DOT = cursor is over a draggable element
         5. **MUST VERIFY CURSOR:** Always verify you see the cursor dot before clicking.
-        6. **When You Are Finished:**  If you have achieved the objective, use the report_done action.
-        7. **IF AT FIRST YOU DON'T SUCCEED, TRY SOMETHING COMPLETELY DIFFERENT.**
+        6. **Use Provided Element Data:** You'll receive both DOM elements and OCR text data with precise coordinates. Use these to guide your mouse movements instead of guessing coordinates.
+        7. **When You Are Finished:**  If you have achieved the objective, use the report_done action.
+        8. **IF AT FIRST YOU DON'T SUCCEED, TRY SOMETHING COMPLETELY DIFFERENT.**
         {cursor_emphasis}{strategy_shift}{visual_verification}{stuck_guidance}
 
             Available tools and their arguments:
@@ -2044,6 +2567,28 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
             user_prompt_text += " I could not detect any cursor dot in the current screenshot."
 
     logger.info(f"Current Feedback: {actions_text} {screenshot_reminder} {cursor_feedback}")
+
+
+    payload = dict()
+    payload['actions_text'] = actions_text
+    payload['screenshot_reminder'] = screenshot_reminder
+    payload['cursor_feedback'] = cursor_feedback
+    #payload['contents'] = payload
+
+    # Log thinking event before API call
+    log_agent_thinking_event(
+        event_type="llm_request",
+        caller_id="get_next_action",
+        client_id=client_id,
+        test_id=test_id,
+        step_number=step,
+        prompt_data=payload, # Send the full payload for detailed logging
+        metadata=payload,
+        #metadata={"attempt": attempt + 1, "temperature": current_temp, "diversity_score": diversity_score, "stuck_counter": stuck_counter},
+        session_id=session_id,
+        rabbitize_url=rabbitize_url,
+        operator="evaluator"
+    )
 
     contents = []
     # Calculate which turns should include images (only the last 3)
@@ -2152,7 +2697,7 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
 
         # Log the stripped version of the payload (without base64 data)
         stripped_payload = strip_base64_from_json(payload)
-        
+
         logger.api_call(f"Requesting next action from Gemini API",
                        endpoint="Gemini API",
                        payload={
@@ -2429,7 +2974,7 @@ def send_to_firebase(client_id: str, test_id: str, step: int, data: dict):
         # Set data at the reference
         ref.set(data)
 
-        logger.success(f"✅ Successfully sent step {step} data to Firebase", 
+        logger.success(f"✅ Successfully sent step {step} data to Firebase",
                       {"client_id": client_id, "test_id": test_id})
         return True
     except Exception as e:
@@ -2469,7 +3014,7 @@ def coordinate_correction_helper(
     if cursor_color != "red" and cursor_color != "not_found":
         return False, current_position, "Cursor is already on a clickable element"
 
-    logger.info(f"🎯 Activating coordinate correction helper", 
+    logger.info(f"🎯 Activating coordinate correction helper",
                {"cursor_color": cursor_color, "position": current_position})
 
     # APPROACH 1: Use DOM Coordinates (most accurate)
@@ -2787,13 +3332,14 @@ def coordinate_correction_helper(
 
 def extract_ui_elements_with_ocr(screenshot: bytes) -> List[Dict[str, Any]]:
     """
-    Extract text elements from a screenshot using OCR.
+    Extract meaningful text blocks from a screenshot using OCR.
+    Groups individual words into coherent text elements.
 
     Args:
         screenshot: Screenshot bytes
 
     Returns:
-        List of dictionaries with text elements and their coordinates
+        List of dictionaries with text blocks and their coordinates
     """
     # Check if the screenshot is valid
     if screenshot is None or len(screenshot) == 0:
@@ -2815,15 +3361,12 @@ def extract_ui_elements_with_ocr(screenshot: bytes) -> List[Dict[str, Any]]:
         # Convert to grayscale for better OCR
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # Use pytesseract to extract text with confidence and bounding boxes
-        # config = '--psm 11'  # Page segmentation mode: sparse text
-
         try:
-            # Wrap OCR with timeout to prevent freezing
+            # Use PSM 6 (uniform block of text) instead of PSM 11 (sparse text) to get better text blocks
             ocr_data = with_timeout(
                 pytesseract.image_to_data,
                 args=(gray,),
-                kwargs={"output_type": pytesseract.Output.DICT, "config": "--psm 11"},
+                kwargs={"output_type": pytesseract.Output.DICT, "config": "--psm 6"},
                 timeout_duration=5,
                 default=None
             )
@@ -2832,18 +3375,26 @@ def extract_ui_elements_with_ocr(screenshot: bytes) -> List[Dict[str, Any]]:
                 logger.warning("OCR timed out or failed")
                 return []
 
-            # Extract text elements with high confidence
-            ui_elements = []
+            # Group words into meaningful text blocks
+            text_blocks = []
+            current_block = []
+            current_line = -1
+            min_confidence = 50  # Lower threshold for more text detection
+
             n_boxes = len(ocr_data['text'])
-            min_confidence = 60  # Minimum confidence threshold
 
             for i in range(n_boxes):
                 text = ocr_data['text'][i].strip()
                 conf = int(ocr_data['conf'][i])
+                level = int(ocr_data['level'][i])
 
-                # Skip empty text or low confidence
+                # Skip empty text or very low confidence
                 if not text or conf < min_confidence:
                     continue
+
+                # Get line number and block info
+                line_num = ocr_data['line_num'][i]
+                block_num = ocr_data['block_num'][i]
 
                 # Get bounding box
                 x = ocr_data['left'][i]
@@ -2851,20 +3402,55 @@ def extract_ui_elements_with_ocr(screenshot: bytes) -> List[Dict[str, Any]]:
                 w = ocr_data['width'][i]
                 h = ocr_data['height'][i]
 
-                # Calculate center point
-                center_x = x + w // 2
-                center_y = y + h // 2
-
-                ui_elements.append({
+                word_info = {
                     "text": text,
                     "confidence": conf,
                     "bbox": (x, y, x + w, y + h),
-                    "center": (center_x, center_y),
-                    "area": w * h
-                })
+                    "center": (x + w // 2, y + h // 2),
+                    "line_num": line_num,
+                    "block_num": block_num,
+                    "level": level
+                }
 
-            logger.success(f"🔤 Extracted {len(ui_elements)} text elements with OCR")
-            return ui_elements
+                # Start a new block if we're on a different line or block
+                if current_line != line_num or (current_block and
+                    abs(word_info["center"][1] - current_block[-1]["center"][1]) > 10):
+
+                    # Finish the current block if it has content
+                    if current_block:
+                        text_blocks.append(_create_text_block(current_block))
+                        current_block = []
+
+                    current_line = line_num
+
+                current_block.append(word_info)
+
+            # Don't forget the last block
+            if current_block:
+                text_blocks.append(_create_text_block(current_block))
+
+            # Filter out very short or common words that aren't useful for navigation
+            useful_blocks = []
+            for block in text_blocks:
+                block_text = block["text"].strip()
+
+                # Skip very short single words unless they look like UI elements
+                if len(block_text) < 2:
+                    continue
+
+                # Skip common single words that don't help with navigation
+                if (len(block_text.split()) == 1 and
+                    block_text.lower() in ["the", "and", "or", "to", "a", "an", "of", "in", "on", "at", "by", "for", "with", "as", "is", "are", "was", "were", "be", "been", "have", "has", "had", "do", "does", "did", "will", "would", "could", "should", "may", "might", "can"]):
+                    continue
+
+                # Skip very low confidence blocks
+                if block["confidence"] < 40:
+                    continue
+
+                useful_blocks.append(block)
+
+            logger.success(f"🔤 Extracted {len(useful_blocks)} meaningful text blocks from {len(text_blocks)} total blocks using OCR")
+            return useful_blocks
 
         except Exception as e:
             logger.error(f"Error during OCR extraction: {e}", exc_info=True)
@@ -2873,6 +3459,44 @@ def extract_ui_elements_with_ocr(screenshot: bytes) -> List[Dict[str, Any]]:
     except Exception as e:
         logger.error(f"Error preparing image for OCR: {e}", exc_info=True)
         return []
+
+def _create_text_block(word_list: List[Dict]) -> Dict[str, Any]:
+    """
+    Create a text block from a list of words.
+
+    Args:
+        word_list: List of word dictionaries
+
+    Returns:
+        Combined text block dictionary
+    """
+    if not word_list:
+        return {}
+
+    # Combine text with spaces
+    combined_text = " ".join(word["text"] for word in word_list)
+
+    # Calculate average confidence
+    avg_confidence = sum(word["confidence"] for word in word_list) / len(word_list)
+
+    # Calculate bounding box that encompasses all words
+    min_x = min(word["bbox"][0] for word in word_list)
+    min_y = min(word["bbox"][1] for word in word_list)
+    max_x = max(word["bbox"][2] for word in word_list)
+    max_y = max(word["bbox"][3] for word in word_list)
+
+    # Calculate center point
+    center_x = (min_x + max_x) // 2
+    center_y = (min_y + max_y) // 2
+
+    return {
+        "text": combined_text,
+        "confidence": int(avg_confidence),
+        "bbox": (min_x, min_y, max_x, max_y),
+        "center": (center_x, center_y),
+        "area": (max_x - min_x) * (max_y - min_y),
+        "word_count": len(word_list)
+    }
 
 def find_elements_matching_intent(ui_elements: List[Dict[str, Any]], intent: str) -> List[Dict[str, Any]]:
     """
@@ -2954,17 +3578,25 @@ def generate_ui_element_metadata(ui_elements: List[Dict[str, Any]]) -> str:
     if not ui_elements:
         return "No text elements detected."
 
-    # Sort elements by confidence
-    sorted_elements = sorted(ui_elements, key=lambda x: x["confidence"], reverse=True)
+    # Sort elements by confidence and relevance (longer text blocks often more useful)
+    sorted_elements = sorted(ui_elements,
+                           key=lambda x: (x["confidence"] * 0.7 + len(x["text"]) * 0.3),
+                           reverse=True)
 
-    # Take only the top N most confident elements to avoid overwhelming the model
-    top_elements = sorted_elements[:15]
+    # Take only the top N most relevant elements to avoid overwhelming the model
+    top_elements = sorted_elements[:12]
 
-    metadata = "UI ELEMENT MAP:\n"
+    metadata = "TEXT BLOCKS FOUND:\n"
     for i, element in enumerate(top_elements):
         text = element["text"]
         x, y = element["center"]
-        metadata += f"{i+1}. '{text}' at ({x}, {y})\n"
+        word_count = element.get("word_count", len(text.split()))
+        confidence = element["confidence"]
+
+        # Truncate very long text for display
+        display_text = text if len(text) <= 40 else text[:37] + "..."
+
+        metadata += f"{i+1}. \"{display_text}\" at ({x}, {y}) [{word_count} words, {confidence}% confident]\n"
 
     return metadata
 
@@ -3492,7 +4124,7 @@ async def debug_ocr_test(url: str = None):
                 response = requests.get(url, timeout=10)
                 response.raise_for_status()
                 test_image_bytes = response.content
-                logger.info(f"⬇️ Downloaded test image from URL", 
+                logger.info(f"⬇️ Downloaded test image from URL",
                            {"url": url, "size": f"{len(test_image_bytes)} bytes"})
             except Exception as e:
                 return {"status": "error", "message": f"Failed to download image from URL: {e}"}
@@ -4131,7 +4763,7 @@ async def start_task(task: TaskRequest):
         timeout_summary = "No actions were taken before the task timed out."
         if history: # Only generate summary if there's history
             logger.info(f"Generating timeout summary for {client_id}/{test_id} as max steps were reached.")
-            timeout_summary = generate_timeout_summary(objective, history, client_id, test_id)
+            timeout_summary = generate_timeout_summary(objective, history, client_id, test_id, session_id, rabbitize_url)
         else:
             logger.info(f"No history to generate timeout summary for {client_id}/{test_id}.")
 

@@ -109,6 +109,9 @@ ehthumbs.db
 Thumbs.db
 
 venv
+__pycache__
+recon/assets
+img_*
 
 # Temporary files
 *.tmp

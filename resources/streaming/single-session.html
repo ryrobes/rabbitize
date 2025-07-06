@@ -32,6 +32,203 @@
             margin: 0 auto;
             padding: 80px 20px 40px;
         }
+
+        /* AI Monologue Panel Styles */
+        .ai-monologue-panel {
+            display: none;
+            margin: 20px 0;
+            border: 1px solid #0ff;
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ai-monologue-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #0ff, transparent);
+            animation: scan-line 3s linear infinite;
+        }
+
+        @keyframes scan-line {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .ai-monologue-header {
+            background: linear-gradient(90deg, #000 0%, #0ff 50%, #000 100%);
+            background-size: 200% 100%;
+            animation: gradient-shift 3s ease infinite;
+            padding: 10px 20px;
+            border-bottom: 1px solid #0ff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .ai-monologue-title {
+            color: #000;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+        }
+
+        .ai-monologue-status {
+            color: #000;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .ai-monologue-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: #0ff;
+            border-top: 1px solid #0ff;
+        }
+
+        .ai-message-box {
+            background: #000;
+            padding: 20px;
+            min-height: 200px;
+            position: relative;
+            overflow: auto;
+            max-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ai-message-box.user {
+            border-right: 1px solid #0ff;
+        }
+
+        .ai-message-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.5;
+        }
+
+        .ai-message-label.user {
+            color: #ff0;
+        }
+
+        .ai-message-label.model {
+            color: #0f0;
+        }
+
+        .ai-message-content {
+            margin-top: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .ai-message-content .function-call {
+            display: inline-block;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #0ff;
+            padding: 2px 6px;
+            margin: 2px 0;
+            font-size: 12px;
+            color: #0ff;
+        }
+
+        .ai-message-timestamp {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            opacity: 0.4;
+        }
+
+        .ai-message-metadata {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            font-size: 11px;
+            color: #0ff;
+        }
+
+        .ai-metadata-container {
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+            min-height: 0;
+        }
+
+        .ai-metadata-table {
+            width: 100%;
+            font-size: 9px;
+            color: #0ff;
+            opacity: 0.7;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        .ai-metadata-table td {
+            padding: 1px 4px;
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+        }
+
+        .ai-metadata-table td:first-child {
+            font-weight: bold;
+            text-align: right;
+            width: 30%;
+            color: #ff0;
+            opacity: 0.8;
+        }
+
+        .ai-message-image {
+            margin: 10px 0;
+            max-width: 100%;
+            border: 1px solid #0ff;
+            display: block;
+        }
+
+        /* Pulsing effect for new messages */
+        @keyframes message-pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .ai-message-box.updating {
+            animation: message-pulse 0.5s ease-in-out;
+        }
+
+        /* No data state */
+        .ai-no-data {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -223,6 +420,32 @@
                             </div>
                             ` : ''}
                         </div>
+
+                        <!-- AI Monologue Panel for active sessions -->
+                        ${session.status === 'active' ? `
+                        <div id="ai-monologue-panel" class="ai-monologue-panel">
+                            <div class="ai-monologue-header">
+                                <div class="ai-monologue-title">AI INNER MONOLOGUE</div>
+                                <div class="ai-monologue-status" id="ai-monologue-status">CHECKING...</div>
+                            </div>
+                            <div class="ai-monologue-content">
+                                <div class="ai-message-box user">
+                                    <div class="ai-message-label user">SYSTEM → AI</div>
+                                    <div id="ai-user-message" class="ai-message-content">
+                                        <div class="ai-no-data">Waiting for AI input...</div>
+                                    </div>
+                                    <div id="ai-user-metadata" class="ai-metadata-container"></div>
+                                </div>
+                                <div class="ai-message-box model">
+                                    <div class="ai-message-label model">AI → ACTION</div>
+                                    <div id="ai-model-message" class="ai-message-content">
+                                        <div class="ai-no-data">Waiting for AI response...</div>
+                                    </div>
+                                    <div id="ai-model-metadata" class="ai-metadata-container"></div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
 
                         <!-- Add larger preview for active sessions -->
                         ${session.status === 'active' ? `
@@ -924,6 +1147,212 @@ ${commands}
         function closeLogsModal() {
             document.getElementById('logs-modal').style.display = 'none';
         }
+
+        // AI Monologue Panel Functions
+        let lastUserMessageTimestamp = null;
+        let lastModelMessageTimestamp = null;
+        let feedbackPollInterval = null;
+        let lastRefreshTime = 0;
+
+        async function checkAndLoadFeedback() {
+            try {
+                const response = await fetch(`/api/session/${clientId}/${testId}/${sessionId}/feedback?operator=actor`);
+                const data = await response.json();
+
+                if (data.exists) {
+                    // Show the panel
+                    const panel = document.getElementById('ai-monologue-panel');
+                    if (panel) {
+                        panel.style.display = 'block';
+                        document.getElementById('ai-monologue-status').textContent =
+                            `${data.totalUserMessages} prompts • ${data.totalModelMessages} responses`;
+                    }
+
+                    // Update user message if new
+                    if (data.latestUser && data.latestUser.timestamp !== lastUserMessageTimestamp) {
+                        lastUserMessageTimestamp = data.latestUser.timestamp;
+                        updateUserMessage(data.latestUser);
+                        
+                        // Trigger partial refresh to update thumbnails/storyboard (with debounce)
+                        const now = Date.now();
+                        if (now - lastRefreshTime > 2000) {
+                            lastRefreshTime = now;
+                            loadSingleSession(false);
+                        }
+                    }
+
+                    // Update model message if new
+                    if (data.latestModel && data.latestModel.timestamp !== lastModelMessageTimestamp) {
+                        lastModelMessageTimestamp = data.latestModel.timestamp;
+                        updateModelMessage(data.latestModel);
+                        
+                        // Trigger partial refresh to update thumbnails/storyboard (with debounce)
+                        const now = Date.now();
+                        if (now - lastRefreshTime > 2000) {
+                            lastRefreshTime = now;
+                            loadSingleSession(false);
+                        }
+                    }
+                } else {
+                    // Hide the panel if no feedback exists
+                    const panel = document.getElementById('ai-monologue-panel');
+                    if (panel) {
+                        panel.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load feedback:', error);
+            }
+        }
+
+        function parseMessageParts(messageParts, isUserMessage = false) {
+            try {
+                const parts = JSON.parse(messageParts);
+                let content = '';
+
+                parts.forEach(part => {
+                    if (part.text) {
+                        let text = part.text;
+                        
+                        // For user messages, remove the repetitive parts
+                        if (isUserMessage) {
+                            // First, remove the coordinate reminder and replace with paragraph breaks
+                            const coordReminder = 'Remember that x is HORIZONTAL (left to right, 0-1920) and y is VERTICAL (top to bottom, 0-1080).';
+                            if (text.includes(coordReminder)) {
+                                text = text.replace(coordReminder, '\n\n');
+                            }
+                            
+                            // Then, remove everything from "What do you see" onwards
+                            const cutoffIndex = text.indexOf('What do you see');
+                            if (cutoffIndex !== -1) {
+                                text = text.substring(0, cutoffIndex).trim();
+                            }
+                        }
+                        
+                        content += text + '\n\n';
+                    }
+                    if (part.functionCall) {
+                        content += `<span class="function-call">⚡ ${part.functionCall.name}(${JSON.stringify(part.functionCall.args)})</span>\n\n`;
+                    }
+                    if (part.inlineData && part.inlineData.data) {
+                        // Extract saved image filename if present
+                        const match = part.inlineData.data.match(/\[IMAGE_SAVED: ([^\]]+)\]/);
+                        if (match) {
+                            content += `<div style="color: #0ff; font-size: 11px;">📸 ${match[1]}</div>\n\n`;
+                        } else {
+                            content += `<div style="color: #0ff; font-size: 11px;">📸 [Image attached]</div>\n\n`;
+                        }
+                    }
+                });
+
+                return content.trim();
+            } catch (e) {
+                return messageParts;
+            }
+        }
+
+        function updateUserMessage(entry) {
+            const container = document.getElementById('ai-user-message');
+            const metadataContainer = document.getElementById('ai-user-metadata');
+            const box = container.parentElement;
+
+            // Add animation
+            box.classList.add('updating');
+            setTimeout(() => box.classList.remove('updating'), 500);
+
+            let content = '';
+
+            // Parse message parts
+            if (entry.payload.message_parts_json) {
+                content = parseMessageParts(entry.payload.message_parts_json, true);
+            }
+
+            container.innerHTML = content || '<div class="ai-no-data">No content</div>';
+
+            // Add timestamp
+            const timestamp = new Date(entry.timestamp).toLocaleTimeString();
+            container.innerHTML += `<div class="ai-message-timestamp">${timestamp}</div>`;
+
+            // Handle metadata separately in a table
+            metadataContainer.innerHTML = '';
+            if (entry.payload.metadata_json) {
+                try {
+                    const metadata = JSON.parse(entry.payload.metadata_json);
+                    if (Object.keys(metadata).length > 0) {
+                        let tableHtml = '<table class="ai-metadata-table">';
+                        for (const [key, value] of Object.entries(metadata)) {
+                            tableHtml += `<tr><td>${key}</td><td>${value}</td></tr>`;
+                        }
+                        tableHtml += '</table>';
+                        metadataContainer.innerHTML = tableHtml;
+                    }
+                } catch (e) {
+                    // Ignore parse errors
+                }
+            }
+        }
+
+        function updateModelMessage(entry) {
+            const container = document.getElementById('ai-model-message');
+            const metadataContainer = document.getElementById('ai-model-metadata');
+            const box = container.parentElement;
+
+            // Add animation
+            box.classList.add('updating');
+            setTimeout(() => box.classList.remove('updating'), 500);
+
+            let content = '';
+
+            // Parse message parts
+            if (entry.payload.message_parts_json) {
+                content = parseMessageParts(entry.payload.message_parts_json);
+            }
+
+            container.innerHTML = content || '<div class="ai-no-data">No content</div>';
+
+            // Add timestamp
+            const timestamp = new Date(entry.timestamp).toLocaleTimeString();
+            container.innerHTML += `<div class="ai-message-timestamp">${timestamp}</div>`;
+
+            // Handle metadata separately in a table
+            metadataContainer.innerHTML = '';
+            if (entry.payload.metadata_json) {
+                try {
+                    const metadata = JSON.parse(entry.payload.metadata_json);
+                    if (Object.keys(metadata).length > 0) {
+                        let tableHtml = '<table class="ai-metadata-table">';
+                        for (const [key, value] of Object.entries(metadata)) {
+                            tableHtml += `<tr><td>${key}</td><td>${value}</td></tr>`;
+                        }
+                        tableHtml += '</table>';
+                        metadataContainer.innerHTML = tableHtml;
+                    }
+                } catch (e) {
+                    // Ignore parse errors
+                }
+            }
+        }
+
+        // Modified loadSingleSession to handle feedback polling
+        const originalLoadSingleSession = loadSingleSession;
+        loadSingleSession = async function(fullRefresh = true) {
+            await originalLoadSingleSession(fullRefresh);
+
+            // Start or stop feedback polling based on session status
+            if (previousStatus === 'active') {
+                // Start polling if not already
+                if (!feedbackPollInterval) {
+                    checkAndLoadFeedback(); // Initial load
+                    feedbackPollInterval = setInterval(checkAndLoadFeedback, 1000); // Poll every second
+                }
+            } else {
+                // Stop polling if session is not active
+                if (feedbackPollInterval) {
+                    clearInterval(feedbackPollInterval);
+                    feedbackPollInterval = null;
+                }
+            }
+        };
 
         // Start loading
         loadSingleSession();
