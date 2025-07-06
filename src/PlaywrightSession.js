@@ -79,11 +79,24 @@ process.on('SIGINT', async () => {
   }
 });
 
+
+
+// Load and display the ANSI art
+try {
+  const ansiArt = fs.readFileSync(path.join(__dirname, '..', 'resources', 'masks.ansi'), 'utf8');
+  // Convert escaped ANSI codes to actual ANSI escape sequences
+  const processedArt = ansiArt.replace(/\\e/g, '\x1b');
+  console.log(processedArt);
+} catch (err) {
+  // Silently ignore if file doesn't exist
+}
+
 console.log(chalk.magenta(figlet.textSync('RABBITIZE RUNNER', {
   font: 'Standard',
   horizontalLayout: 'default',
   verticalLayout: 'default'
 })));
+
 console.log(chalk.cyan('Using Playwright v'), require('playwright/package.json').version);
 
 
