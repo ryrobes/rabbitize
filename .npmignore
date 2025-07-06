@@ -30,6 +30,8 @@ README.md.3
 .gitlab-ci.yml
 .travis.yml
 
+recon
+
 # Documentation source files
 docs/drafts/
 

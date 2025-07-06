@@ -455,7 +455,7 @@ async function main() {
     });
 
     app.post('/start', async (req, res) => {
-      const { url, command, clientId, testId } = req.body;
+      const { url, command, clientId, testId, sessionId } = req.body;
       if (!url) {
         return res.status(400).json({ error: 'URL is required' });
       }
@@ -466,7 +466,7 @@ async function main() {
 
       try {
         // Create fresh session instance with timestamp
-        const sessionTimestamp = argv.sessionId || new Date().toISOString().replace(/[:.]/g, '-');
+        const sessionTimestamp = sessionId || argv.sessionId || new Date().toISOString().replace(/[:.]/g, '-');
 
         // Create new logger with sessionTimestamp
         const sessionLogger = new SimpleLogger(actualClientId, actualTestId, sessionTimestamp);
@@ -478,6 +478,7 @@ async function main() {
           firebase: sessionLogger,  // Keep the property name for compatibility
           clientId: actualClientId,
           testId: actualTestId,
+          //sessionId: sessionTimestamp,
           enableLiveScreenshots: argv.liveScreenshots
         });
 
@@ -675,6 +676,103 @@ async function main() {
         success: true,
         message: bootstrap ? 'End and bootstrap commands queued' : 'End command queued'
       });
+    });
+
+    app.post('/feedback', async (req, res) => {
+      try {
+        const { client_id, test_id, session_id, payload, operator } = req.body;
+        
+        // Validate required fields
+        if (!client_id || !test_id || !session_id) {
+          return res.status(400).json({
+            success: false,
+            error: 'client_id, test_id, and session_id are required'
+          });
+        }
+        
+        // Validate payload exists
+        if (!payload) {
+          return res.status(400).json({
+            success: false,
+            error: 'payload is required'
+          });
+        }
+        
+        // Determine filename based on operator or use default
+        let filename = 'feedback_loop.json';
+        if (operator && typeof operator === 'string') {
+          // Sanitize operator to be a valid filename
+          const sanitizedOperator = operator.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+          filename = `feedback_${sanitizedOperator}.json`;
+        }
+        
+        // Construct path to feedback file
+        const feedbackPath = path.join(
+          process.cwd(), 
+          'rabbitize-runs', 
+          client_id, 
+          test_id, 
+          session_id, 
+          filename
+        );
+        
+        // Create feedback entry with timestamp
+        const feedbackEntry = {
+          timestamp: new Date().toISOString(),
+          payload: payload
+        };
+        
+        try {
+          // Ensure directory exists
+          const dir = path.dirname(feedbackPath);
+          await fsPromises.mkdir(dir, { recursive: true });
+          
+          // Read existing feedback array or create new one
+          let feedbackArray = [];
+          try {
+            const existingData = await fsPromises.readFile(feedbackPath, 'utf8');
+            feedbackArray = JSON.parse(existingData);
+            if (!Array.isArray(feedbackArray)) {
+              feedbackArray = [feedbackArray]; // Convert to array if it wasn't
+            }
+          } catch (err) {
+            // File doesn't exist or is invalid, start with empty array
+            feedbackArray = [];
+          }
+          
+          // Append new feedback
+          feedbackArray.push(feedbackEntry);
+          
+          // Write back to file
+          await fsPromises.writeFile(
+            feedbackPath, 
+            JSON.stringify(feedbackArray, null, 2),
+            'utf8'
+          );
+          
+          logger.log(`Feedback appended to ${filename} for ${client_id}/${test_id}/${session_id}`);
+          
+          res.json({
+            success: true,
+            message: 'Feedback recorded successfully',
+            timestamp: feedbackEntry.timestamp
+          });
+          
+        } catch (fileError) {
+          logger.error('Failed to write feedback:', fileError);
+          res.status(500).json({
+            success: false,
+            error: 'Failed to write feedback to file'
+          });
+        }
+        
+      } catch (error) {
+        logger.error('Feedback endpoint error:', error);
+        res.status(500).json({
+          success: false,
+          error: error.message
+        });
+      }
     });
 
     app.get('/status', async (req, res) => {
@@ -1620,8 +1718,26 @@ async function main() {
 
         let html = await fsPromises.readFile(templatePath, 'utf8');
 
-        // Generate a unique test ID for this flow builder session
-        const flowTestId = `flow-${Date.now()}`;
+        // Generate a memorable test ID for this flow builder session
+        const generateFlowTestId = () => {
+          const verbs = [
+            'dancing', 'flying', 'running', 'jumping', 'spinning', 'gliding', 'racing', 'floating',
+            'bouncing', 'sliding', 'rolling', 'drifting', 'soaring', 'diving', 'climbing', 'surfing'
+          ];
+          const nouns = [
+            'rabbit', 'fox', 'wolf', 'eagle', 'tiger', 'lion', 'bear', 'shark', 'falcon', 'panther',
+            'dolphin', 'hawk', 'lynx', 'otter', 'raven', 'cobra', 'phoenix', 'dragon', 'unicorn', 'griffin'
+          ];
+
+          const verb = verbs[Math.floor(Math.random() * verbs.length)];
+          const noun = nouns[Math.floor(Math.random() * nouns.length)];
+          const num = Math.floor(Math.random() * 99) + 1; // 1-99
+
+          return `${verb}-${noun}-${num}`;
+        };
+
+        const flowTestId = generateFlowTestId();
+        // const flowTestId = `flow-${Date.now()}`;
 
         // Replace placeholders
         html = html.replace(/{{FLOW_TEST_ID}}/g, flowTestId);

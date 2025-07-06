@@ -108,6 +108,8 @@ coverage/
 ehthumbs.db
 Thumbs.db
 
+venv
+
 # Temporary files
 *.tmp
 *.temp

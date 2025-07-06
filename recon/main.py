@@ -18,14 +18,133 @@ from concurrent.futures import ThreadPoolExecutor  # Add proper import
 from fastapi.middleware.cors import CORSMiddleware  # Import CORS middleware
 from typing import Optional, List, Dict, Tuple, Any
 
-# --- Logging Configuration ---
+# Import Rich for beautiful console output
+from rich.console import Console
+from rich.logging import RichHandler
+from rich.traceback import install as install_rich_traceback
+from rich.pretty import Pretty
+from rich.syntax import Syntax
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
+from rich import print as rprint
+from rich.theme import Theme
+
+### needs tesseract-ocr installed
+
+# Install rich traceback handler for beautiful exception formatting
+install_rich_traceback()
+
+# Create a custom theme for our logging
+custom_theme = Theme({
+    "info": "cyan",
+    "warning": "yellow",
+    "error": "bold red",
+    "critical": "bold white on red",
+    "debug": "dim cyan",
+    "success": "bold green",
+    "api_call": "magenta",
+    "json": "blue",
+    "timestamp": "dim white",
+})
+
+# Create console with custom theme
+console = Console(theme=custom_theme)
+
+# --- Logging Configuration with Rich ---
 log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+
+# Configure logging with RichHandler
 logging.basicConfig(
     level=getattr(logging, log_level),
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(message)s",
+    datefmt="[%X]",
+    handlers=[
+        RichHandler(
+            console=console,
+            rich_tracebacks=True,
+            tracebacks_show_locals=True,
+            show_path=True,
+            show_level=True,
+            markup=True
+        )
+    ]
 )
-logger = logging.getLogger("Recon")
-logger.info(f"Starting with log level: {log_level}")
+
+# Create custom logger class for enhanced logging
+class RichLogger:
+    def __init__(self, name: str):
+        self.logger = logging.getLogger(name)
+        self.console = console
+        
+    def _format_json(self, data: dict) -> Syntax:
+        """Format JSON data with syntax highlighting"""
+        json_str = json.dumps(data, indent=2, default=str)
+        return Syntax(json_str, "json", theme="monokai", line_numbers=False)
+    
+    def _log_with_style(self, level: str, message: str, data: dict = None, style: str = None):
+        """Log with enhanced formatting"""
+        if data and isinstance(data, dict):
+            # Pretty print JSON data
+            self.console.print(f"[{style or level}]{message}[/{style or level}]")
+            self.console.print(self._format_json(data))
+        else:
+            getattr(self.logger, level)(f"[{style or level}]{message}[/{style or level}]")
+    
+    def info(self, message: str, data: dict = None):
+        if data:
+            self._log_with_style("info", message, data)
+        else:
+            self.logger.info(f"[info]{message}[/info]")
+    
+    def warning(self, message: str, data: dict = None):
+        if data:
+            self._log_with_style("warning", message, data)
+        else:
+            self.logger.warning(f"[warning]{message}[/warning]")
+    
+    def error(self, message: str, data: dict = None, exc_info: bool = False):
+        if exc_info:
+            self.logger.error(f"[error]{message}[/error]", exc_info=True)
+        elif data:
+            self._log_with_style("error", message, data)
+        else:
+            self.logger.error(f"[error]{message}[/error]")
+    
+    def debug(self, message: str, data: dict = None):
+        if data:
+            self._log_with_style("debug", message, data)
+        else:
+            self.logger.debug(f"[debug]{message}[/debug]")
+    
+    def critical(self, message: str, data: dict = None):
+        if data:
+            self._log_with_style("critical", message, data)
+        else:
+            self.logger.critical(f"[critical]{message}[/critical]")
+    
+    def success(self, message: str, data: dict = None):
+        """Custom success level logging"""
+        if data:
+            self._log_with_style("info", message, data, style="success")
+        else:
+            self.logger.info(f"[success]{message}[/success]")
+    
+    def api_call(self, message: str, endpoint: str = None, payload: dict = None, response: dict = None):
+        """Special logging for API calls"""
+        self.console.print(f"[api_call]🌐 API Call: {message}[/api_call]")
+        if endpoint:
+            self.console.print(f"  [dim]Endpoint:[/dim] {endpoint}")
+        if payload:
+            self.console.print("  [dim]Payload:[/dim]")
+            self.console.print(self._format_json(payload))
+        if response:
+            self.console.print("  [dim]Response:[/dim]")
+            self.console.print(self._format_json(response))
+
+# Create the enhanced logger
+logger = RichLogger("Recon")
+logger.success(f"Starting Recon service with log level: {log_level}")
 
 # Try to import pytesseract, but provide fallback if not available
 try:
@@ -69,7 +188,7 @@ try:
         try:
             gcs_client = storage.Client.from_service_account_json(temp_path)
             gcs_initialized = True
-            logger.info("Google Cloud Storage initialized successfully")
+            logger.success("✅ Google Cloud Storage initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize Google Cloud Storage: {e}")
 
@@ -92,7 +211,7 @@ try:
         try:
             gcs_client = storage.Client.from_service_account_json(temp_path)
             gcs_initialized = True
-            logger.info("Google Cloud Storage initialized successfully")
+            logger.success("✅ Google Cloud Storage initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize Google Cloud Storage: {e}")
 
@@ -100,9 +219,9 @@ try:
         os.unlink(temp_path)
         firebase_initialized = True
     else:
-        logging.warning("No Firebase credentials found. Firebase integration disabled.")
+        logger.warning("⚠️ No Firebase credentials found. Firebase integration disabled.")
 except Exception as e:
-    logging.error(f"Failed to initialize Firebase: {e}")
+    logger.error(f"Failed to initialize Firebase: {e}", exc_info=True)
     firebase_initialized = False
 
 def generate_timeout_summary(objective: str, history: list, client_id: str, test_id: str) -> str:
@@ -165,7 +284,9 @@ progress, and potential reasons for the timeout. Be clear and concise."""
     }
 
     try:
-        logger.info(f"Requesting timeout summary for {client_id}/{test_id} from Gemini API.")
+        logger.api_call(f"Requesting timeout summary for {client_id}/{test_id}", 
+                       endpoint="Gemini API", 
+                       payload={"objective": objective, "history_length": len(history)})
         # Log thinking event before API call
         log_agent_thinking_event(
             event_type="llm_request",
@@ -173,7 +294,8 @@ progress, and potential reasons for the timeout. Be clear and concise."""
             client_id=client_id,
             test_id=test_id,
             prompt_data=payload,
-            metadata={"objective": objective}
+            metadata={"objective": objective},
+            operator="summarizer"
         )
 
         # This uses the globally defined GEMINI_API_URL and api_key
@@ -184,7 +306,7 @@ progress, and potential reasons for the timeout. Be clear and concise."""
             if "content" in candidate and "parts" in candidate["content"]:
                 summary_text = "".join(part.get("text", "") for part in candidate["content"]["parts"]).strip()
                 if summary_text:
-                    logger.info(f"Successfully generated timeout summary for {client_id}/{test_id}.")
+                    logger.success(f"✅ Successfully generated timeout summary for {client_id}/{test_id}")
                     # Log thinking event after API call (success)
                     log_agent_thinking_event(
                         event_type="llm_response_success",
@@ -192,10 +314,12 @@ progress, and potential reasons for the timeout. Be clear and concise."""
                         client_id=client_id,
                         test_id=test_id,
                         response_data=response, # Log the full successful response
-                        metadata={"objective": objective, "summary_generated": summary_text}
+                        metadata={"objective": objective, "summary_generated": summary_text},
+                        operator="summarizer"
                     )
                     return summary_text
-        logger.warning(f"Failed to generate a valid summary from Gemini API for {client_id}/{test_id}. Response: {response}")
+        logger.warning(f"⚠️ Failed to generate a valid summary from Gemini API for {client_id}/{test_id}", 
+                      {"response": response})
         # Log thinking event after API call (failure to generate summary)
         log_agent_thinking_event(
             event_type="llm_response_error",
@@ -203,11 +327,12 @@ progress, and potential reasons for the timeout. Be clear and concise."""
             client_id=client_id,
             test_id=test_id,
             response_data=response, # Log the problematic response
-            metadata={"objective": objective, "reason": "Failed to extract valid summary text"}
+            metadata={"objective": objective, "reason": "Failed to extract valid summary text"},
+            operator="summarizer"
         )
         return "Automated summary generation failed. The session ended due to reaching the step limit. Please review the raw history if available."
     except Exception as e:
-        logger.error(f"Error generating timeout summary for {client_id}/{test_id}: {e}", exc_info=True)
+        logger.error(f"❌ Error generating timeout summary for {client_id}/{test_id}: {e}", exc_info=True)
         # Log thinking event after API call (exception)
         log_agent_thinking_event(
             event_type="llm_response_error",
@@ -215,7 +340,8 @@ progress, and potential reasons for the timeout. Be clear and concise."""
             client_id=client_id,
             test_id=test_id,
             response_data={"error": str(e), "traceback": traceback.format_exc()},
-            metadata={"objective": objective}
+            metadata={"objective": objective},
+            operator="summarizer"
         )
         return f"Error during automated summary generation: {str(e)}. The session ended due to the step limit."
 
@@ -295,20 +421,21 @@ TOOLS = [
 # --- API Configuration ---
 api_key = os.getenv("GEMINI_API_KEY")
 if not api_key:
-    logger.error("GEMINI_API_KEY environment variable is not set")
+    logger.critical("❌ GEMINI_API_KEY environment variable is not set")
     raise RuntimeError("GEMINI_API_KEY is required")
-logger.info(f"API key (partial): {api_key[:4]}...{api_key[-4:]}")
+logger.success(f"✅ API key loaded (partial): {api_key[:4]}...{api_key[-4:]}")
 GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key={api_key}"
 #GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-05-06:generateContent?key={api_key}"
 #GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
 
 # --- Pydantic Model for Task Request ---
 class TaskRequest(BaseModel):
-    playwright_url: str
+    rabbitize_url: str
     target_url: str
     objective: str
     client_id: str
     test_id: str
+    rabbitize_runs_dir: str
     max_steps: int = 20
 
 # --- Helper Functions ---
@@ -337,18 +464,52 @@ def with_timeout(func, args=(), kwargs=None, timeout_duration=10, default=None):
 
     return result[0]
 
-def _send_log_to_remote(log_payload: Dict, endpoint_url: str, log_description: str):
-    """Helper function to send a log payload to the remote logging endpoint."""
-    try:
-        response = requests.post(endpoint_url, json=log_payload, timeout=5)
-        response.raise_for_status()
-        logger.debug(f"Successfully sent {log_description} to {endpoint_url}. Status: {response.status_code}")
-    except requests.exceptions.Timeout:
-        logger.warning(f"Timeout while sending {log_description} to {endpoint_url}")
-    except requests.exceptions.RequestException as e:
-        logger.warning(f"Error sending {log_description} to {endpoint_url}: {e}")
-    except Exception as e:
-        logger.error(f"An unexpected error occurred during remote logging of {log_description}: {e}", exc_info=True)
+def _send_log_to_remote(log_payload: Dict, endpoint_url: str, log_description: str,
+                       client_id: str = None, test_id: str = None, session_id: str = None,
+                       rabbitize_url: str = None, operator: str = None):
+    """Helper function to send a log payload to the remote logging endpoint.
+
+    If rabbitize_url and all required IDs are provided, will use the local /feedback endpoint.
+    Otherwise falls back to the original remote endpoint.
+    
+    Args:
+        operator: Optional operator name to categorize the feedback (e.g., "actor", "validator", "corrector")
+    """
+    # Check if we can use the local feedback endpoint
+    if rabbitize_url and client_id and test_id and session_id:
+        try:
+            feedback_payload = {
+                "client_id": client_id,
+                "test_id": test_id,
+                "session_id": session_id,
+                "payload": log_payload
+            }
+            
+            # Add operator if provided
+            if operator:
+                feedback_payload["operator"] = operator
+            
+            response = requests.post(f"{rabbitize_url}/feedback", json=feedback_payload, timeout=5)
+            response.raise_for_status()
+            
+            filename = f"feedback_{operator}.json" if operator else "feedback_loop.json"
+            logger.success(f"✅ Successfully sent {log_description} to {filename}", 
+                         {"status_code": response.status_code, "endpoint": f"{rabbitize_url}/feedback"})
+            return  # Success, don't try remote endpoint
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to send to local feedback endpoint: {e}")
+
+    # Original remote endpoint logic
+    # try:
+    #     response = requests.post(endpoint_url, json=log_payload, timeout=5)
+    #     response.raise_for_status()
+    #     logger.debug(f"Successfully sent {log_description} to {endpoint_url}. Status: {response.status_code}")
+    # except requests.exceptions.Timeout:
+    #     logger.warning(f"Timeout while sending {log_description} to {endpoint_url}")
+    # except requests.exceptions.RequestException as e:
+    #     logger.warning(f"Error sending {log_description} to {endpoint_url}: {e}")
+    # except Exception as e:
+    #     logger.error(f"An unexpected error occurred during remote logging of {log_description}: {e}", exc_info=True)
 
 def log_agent_thinking_event(
     event_type: str,
@@ -358,7 +519,10 @@ def log_agent_thinking_event(
     step_number: Optional[int] = None,
     prompt_data: Optional[Dict | str] = None,
     response_data: Optional[Dict | str] = None,
-    metadata: Optional[Dict] = None
+    metadata: Optional[Dict] = None,
+    session_id: str = None,
+    rabbitize_url: str = None,
+    operator: str = None
 ):
     """Logs a structured event related to agent's thinking or LLM interaction."""
     log_entry = {
@@ -398,10 +562,10 @@ def log_agent_thinking_event(
         log_entry["metadata"] = metadata
 
     # Local logging with potentially nested structure (good for detailed local inspection)
-    logger.info(f"[AGENT_THINKING_EVENT] {json.dumps(log_entry, default=str)}")
+    logger.info("🤔 [AGENT_THINKING_EVENT]", log_entry)
 
     # --- Remote Logging to DuckDB endpoint ---
-    remote_log_url = "https://ducksub.grinx.ai/api/save-parquet/recon_gossip" # User updated this
+    remote_log_url = "https://ducksub.grinx.ai/api/save-parquet/recon_gossip"
 
     # Base fields for any log entry to recon_gossip
     base_log_payload = {
@@ -429,7 +593,8 @@ def log_agent_thinking_event(
                     "message_parts_json": json.dumps(current_user_turn_message.get("parts"), default=str),
                 }
                 if metadata: log_payload["metadata_json"] = json.dumps(metadata, default=str)
-                _send_log_to_remote(log_payload, remote_log_url, f"llm_current_user_message for {client_id or 'N/A'}/{test_id or 'N/A'}")
+                _send_log_to_remote(log_payload, remote_log_url, f"llm_current_user_message for {client_id or 'N/A'}/{test_id or 'N/A'}",
+                                   client_id=client_id, test_id=test_id, session_id=session_id, rabbitize_url=rabbitize_url, operator=operator)
 
     elif event_type == "llm_response_success" and isinstance(response_data, dict) and "candidates" in response_data:
         for cand_index, candidate in enumerate(response_data.get("candidates", [])): # Usually one candidate
@@ -443,7 +608,8 @@ def log_agent_thinking_event(
                     "candidate_index": cand_index,
                 }
                 if metadata: log_payload["metadata_json"] = json.dumps(metadata, default=str)
-                _send_log_to_remote(log_payload, remote_log_url, f"llm_model_response_message (cand {cand_index}) for {client_id or 'N/A'}/{test_id or 'N/A'}")
+                _send_log_to_remote(log_payload, remote_log_url, f"llm_model_response_message (cand {cand_index}) for {client_id or 'N/A'}/{test_id or 'N/A'}",
+                                   client_id=client_id, test_id=test_id, session_id=session_id, rabbitize_url=rabbitize_url, operator=operator)
 
     elif event_type == "llm_response_error": # Handling specific LLM error events
         error_details_payload = {}
@@ -459,7 +625,8 @@ def log_agent_thinking_event(
             **error_details_payload
         }
         if metadata: log_payload["metadata_json"] = json.dumps(metadata, default=str)
-        _send_log_to_remote(log_payload, remote_log_url, f"llm_error_event ({event_type}) for {client_id or 'N/A'}/{test_id or 'N/A'}")
+        _send_log_to_remote(log_payload, remote_log_url, f"llm_error_event ({event_type}) for {client_id or 'N/A'}/{test_id or 'N/A'}",
+                           client_id=client_id, test_id=test_id, session_id=session_id, rabbitize_url=rabbitize_url, operator=operator)
 
     # Note: Other event_types are not explicitly sent to the remote `recon_gossip` log with this logic.
     # They are still logged locally by the `logger.info` call at the beginning of this function.
@@ -483,10 +650,10 @@ def clear_firebase_data(client_id: str, test_id: str):
     try:
         ref = db.reference(f"recon/{client_id}/{test_id}")
         ref.delete()
-        logger.info(f"Cleared existing Firebase data for {client_id}/{test_id}")
+        logger.info(f"🗑️ Cleared existing Firebase data for {client_id}/{test_id}")
         return True
     except Exception as e:
-        logger.error(f"Failed to clear Firebase data: {e}")
+        logger.error(f"❌ Failed to clear Firebase data: {e}", exc_info=True)
         return False
 
 def update_task_status(client_id: str, test_id: str, status: str, extra_data: dict = None):
@@ -519,10 +686,10 @@ def update_task_status(client_id: str, test_id: str, status: str, extra_data: di
             update_data.update(extra_data)
 
         ref.update(update_data)
-        logger.info(f"Updated task status to '{status}' in Firebase for {client_id}/{test_id}")
+        logger.success(f"✅ Updated task status to '{status}' in Firebase for {client_id}/{test_id}")
         return True
     except Exception as e:
-        logger.error(f"Failed to update task status in Firebase: {e}")
+        logger.error(f"❌ Failed to update task status in Firebase: {e}", exc_info=True)
         return False
 
 def save_to_gcs(client_id: str, test_id: str, path: str, data, content_type: str = None):
@@ -570,10 +737,10 @@ def save_to_gcs(client_id: str, test_id: str, path: str, data, content_type: str
         blob.make_public()
 
         public_url = f"https://storage.googleapis.com/{GCS_BUCKET_NAME}/{full_path}"
-        logger.info(f"Saved data to GCS and made public: {full_path}")
+        logger.success(f"☁️ Saved data to GCS and made public: {full_path}")
         return True, public_url
     except Exception as e:
-        logger.error(f"Failed to save data to GCS: {e}")
+        logger.error(f"❌ Failed to save data to GCS: {e}", exc_info=True)
         return False, str(e)
 
 def save_debug_data(client_id: str, test_id: str, step: int, screenshot: bytes, ui_elements: List[Dict],
@@ -616,7 +783,7 @@ def save_debug_data(client_id: str, test_id: str, step: int, screenshot: bytes, 
             )
             results["original_screenshot"] = {"success": success, "url": url if success else None}
         except Exception as e:
-            logger.error(f"Failed to save original screenshot: {e}")
+            logger.error(f"❌ Failed to save original screenshot: {e}")
             results["original_screenshot"] = {"success": False, "error": str(e)}
     else:
         logger.warning("Empty screenshot provided, skipping screenshot storage")
@@ -705,7 +872,8 @@ def call_gemini_api(payload, attempt=1, max_attempts=3, timeout=20):
     Call the Gemini API with timeout protection
     """
     try:
-        logger.info(f"Calling Gemini API (attempt {attempt}/{max_attempts})")
+        logger.api_call(f"Calling Gemini API (attempt {attempt}/{max_attempts})",
+                       endpoint=GEMINI_API_URL.split('?')[0] + "?key=***")
         response = requests.post(
             GEMINI_API_URL,
             json=payload,
@@ -715,17 +883,17 @@ def call_gemini_api(payload, attempt=1, max_attempts=3, timeout=20):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.Timeout:
-        logger.warning(f"Gemini API timeout on attempt {attempt}")
+        logger.warning(f"⏱️ Gemini API timeout on attempt {attempt}")
         if attempt < max_attempts:
             # Reduce payload size on timeout
             if "contents" in payload and len(payload["contents"]) > 2:
                 # Keep only the most recent message
                 payload["contents"] = payload["contents"][-2:]
-                logger.warning("Reduced payload size due to timeout")
+                logger.warning("📉 Reduced payload size due to timeout")
             return call_gemini_api(payload, attempt + 1, max_attempts, timeout)
         raise
     except requests.exceptions.RequestException as e:
-        logger.error(f"Request error on attempt {attempt}: {e}")
+        logger.error(f"❌ Request error on attempt {attempt}: {e}")
         if attempt < max_attempts:
             return call_gemini_api(payload, attempt + 1, max_attempts, timeout)
         raise
@@ -782,92 +950,94 @@ def prune_history(history, max_items=5):
             history[i]['screenshot'] = b""
             entries_pruned += 1
 
-    logger.info(f"Pruned screenshots from {entries_pruned} history entries, freed ~{screenshot_bytes_removed/1024:.1f}KB while preserving text context")
+    logger.info(f"🧹 Pruned screenshots from {entries_pruned} history entries, freed ~{screenshot_bytes_removed/1024:.1f}KB while preserving text context")
     return history
 
-def start_session(playwright_url: str, target_url: str, client_id: str, test_id: str, max_retries: int = 3):
-    """Start a browser session via the Playwright API."""
+def start_session(rabbitize_url: str, target_url: str, max_retries: int = 3) -> str:
+    """Start a browser session via the Rabbitize API using /start endpoint.
+
+    Returns:
+        str: The sessionId returned by the /start endpoint
+    """
     retries = 0
     while retries < max_retries:
         try:
-            payload = {"url": target_url, "client-id": client_id, "test-id": test_id}
-            response = requests.post(f"{playwright_url}/api/create-recon-worker", json=payload, timeout=30)
+            # Updated to use /start endpoint with just the URL
+            payload = {"url": target_url}
+            response = requests.post(f"{rabbitize_url}/start", json=payload, timeout=30)
             response.raise_for_status()
-            logger.info(f"Session started: {json.dumps(payload)}")
-            return
+
+            # Extract sessionId from response
+            response_data = response.json()
+            session_id = response_data.get('sessionId')
+            if not session_id:
+                raise ValueError("No sessionId returned from /start endpoint")
+
+            logger.success(f"🚀 Session started successfully", 
+                         {"payload": payload, "session_id": session_id})
+            return session_id
         except Exception as e:
             retries += 1
-            logger.error(f"Failed to start session (attempt {retries}/{max_retries}): {e}")
+            logger.error(f"❌ Failed to start session (attempt {retries}/{max_retries}): {e}")
             if retries >= max_retries:
                 raise HTTPException(status_code=500, detail=f"Could not start session after {max_retries} attempts")
             time.sleep(5)
 
-def get_screenshot(playwright_url: str, client_id: str, test_id: str, step: int, max_retries: int = 40, retry_delay: int = 12) -> bytes:
-    """Fetch the screenshot for the given step from the Playwright API with retries."""
+def get_screenshot(rabbitize_runs_dir: str, client_id: str, test_id: str, session_id: str, step: int, max_retries: int = 40, retry_delay: int = 12) -> bytes:
+    """Fetch the screenshot for the given step from the local filesystem."""
     start_time = time.time()
-    used_fallback = False
 
+    # Construct local file path - replacing 'interactive' with session_id
     if step == 0:
-        url = f"{playwright_url}/api/quick/{client_id}/{test_id}/interactive/screenshots/start.jpg"
+        file_path = os.path.join(rabbitize_runs_dir, client_id, test_id, session_id, "screenshots", "start.jpg")
     else:
-        url = f"{playwright_url}/api/quick/{client_id}/{test_id}/interactive/screenshots/{step-1}.jpg"
+        file_path = os.path.join(rabbitize_runs_dir, client_id, test_id, session_id, "screenshots", f"{step-1}.jpg")
 
-    fallback_url = f"{playwright_url}/api/quick/{client_id}/{test_id}/interactive/latest.jpg"
+    fallback_path = os.path.join(rabbitize_runs_dir, client_id, test_id, "latest.jpg")
 
     for attempt in range(max_retries):
         try:
-            # Switch to fallback URL after 10 failed attempts
-            if attempt >= 10 and not used_fallback:
-                used_fallback = True
-                url = fallback_url
-                logger.info(f"Switching to fallback screenshot URL after {attempt} failed attempts: {fallback_url}")
+            # Switch to fallback path after 10 failed attempts
+            if attempt >= 10:
+                current_path = fallback_path
+                logger.info(f"🔄 Switching to fallback screenshot path after {attempt} failed attempts: {fallback_path}")
+            else:
+                current_path = file_path
 
-            response = requests.get(url, timeout=10)
+            # Check if file exists
+            if os.path.exists(current_path):
+                with open(current_path, 'rb') as f:
+                    content = f.read()
+                    elapsed = time.time() - start_time
+                    logger.success(f"📸 Screenshot for step {step} fetched successfully",
+                                 {"path": current_path, "elapsed": f"{elapsed:.2f}s", "attempts": attempt+1})
+                    return content
+            else:
+                logger.info(f"Screenshot for step {step} not found at {current_path}, retrying in {retry_delay} seconds... (attempt {attempt+1}/{max_retries})")
+                time.sleep(retry_delay)
 
-            try:
-                response.raise_for_status()
-                elapsed = time.time() - start_time
-
-                if used_fallback:
-                    logger.info(f"Screenshot for step {step} fetched successfully using fallback URL (took {elapsed:.2f}s after {attempt+1} attempts)")
-                else:
-                    logger.info(f"Screenshot for step {step} fetched successfully (took {elapsed:.2f}s after {attempt+1} attempts)")
-
-                return response.content
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 404:
-                    logger.info(f"Screenshot for step {step} not found, retrying in {retry_delay} seconds... (attempt {attempt+1}/{max_retries})")
-                    time.sleep(retry_delay)
-                else:
-                    logger.error(f"HTTP error while fetching screenshot: {e}")
-                    # For non-404 errors, also retry but log the specific error
-                    logger.info(f"Retrying after HTTP error (attempt {attempt+1}/{max_retries})")
-                    time.sleep(retry_delay)
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error getting screenshot: {e}")
-            time.sleep(retry_delay)
-            continue
         except Exception as e:
-            logger.error(f"Unexpected error while fetching screenshot: {e}")
+            logger.error(f"Error while fetching screenshot: {e}")
+            logger.info(f"Retrying after error (attempt {attempt+1}/{max_retries})")
             time.sleep(retry_delay)
-            continue
 
-    elapsed = time.time() - start_time
-    error_msg = f"Could not fetch screenshot for step {step} after {max_retries} attempts over {elapsed:.2f}s"
-    logger.error(error_msg)
-    # Return empty bytes instead of raising an exception
-    return b""
+    raise HTTPException(status_code=404, detail=f"Screenshot for step {step} not found after {max_retries} attempts")
 
-def get_dom_md(playwright_url: str, client_id: str, test_id: str, max_retries: int = 3) -> str:
-    """Fetch the DOM markdown from the Playwright API (optional)."""
+def get_dom_md(rabbitize_runs_dir: str, client_id: str, test_id: str, session_id: str, max_retries: int = 3) -> str:
+    """Fetch the DOM markdown from the local filesystem."""
     retries = 0
+    file_path = os.path.join(rabbitize_runs_dir, client_id, test_id, "latest.md")
+
     while retries < max_retries:
         try:
-            url = f"{playwright_url}/api/quick/{client_id}/{test_id}/latest.md"
-            response = requests.get(url, timeout=5)
-            response.raise_for_status()
-            logger.info("DOM markdown fetched successfully")
-            return response.text
+            if os.path.exists(file_path):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    logger.info("DOM markdown fetched successfully")
+                    return content
+            else:
+                logger.warning(f"DOM markdown file not found at {file_path}")
+                return ""
         except Exception as e:
             retries += 1
             logger.error(f"Failed to fetch DOM markdown (attempt {retries}/{max_retries}): {e}")
@@ -876,24 +1046,23 @@ def get_dom_md(playwright_url: str, client_id: str, test_id: str, max_retries: i
                 return ""
             time.sleep(5)
 
-def get_dom_coordinates(playwright_url: str, client_id: str, test_id: str, step: int, max_retries: int = 3) -> Dict:
+def get_dom_coordinates(rabbitize_runs_dir: str, client_id: str, test_id: str, session_id: str, step: int, max_retries: int = 3) -> Dict:
     """
-    Fetch the DOM coordinates data for the given step from the Playwright API.
+    Fetch the DOM coordinates data for the given step from the local filesystem.
 
     Args:
-        playwright_url: The Playwright API URL
+        rabbitize_runs_dir: The base directory for Rabbitize runs
         client_id: The client ID
         test_id: The test ID
+        session_id: The session ID
         step: The current step number
         max_retries: Maximum number of retry attempts
 
     Returns:
         Dictionary containing DOM coordinates data or empty dict if not available
     """
-    if step == 0:
-        url = f"{playwright_url}/api/quick/{client_id}/{test_id}/interactive/dom_coords/dom_coords_start.json"
-    else:
-        url = f"{playwright_url}/api/quick/{client_id}/{test_id}/interactive/dom_coords/dom_coords_{step-1}.json"
+    # Use latest.json for DOM coordinates as discussed
+    file_path = os.path.join(rabbitize_runs_dir, client_id, test_id, "latest.json")
 
     retries = 0
     start_time = time.time()
@@ -901,44 +1070,33 @@ def get_dom_coordinates(playwright_url: str, client_id: str, test_id: str, step:
     while retries < max_retries:
         try:
             logger.info(f"Fetching DOM coordinates for step {step} (attempt {retries+1}/{max_retries})")
-            response = requests.get(url, timeout=5)
 
-            if response.status_code == 404:
-                logger.warning(f"DOM coordinates not found for step {step}, retrying...")
+            if os.path.exists(file_path):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    dom_data = json.load(f)
+                    elements_count = len(dom_data.get("elements", []))
+                    logger.info(f"DOM coordinates fetched successfully for step {step}: {elements_count} elements")
+                    return dom_data
+            else:
+                logger.warning(f"DOM coordinates not found for step {step} at {file_path}, retrying...")
                 retries += 1
                 time.sleep(2)
                 continue
 
-            response.raise_for_status()
-
-            try:
-                dom_data = response.json()
-                elements_count = len(dom_data.get("elements", []))
-                logger.info(f"DOM coordinates fetched successfully for step {step}: {elements_count} elements")
-                return dom_data
-            except json.JSONDecodeError:
-                logger.error(f"Failed to parse DOM coordinates JSON for step {step}")
-                retries += 1
-                time.sleep(2)
-                continue
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Request error fetching DOM coordinates (attempt {retries+1}/{max_retries}): {e}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in DOM coordinates file for step {step}: {e}")
             retries += 1
             time.sleep(2)
-            continue
         except Exception as e:
-            logger.error(f"Unexpected error fetching DOM coordinates: {e}")
+            logger.error(f"Unexpected error fetching DOM coordinates for step {step}: {e}")
             retries += 1
             time.sleep(2)
-            continue
 
-    elapsed = time.time() - start_time
-    logger.warning(f"Failed to fetch DOM coordinates after {max_retries} attempts over {elapsed:.2f}s")
+    logger.warning(f"Failed to fetch DOM coordinates for step {step} after {max_retries} attempts")
     return {}
 
-def send_command(playwright_url: str, tool_name: str, args: dict, max_retries: int = 3) -> list:
-    """Send a command to the Playwright API based on the tool called."""
+def send_command(rabbitize_url: str, session_id: str, tool_name: str, args: dict, max_retries: int = 3) -> list:
+    """Send a command to the Rabbitize API using /execute endpoint."""
     command_map = {
         "click": [":click"],
         "right_click": [":right-click"],
@@ -958,7 +1116,7 @@ def send_command(playwright_url: str, tool_name: str, args: dict, max_retries: i
     if tool_name == "move_mouse":
         x, y = args.get("x"), args.get("y")
         # Log the requested coordinates for debugging
-        logger.info(f"Mouse movement requested to coordinates: x={x}, y={y}")
+        logger.debug(f"🖱️ Mouse movement requested", {"x": x, "y": y})
 
         # Validate coordinates are within reasonable bounds
         if x is not None and y is not None:
@@ -971,9 +1129,11 @@ def send_command(playwright_url: str, tool_name: str, args: dict, max_retries: i
     while retries < max_retries:
         try:
             payload = {"command": command}
-            response = requests.post(f"{playwright_url}/api/interactive/execute", json=payload, timeout=5)
+            # Updated to use /execute endpoint
+            response = requests.post(f"{rabbitize_url}/execute", json=payload, timeout=5)
             response.raise_for_status()
-            logger.info(f"Command sent: {json.dumps(payload)}")
+            logger.success(f"✅ Command sent successfully", 
+                         {"command": command, "session_id": session_id})
             return command
         except Exception as e:
             retries += 1
@@ -981,6 +1141,22 @@ def send_command(playwright_url: str, tool_name: str, args: dict, max_retries: i
             if retries >= max_retries:
                 raise HTTPException(status_code=500, detail=f"Could not send command after {max_retries} attempts")
             time.sleep(5)
+
+def end_session(rabbitize_url: str, session_id: str, max_retries: int = 3):
+    """End a browser session via the Rabbitize API using /end endpoint."""
+    retries = 0
+    while retries < max_retries:
+        try:
+            # Updated to use /end endpoint
+            response = requests.post(f"{rabbitize_url}/end", json={}, timeout=5)
+            response.raise_for_status()
+            logger.info(f"Session ended for session_id: {session_id}")
+            return
+        except Exception as e:
+            retries += 1
+            logger.error(f"Failed to end session (attempt {retries}/{max_retries}): {e}")
+            if retries >= max_retries:
+                logger.warning(f"Could not end session after {max_retries} attempts, continuing anyway")
 
 def compute_image_hash(image_bytes: bytes) -> str:
     """Compute a perceptual hash of the image for comparison."""
@@ -1002,7 +1178,8 @@ def detect_cursor(screenshot: bytes, expected_x: int = None, expected_y: int = N
     Returns:
         tuple: (cursor_color, (x, y)) where cursor_color is 'red', 'green', 'blue', or 'not_found'
     """
-    logger.info(f"Starting cursor detection with image size: {len(screenshot)} bytes, expected coords: ({expected_x}, {expected_y})")
+    logger.debug(f"🔍 Starting cursor detection", 
+                {"image_size": f"{len(screenshot)} bytes", "expected_coords": f"({expected_x}, {expected_y})"})
 
     if not screenshot:
         logger.warning("Empty screenshot provided to detect_cursor")
@@ -1321,7 +1498,8 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
         }
     }
 
-    logger.info("Sending screenshot comparison request to Gemini API with determinism settings: temperature=0.1, topP=0.95, topK=40")
+    logger.debug("📊 Sending screenshot comparison request to Gemini API", 
+                {"temperature": 0.1, "topP": 0.95, "topK": 40})
     try:
         # Log thinking event before API call
         log_agent_thinking_event(
@@ -1331,7 +1509,8 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             test_id=test_id,   # Note: test_id might be None here
             step_number=step,    # Note: step might be None here
             prompt_data=payload,
-            metadata={"context": "screenshot_comparison"}
+            metadata={"context": "screenshot_comparison"},
+            operator="validator"
         )
 
         response = requests.post(GEMINI_API_URL, json=payload, headers={"Content-Type": "application/json"}, timeout=30)
@@ -1346,7 +1525,8 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             test_id=test_id,
             step_number=step,
             response_data=result,
-            metadata={"context": "screenshot_comparison"}
+            metadata={"context": "screenshot_comparison"},
+            operator="validator"
         )
 
         changes_description = ""
@@ -1454,7 +1634,8 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             test_id=test_id,
             step_number=step,
             response_data={"error": str(e), "status_code": e.response.status_code if e.response else None, "response_text": e.response.text if e.response else None},
-            metadata={"context": "screenshot_comparison"}
+            metadata={"context": "screenshot_comparison"},
+            operator="validator"
         )
         return "", False, False
     except Exception as e:
@@ -1467,7 +1648,8 @@ def compare_screenshots(previous_screenshot: bytes, current_screenshot: bytes, l
             test_id=test_id,
             step_number=step,
             response_data={"error": str(e), "traceback": traceback.format_exc()},
-            metadata={"context": "screenshot_comparison"}
+            metadata={"context": "screenshot_comparison"},
+            operator="validator"
         )
         return "", False, False
 
@@ -1514,7 +1696,7 @@ def calculate_action_diversity(history: list, window_size: int = 5) -> float:
 
     return diversity
 
-def get_next_action(screenshot: bytes, objective: str, history: list, client_id: str = None, test_id: str = None, step: int = None, dom_elements: List[Dict] = None, dom_markdown: str = None) -> tuple[str, dict, str, str, int]:
+def get_next_action(screenshot: bytes, objective: str, history: list, client_id: str = None, test_id: str = None, step: int = None, dom_elements: List[Dict] = None, dom_markdown: str = None, session_id: str = None, rabbitize_url: str = None) -> tuple[str, dict, str, str, int]:
     # Check if the screenshot is empty or invalid
     if not screenshot or len(screenshot) == 0:
         logger.error("Empty screenshot data detected, cannot proceed with action determination")
@@ -1970,8 +2152,16 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
 
         # Log the stripped version of the payload (without base64 data)
         stripped_payload = strip_base64_from_json(payload)
-        logger.debug(f"API request structure: {json.dumps(stripped_payload, indent=2)[:500]}...")
-        logger.info(f"Sending request to Gemini API with temperature={current_temp}, diversity={diversity_score:.2f}, stuck_counter={stuck_counter}, attempt={attempt+1}/3")
+        
+        logger.api_call(f"Requesting next action from Gemini API",
+                       endpoint="Gemini API",
+                       payload={
+                           "temperature": current_temp,
+                           "diversity": f"{diversity_score:.2f}",
+                           "stuck_counter": stuck_counter,
+                           "attempt": f"{attempt+1}/3",
+                           "payload_size": f"{len(str(stripped_payload))} chars"
+                       })
 
         # Log thinking event before API call
         log_agent_thinking_event(
@@ -1981,7 +2171,10 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
             test_id=test_id,
             step_number=step,
             prompt_data=payload, # Send the full payload for detailed logging
-            metadata={"attempt": attempt + 1, "temperature": current_temp, "diversity_score": diversity_score, "stuck_counter": stuck_counter}
+            metadata={"attempt": attempt + 1, "temperature": current_temp, "diversity_score": diversity_score, "stuck_counter": stuck_counter},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
+            operator="actor"
         )
 
         try:
@@ -1997,7 +2190,10 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
                     test_id=test_id,
                     step_number=step,
                     response_data=result,
-                    metadata={"attempt": attempt + 1}
+                    metadata={"attempt": attempt + 1},
+                    session_id=session_id,
+                    rabbitize_url=rabbitize_url,
+                    operator="actor"
                 )
 
                 # Parse the response
@@ -2057,7 +2253,7 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
                     args = function_call.get("args", {})
                     feedback = f"Calling {tool_name} with args: {args}"
 
-                    logger.info(f"Model feedback: {text_feedback}")
+                    logger.info(f"🤖 Model feedback: [cyan]{text_feedback}[/cyan]")
                     return tool_name, args, feedback, text_feedback, stuck_counter
 
                 # If we got here, no function call was found
@@ -2127,7 +2323,10 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
                     test_id=test_id,
                     step_number=step,
                     response_data={"error": str(e), "traceback": traceback.format_exc()},
-                    metadata={"attempt": attempt + 1}
+                    metadata={"attempt": attempt + 1},
+                    session_id=session_id,
+                    rabbitize_url=rabbitize_url,
+                    operator="actor"
                 )
 
                 # If we're on the last attempt, use a fallback action
@@ -2167,7 +2366,10 @@ def get_next_action(screenshot: bytes, objective: str, history: list, client_id:
                 test_id=test_id,
                 step_number=step,
                 response_data={"error": str(e), "traceback": traceback.format_exc()},
-                metadata={"attempt": attempt + 1}
+                metadata={"attempt": attempt + 1},
+                session_id=session_id,
+                rabbitize_url=rabbitize_url,
+                operator="actor"
             )
 
             # If we're on the last attempt, use a fallback action
@@ -2227,10 +2429,11 @@ def send_to_firebase(client_id: str, test_id: str, step: int, data: dict):
         # Set data at the reference
         ref.set(data)
 
-        logger.info(f"Successfully sent step {step} data to Firebase for {client_id}/{test_id}")
+        logger.success(f"✅ Successfully sent step {step} data to Firebase", 
+                      {"client_id": client_id, "test_id": test_id})
         return True
     except Exception as e:
-        logger.error(f"Failed to send data to Firebase: {e}")
+        logger.error(f"❌ Failed to send data to Firebase: {e}", exc_info=True)
         return False
 
 def coordinate_correction_helper(
@@ -2238,9 +2441,11 @@ def coordinate_correction_helper(
     intent: str,
     current_position: tuple[int, int],
     cursor_color: str,
-    playwright_url: str = None,
+    rabbitize_url: str = None,
+    rabbitize_runs_dir: str = None,
     client_id: str = None,
     test_id: str = None,
+    session_id: str = None,
     step: int = None
 ) -> tuple[bool, tuple[int, int], str]:
     """
@@ -2252,7 +2457,7 @@ def coordinate_correction_helper(
         intent: Agent's stated intention (from text_feedback)
         current_position: Current cursor position (x, y)
         cursor_color: Current cursor color ("red", "green", "blue", "not_found")
-        playwright_url: URL for the playwright API (needed for executing moves)
+        rabbitize_url: URL for the playwright API (needed for executing moves)
         client_id: Client ID for debugging/logging
         test_id: Test ID for debugging/logging
         step: Current step number
@@ -2264,11 +2469,12 @@ def coordinate_correction_helper(
     if cursor_color != "red" and cursor_color != "not_found":
         return False, current_position, "Cursor is already on a clickable element"
 
-    logger.info(f"Activating coordinate correction helper for {cursor_color} cursor at {current_position}")
+    logger.info(f"🎯 Activating coordinate correction helper", 
+               {"cursor_color": cursor_color, "position": current_position})
 
     # APPROACH 1: Use DOM Coordinates (most accurate)
     if step is not None:
-        dom_data = get_dom_coordinates(playwright_url, client_id, test_id, step)
+        dom_data = get_dom_coordinates(rabbitize_runs_dir, client_id, test_id, session_id, step)
 
         if dom_data and "elements" in dom_data and len(dom_data["elements"]) > 0:
             logger.info(f"Using DOM coordinates with {len(dom_data['elements'])} elements")
@@ -2333,10 +2539,10 @@ def coordinate_correction_helper(
                         logger.error(f"Failed to generate DOM visualization: {e}")
 
                     # Execute the move if possible
-                    if playwright_url:
+                    if rabbitize_url:
                         try:
                             args = {"x": match_x, "y": match_y}
-                            command = send_command(playwright_url, "move_mouse", args)
+                            command = send_command(rabbitize_url, session_id, "move_mouse", args)
                             logger.info(f"Executed DOM-guided move to '{element_text}' at ({match_x}, {match_y})")
                             explanation = f"Moved to {tag_name} '{element_text}' at ({match_x}, {match_y}) - {match_reason}"
                             return True, (match_x, match_y), explanation
@@ -2358,12 +2564,12 @@ def coordinate_correction_helper(
         logger.info(f"Found matching element via OCR: '{best_match['text']}' at ({match_x}, {match_y})")
 
         # Only execute if a move is possible
-        if playwright_url:
+        if rabbitize_url:
             correction_successful = False
             try:
                 # Execute the improved move_mouse command
                 args = {"x": match_x, "y": match_y}
-                command = send_command(playwright_url, "move_mouse", args)
+                command = send_command(rabbitize_url, session_id, "move_mouse", args)
                 logger.info(f"Executed OCR-guided move to '{best_match['text']}' at ({match_x}, {match_y})")
                 correction_successful = True
             except Exception as e:
@@ -2464,7 +2670,10 @@ def coordinate_correction_helper(
             test_id=test_id,
             step_number=step,
             prompt_data=payload,
-            metadata={"intent": intent, "current_position": current_position, "cursor_color": cursor_color}
+            metadata={"intent": intent, "current_position": current_position, "cursor_color": cursor_color},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
+            operator="corrector"
         )
 
         # Use existing API call function with timeout protection
@@ -2486,7 +2695,10 @@ def coordinate_correction_helper(
                 test_id=test_id,
                 step_number=step,
                 response_data={"error": "API call timed out"},
-                metadata={"intent": intent, "current_position": current_position, "cursor_color": cursor_color}
+                metadata={"intent": intent, "current_position": current_position, "cursor_color": cursor_color},
+                session_id=session_id,
+                rabbitize_url=rabbitize_url,
+                operator="corrector"
             )
             return False, current_position, "Analysis timed out"
 
@@ -2498,7 +2710,10 @@ def coordinate_correction_helper(
             test_id=test_id,
             step_number=step,
             response_data=result,
-            metadata={"intent": intent, "current_position": current_position, "cursor_color": cursor_color}
+            metadata={"intent": intent, "current_position": current_position, "cursor_color": cursor_color},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
+            operator="corrector"
         )
 
         # Parse response
@@ -2529,12 +2744,12 @@ def coordinate_correction_helper(
                 logger.info(f"Correction found better coordinates: ({new_x}, {new_y}), Analysis: {analysis}")
 
                 # Only execute if a move is possible (we have the playwright URL)
-                if playwright_url:
+                if rabbitize_url:
                     correction_successful = False
                     try:
                         # Execute the improved move_mouse command
                         args = {"x": new_x, "y": new_y}
-                        command = send_command(playwright_url, "move_mouse", args)
+                        command = send_command(rabbitize_url, session_id, "move_mouse", args)
                         logger.info(f"Executed corrected move to ({new_x}, {new_y})")
                         correction_successful = True
                     except Exception as e:
@@ -2563,7 +2778,10 @@ def coordinate_correction_helper(
             test_id=test_id,
             step_number=step,
             response_data={"error": str(e), "traceback": traceback.format_exc()},
-            metadata={"intent": intent, "current_position": current_position, "cursor_color": cursor_color}
+            metadata={"intent": intent, "current_position": current_position, "cursor_color": cursor_color},
+            session_id=session_id,
+            rabbitize_url=rabbitize_url,
+            operator="corrector"
         )
         return False, current_position, f"Correction error: {str(e)}"
 
@@ -2645,7 +2863,7 @@ def extract_ui_elements_with_ocr(screenshot: bytes) -> List[Dict[str, Any]]:
                     "area": w * h
                 })
 
-            logger.info(f"Extracted {len(ui_elements)} text elements with OCR")
+            logger.success(f"🔤 Extracted {len(ui_elements)} text elements with OCR")
             return ui_elements
 
         except Exception as e:
@@ -3247,7 +3465,7 @@ async def debug_cursor_detection():
             "results": results
         }
     except Exception as e:
-        logger.error(f"Error in cursor detection debug: {e}", exc_info=True)
+        logger.error(f"❌ Error in cursor detection debug: {e}", exc_info=True)
         return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}
 
 @app.get("/debug/ocr-test")
@@ -3274,7 +3492,8 @@ async def debug_ocr_test(url: str = None):
                 response = requests.get(url, timeout=10)
                 response.raise_for_status()
                 test_image_bytes = response.content
-                logger.info(f"Downloaded test image from URL: {url}, size: {len(test_image_bytes)} bytes")
+                logger.info(f"⬇️ Downloaded test image from URL", 
+                           {"url": url, "size": f"{len(test_image_bytes)} bytes"})
             except Exception as e:
                 return {"status": "error", "message": f"Failed to download image from URL: {e}"}
         else:
@@ -3470,15 +3689,18 @@ async def debug_gcs_download(filepath: str):
 async def start_task(task: TaskRequest):
     """Start a browser automation task."""
     logger.info(f"Starting Recon task: {task.dict()}")
-    playwright_url = task.playwright_url
+    rabbitize_url = task.rabbitize_url
     target_url = task.target_url
     objective = task.objective
     client_id = task.client_id
     test_id = task.test_id
+    rabbitize_runs_dir = task.rabbitize_runs_dir
     max_steps = task.max_steps
 
     try:
-        start_session(playwright_url, target_url, client_id, test_id)
+        # Start session and get the sessionId from the response
+        session_id = start_session(rabbitize_url, target_url)
+        logger.info(f"Using session_id: {session_id}")
         history = []
         stuck_counter = 0
         last_cursor_color = "not_found"
@@ -3522,7 +3744,7 @@ async def start_task(task: TaskRequest):
                 for screenshot_attempt in range(3):  # Try up to 3 times to get a valid screenshot
                     try:
                         logger.info(f"Fetching screenshot (attempt {screenshot_attempt + 1}/3)")
-                        screenshot = get_screenshot(playwright_url, client_id, test_id, step, max_retries=13, retry_delay=5)
+                        screenshot = get_screenshot(rabbitize_runs_dir, client_id, test_id, session_id, step, max_retries=13, retry_delay=5)
 
                         # Validate screenshot data is not empty
                         if not screenshot or len(screenshot) == 0:
@@ -3554,7 +3776,7 @@ async def start_task(task: TaskRequest):
 
                 if not screenshot_success or screenshot is None or len(screenshot) == 0:
                     logger.error("Failed to obtain valid screenshot after multiple attempts")
-                    requests.post(f"{playwright_url}/api/interactive/end", json={}, timeout=5)
+                    end_session(rabbitize_url, session_id)
 
                     # Update task status to failed
                     if firebase_initialized:
@@ -3580,7 +3802,7 @@ async def start_task(task: TaskRequest):
                 dom_elements = []
                 clickable_dom_elements = []
                 try:
-                    dom_data = get_dom_coordinates(playwright_url, client_id, test_id, step, max_retries=2)
+                    dom_data = get_dom_coordinates(rabbitize_runs_dir, client_id, test_id, session_id, step, max_retries=2)
                     if dom_data and "elements" in dom_data:
                         dom_elements = dom_data.get("elements", [])
                         clickable_dom_elements = filter_clickable_elements(dom_elements)
@@ -3593,7 +3815,7 @@ async def start_task(task: TaskRequest):
                 # Fetch DOM markdown for the current step - provides textual content
                 dom_markdown = None
                 try:
-                    dom_markdown = get_dom_md(playwright_url, client_id, test_id)
+                    dom_markdown = get_dom_md(rabbitize_runs_dir, client_id, test_id, session_id)
                     if dom_markdown and len(dom_markdown.strip()) > 0:
                         dom_markdown_length = len(dom_markdown)
                         logger.info(f"DOM markdown fetched successfully: {dom_markdown_length} chars")
@@ -3639,9 +3861,11 @@ async def start_task(task: TaskRequest):
                             intent=agent_intent,
                             current_position=cursor_position,
                             cursor_color=cursor_color,
-                            playwright_url=playwright_url,
+                            rabbitize_url=rabbitize_url,
+                            rabbitize_runs_dir=rabbitize_runs_dir,
                             client_id=client_id,
                             test_id=test_id,
+                            session_id=session_id,
                             step=step
                         )
 
@@ -3693,12 +3917,14 @@ async def start_task(task: TaskRequest):
                     test_id,
                     step,
                     dom_elements,
-                    dom_markdown
+                    dom_markdown,
+                    session_id,
+                    rabbitize_url
                 )
 
                 if tool_name == "report_done":
                     logger.info(f"Objective completed at step {step + 1}")
-                    requests.post(f"{playwright_url}/api/interactive/end", json={}, timeout=5)
+                    end_session(rabbitize_url, session_id)
 
                     # Save final step to Firebase
                     if firebase_initialized:
@@ -3726,7 +3952,7 @@ async def start_task(task: TaskRequest):
                 history.append({
                     "tool_name": tool_name,
                     "args": args,
-                    "command": send_command(playwright_url, tool_name, args),
+                    "command": send_command(rabbitize_url, session_id, tool_name, args),
                     "feedback": feedback,
                     "screenshot": screenshot,
                     "screenshot_hash": screenshot_hash,
@@ -3869,7 +4095,7 @@ async def start_task(task: TaskRequest):
             except HTTPException as e:
                 # Critical error - fail the whole run
                 logger.error(f"Critical error during step {step}: {e}")
-                requests.post(f"{playwright_url}/api/interactive/end", json={}, timeout=5)
+                end_session(rabbitize_url, session_id)
 
                 # Save error state to Firebase
                 if firebase_initialized:
@@ -3899,7 +4125,7 @@ async def start_task(task: TaskRequest):
                 continue
 
         logger.info(f"Max steps ({max_steps}) reached")
-        requests.post(f"{playwright_url}/api/interactive/end", json={}, timeout=5)
+        end_session(rabbitize_url, session_id)
 
         # Generate a summary of the session
         timeout_summary = "No actions were taken before the task timed out."
@@ -3935,7 +4161,7 @@ async def start_task(task: TaskRequest):
     except Exception as e:
         logger.error(f"Unexpected error in task: {e}", exc_info=True)
         try:
-            requests.post(f"{playwright_url}/api/interactive/end", json={}, timeout=5)
+            end_session(rabbitize_url, session_id)
         except:
             pass
 
@@ -4022,12 +4248,12 @@ async def debug_dom_test(client_id: str, test_id: str, step: int = 0):
 
         # Construct the base URL for Playwright API
         # Use a reasonable default that works in most environments
-        playwright_url = f"http://10.0.0.53:8889"
+        rabbitize_url = f"http://10.0.0.53:8889"
 
         # Fetch the screenshot for visualization
         screenshot = None
         try:
-            screenshot = get_screenshot(playwright_url, client_id, test_id, step, max_retries=3, retry_delay=2)
+            screenshot = get_screenshot(rabbitize_url, client_id, test_id, step, max_retries=3, retry_delay=2)
             if not screenshot or len(screenshot) == 0:
                 return {
                     "status": "warning",
@@ -4038,7 +4264,7 @@ async def debug_dom_test(client_id: str, test_id: str, step: int = 0):
             screenshot = None
 
         # Fetch DOM coordinates
-        dom_data = get_dom_coordinates(playwright_url, client_id, test_id, step, max_retries=3)
+        dom_data = get_dom_coordinates(rabbitize_url, client_id, test_id, step, max_retries=3)
 
         if not dom_data or "elements" not in dom_data:
             return {
@@ -4112,10 +4338,10 @@ async def debug_dom_markdown(client_id: str, test_id: str):
 
         # Construct the base URL for Playwright API
         # Use a reasonable default that works in most environments
-        playwright_url = f"http://10.0.0.53:8889"
+        rabbitize_url = f"http://10.0.0.53:8889"
 
         # Fetch DOM markdown
-        dom_markdown = get_dom_md(playwright_url, client_id, test_id)
+        dom_markdown = get_dom_md(rabbitize_url, client_id, test_id)
 
         if not dom_markdown or len(dom_markdown.strip()) == 0:
             return {
@@ -4136,4 +4362,4 @@ async def debug_dom_markdown(client_id: str, test_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=3737)

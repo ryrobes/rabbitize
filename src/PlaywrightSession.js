@@ -83,7 +83,7 @@ process.on('SIGINT', async () => {
 
 // Load and display the ANSI art
 try {
-  const ansiArt = fs.readFileSync(path.join(__dirname, '..', 'resources', 'masks.ansi'), 'utf8');
+  const ansiArt = fs.readFileSync(path.join(__dirname, '..', 'resources', '80masks.ansi'), 'utf8');
   // Convert escaped ANSI codes to actual ANSI escape sequences
   const processedArt = ansiArt.replace(/\\e/g, '\x1b');
   console.log(processedArt);
@@ -3223,6 +3223,13 @@ class PlaywrightSession {
               JSON.stringify(domElements, null, 2)
             );
             this.firebase.debug(`Saved DOM coordinates for command ${commandIndex} to ${domCoordsPath}`);
+
+            // Also save the same data to latest.json in the parent directory
+            const latestPath = path.join(this.basePath, 'latest.json');
+            await fsPromises.writeFile(
+              latestPath,
+              JSON.stringify(domElements, null, 2)
+            );
           }
         } catch (domCaptureError) {
           // Log error but don't interrupt the command execution
@@ -3987,7 +3994,7 @@ const domMarkdown = await this.page.evaluate(() => {
               // Create small cover GIF
               const webmPath = path.join(this.videoPath, 'session.webm');
               const coverGifPath = path.join(this.videoPath, 'cover.gif');
-              
+
               try {
                 this.firebase.log('Creating small cover GIF...');
 
