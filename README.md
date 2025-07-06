@@ -15,7 +15,8 @@ A REST API that turns Playwright into an observable, stateful service perfect fo
 ```bash
 # Quick start
 npm install rabbitize
-npx rabbitize --url https://example.com --flow-builder
+sudo npx playwright install-deps # required for PW to work
+npx rabbitize # for an interactive session
 ```
 
 
