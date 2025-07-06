@@ -9,7 +9,7 @@
 [![CI](https://github.com/ryrobes/rabbitize/actions/workflows/node.js.yml/badge.svg)](https://github.com/ryrobes/rabbitize/actions) [![npm](https://img.shields.io/npm/v/rabbitize.svg)](https://www.npmjs.com/package/rabbitize) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ```bash
-#
+# LFG
 npm install rabbitize
 sudo npx playwright install-deps # required for PW to work
 npx rabbitize # start server for interactive sessions
