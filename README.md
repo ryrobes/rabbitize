@@ -1,6 +1,6 @@
 # Rabbitize (🐰👀)
 
-**SEE what your browser automation is doing.**
+**Point. Click. Rabbitize.**
 
 *Turn Playwright into a live, stateful REST service - recording video, screenshots, and DOM snapshots for every step—so humans and AI agents can SEE automation, not just hope it worked.
 
@@ -8,7 +8,7 @@
 
 > A REST API for Playwright that records video, screenshots, and metrics for each step, giving humans *and AI agents* full visual context.
 
-[![CI](https://github.com/ryrobes/rabbitize/workflows/CI/badge.svg)](https://github.com/ryrobes/rabbitize/actions) [![npm](https://img.shields.io/npm/v/rabbitize.svg)](https://www.npmjs.com/package/rabbitize) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/ryrobes/rabbitize/actions/workflows/node.js.yml/badge.svg)](https://github.com/ryrobes/rabbitize/actions) [![npm](https://img.shields.io/npm/v/rabbitize.svg)](https://www.npmjs.com/package/rabbitize) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ```bash
 # Quick start
