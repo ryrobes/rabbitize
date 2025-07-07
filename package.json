@@ -1,6 +1,6 @@
 {
   "name": "rabbitize",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Transform visual UI interactions into automated processes",
   "main": "src/index.js",
   "bin": {
@@ -24,7 +24,20 @@
     "visual-testing",
     "e2e-testing"
   ],
-  "author": "Ryan Robitaille",
+  "author": {
+    "name": "Ryan Robitaille",
+    "email": "ryan.robitaille@gmail.com",
+    "url": "https://ryrob.es"
+  },
+  "social": {
+    "twitter": "https://twitter.com/ryrobes"
+  },
+
+  "links": {
+    "twitter": "https://twitter.com/ryrobes",
+    "github": "https://github.com/ryrobes"
+  },
+
   "license": "MIT",
   "repository": {
     "type": "git",
