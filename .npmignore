@@ -25,6 +25,8 @@ README3.md
 README.md.3
 
 
+mcp_venv/*
+
 # CI/CD
 .github/
 .gitlab-ci.yml
