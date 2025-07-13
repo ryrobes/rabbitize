@@ -1,0 +1,15 @@
+flask==2.3.3
+requests==2.31.0
+aiohttp==3.8.6
+aiofiles==23.2.1
+asyncio-mqtt==0.11.0
+python-socketio==5.8.0
+websockets==11.0.3
+pydantic==2.3.0
+typing-extensions==4.7.1
+
+# Optional: For better JSON handling
+ujson==5.8.0
+
+# Optional: For improved HTTP client
+httpx==0.24.1

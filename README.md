@@ -1,180 +1,298 @@
-# Rabbitize (🐰👀)
+# Rabbitize MCP Server
 
-**Point. Click. Rabbitize.**
+A Model Context Protocol (MCP) server that provides LLMs with tools to control Rabbitize browser automation sessions. This server acts as a proxy between LLMs and Rabbitize, automatically managing session lifecycle and returning screenshots as base64 images.
 
-*Turn Playwright into a live, stateful REST service - recording video, screenshots, and DOM snapshots for every step—so humans and AI agents can SEE automation, not just hope it worked.*
+## Features
 
-![playwright rabbit masks](https://raw.githubusercontent.com/ryrobes/rabbitize/refs/heads/main/resources/streaming/images/rabbitize-masks.png "Rabbitize + Playwright")
+- **Automatic Session Management**: Handles Rabbitize session creation and cleanup
+- **Visual Feedback**: Returns screenshots as base64 images after each command
+- **MCP Protocol Compliance**: Implements the standard MCP protocol over stdin/stdout
+- **Command Execution**: Supports all Rabbitize commands (clicks, navigation, etc.)
+- **Error Handling**: Robust error handling with meaningful error messages
+- **Session Status**: Real-time session status monitoring
 
-[![CI](https://github.com/ryrobes/rabbitize/actions/workflows/node.js.yml/badge.svg)](https://github.com/ryrobes/rabbitize/actions) [![npm](https://img.shields.io/npm/v/rabbitize.svg)](https://www.npmjs.com/package/rabbitize) [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+## Installation
 
-```bash
-# LFG
-npm install rabbitize
-sudo npx playwright install-deps # required for PW to work
-npx rabbitize # start server for interactive sessions
-# http://localhost:3037
-```
+### Prerequisites
 
-## Why Rabbitize?
-- Visual by default – video + before/after screenshots for every command.
-- Stateful sessions – keep browsers warm between API calls.
-- AI-ready – deterministic file paths for screenshots & DOM dumps.
-- Human-like coordinates – real mouse movement, not synthetic DOM clicks.
-- Click-to-code Flow Builder – non-devs can point-and-automate.
-- Declarative - just some simple JSON
+1. **Python 3.8+** installed
+2. **Rabbitize server** running (typically on `http://localhost:3000`)
+3. **Node.js** and **npm** for running Rabbitize
 
-<video src="https://github.com/user-attachments/assets/5f7ff405-1c11-48f6-810f-78aa8b73bf91" width="100%" controls></video>
+### Setup
 
-## The Problem
+1. **Clone/Download the MCP server files**:
+   ```bash
+   # Download the files to your project directory
+   wget https://example.com/rabbitize_mcp_server_simple.py
+   wget https://example.com/requirements.txt
+   ```
 
-1. Traditional browser automation is blind. You write scripts, run them, and hope they work. When they fail, you're left guessing why.
-2. These tools are often geared toward developers and have a high bar for entry for people just looking to locally automate some workflow.
+2. **Install Python dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## The Solution
+3. **Make the server executable**:
+   ```bash
+   chmod +x rabbitize_mcp_server_simple.py
+   ```
 
-Rabbitize changes browser automation from a black box into a visual feedback loop:
+4. **Start your Rabbitize server**:
+   ```bash
+   cd /path/to/rabbitize
+   npm start
+   # or
+   node src/server.js
+   ```
 
-```bash
-# Send a command
-curl -X POST localhost:3037/execute -d '{"command": [":move-mouse", ":to", 240, 1230]}'
+## Usage
 
-# Get instant visual feedback
-ls rabbitize-runs/session/screenshots/
-# before-click.jpg
-# after-click.jpg
-# zoomed-click.jpg
-```
+### Running the MCP Server
 
-Every action generates screenshots, videos, a markdown'd DOM, and performance data. Sessions stay alive between commands, enabling true interactive automation.
-
-## Two Ways to Use It
-
-### For Everyone: Flow Builder & Browser
-Point, click, and create automations without writing code:
-1. Open `http://localhost:3037/flow-builder`
-2. Click around any website
-3. Watch your automation build itself
-4. End the session (saves)
-4. Export as cURL, CLI, schedule with cron, or go to the Dashboard and re-run it with a single click
-5. Browse historical data collected via the UI or your harddrive (no weird formats)
-
-### For Developers: REST API
-Perfect for AI agents and complex integrations:
-```python
-# Start session
-response = requests.post("http://localhost:3000/start", json={"url": "https://example.com"})
-
-# AI analyzes screenshot, decides next action
-response = requests.post("http://localhost:3000/execute", json={"command": [":click", ":at", 400, 300]})
-
-# Session maintains state, ready for next command when you are
-# or script CURL commands!
-```
+The MCP server communicates over stdin/stdout using JSON-RPC protocol:
 
 ```bash
-# or run the whole thing in one shot (once your commands are nailed down, just run it - process will end on completion)
-node src/index.js \
-  --stability-detection false \
-  --exit-on-end true \
-  --process-video true \
-  --client-id "test" \
-  --port 3000 \
-  --test-id "batchtest" \
-  --batch-url "https://rvbbit.com" \
-  --batch-commands='[
-    [":move-mouse", ":to", 1600, 75],
-    [":move-mouse", ":to", 1600, 575],
-    [":scroll-wheel-down", 3],
-    [":wait", 5],
-    [":scroll-wheel-up", 3],
-    [":move-mouse", ":to", 1600, 75]
-    # ...etc...
-  ]'
+# Basic usage
+python rabbitize_mcp_server_simple.py
+
+# With custom Rabbitize URL
+python rabbitize_mcp_server_simple.py --rabbitize-url http://localhost:3000
+
+# With debug logging
+python rabbitize_mcp_server_simple.py --log-level DEBUG
 ```
 
-## What Makes It Different
+### Available Tools
 
-| Traditional Automation | Rabbitize |
-|------------------------|-----------|
-| DOM selectors break | Uses visual coordinates |
-| Blind execution | See every action happen |
-| Code-only | Click-to-create + API |
-| Start from scratch each time | Stateful sessions |
-| "Did it work?" | Full video + screenshots |
+The server provides the following tools to LLMs:
 
-- **Mouse actually moves** - Watch the cursor travel across the screen
-- **Real coordinates** - Click at (x,y) just like a human would
-- **Visual feedback** - See every action happen in real(ish)-time
-- **No hidden shortcuts** - If a human can't do it, neither should your tests
+#### 1. `rabbitize_start_session`
+Start a new browser session with a given URL.
 
-## Real-World Use Cases
+**Parameters:**
+- `url` (string): The URL to navigate to
 
-- **QA Engineers**: Record bugs with visual proof, no coding required
-- **AI Developers**: Build web agents that can see and react
-- **Business Users**: Automate daily tasks by showing, not coding
-- **DevOps**: Monitor sites with video evidence of failures
+**Returns:**
+- Success message with session details
+- Base64 encoded screenshot of the initial page
 
-## Example: AI Web Agent
-
-```javascript
-// 1. Start browser
-await fetch('/start', {
-  method: 'POST',
-  body: JSON.stringify({ url: 'https://news.ycombinator.com' })
-});
-
-// 2. AI reads screenshot from deterministic filepath: rabbitize-runs/.../screenshots/latest.jpg
-// 3. AI decides: "Click on the top story"
-
-await fetch('/execute', {
-  method: 'POST',
-  body: JSON.stringify({ command: [':click', ':at', 150, 200] })
-});
-
-// 4. New screenshot appears, AI continues...
-
-// OR scripted as a "tool" for an LLM to use
+**Example:**
+```json
+{
+  "name": "rabbitize_start_session",
+  "arguments": {
+    "url": "https://example.com"
+  }
+}
 ```
 
-## Boatloads of data at every step
+#### 2. `rabbitize_execute`
+Execute a command in the active session.
 
-Every session creates:
+**Parameters:**
+- `command` (array): Command as array of strings
 
+**Returns:**
+- Command execution result
+- Base64 encoded screenshot after command execution
+
+**Example:**
+```json
+{
+  "name": "rabbitize_execute",
+  "arguments": {
+    "command": [":move-mouse", ":to", "100", "200"]
+  }
+}
 ```
-rabbitize-runs/
-└── session-id/
-    ├── video.webm          # Full session recording
-    ├── screenshots/        # Before/after each action
-    ├── commands.json       # Detailed audit trail
-    ├── metrics.json        # Performance data
-    ├── dom_snapshots/      # Page content as markdown text
-    └── dom_coords/         # All useful DOM info in simple JSON
-```
 
-## Commands Are Simple
+**Common Commands:**
+- `[":click"]` - Click at current mouse position
+- `[":move-mouse", ":to", "100", "200"]` - Move mouse to coordinates
+- `[":scroll-wheel-down", "3"]` - Scroll down 3 clicks
+- `[":keypress", "Enter"]` - Press Enter key
+- `[":url", "https://example.com"]` - Navigate to URL
+
+#### 3. `rabbitize_get_screenshot`
+Get the latest screenshot from the active session.
+
+**Parameters:** None
+
+**Returns:**
+- Base64 encoded screenshot of current page state
+
+#### 4. `rabbitize_end_session`
+End the current session and cleanup resources.
+
+**Parameters:** None
+
+**Returns:**
+- Session termination confirmation
+- Statistics about the session
+
+#### 5. `rabbitize_status`
+Get current session status information.
+
+**Parameters:** None
+
+**Returns:**
+- Session status details (active, session ID, command count, etc.)
+
+## Integration with LLMs
+
+### Claude Desktop
+
+To use with Claude Desktop, add this to your `claude_desktop_config.json`:
 
 ```json
-[":navigate", "https://rvbbit.com"]
-[":move-mouse", ":to", 150, 200]
-[":click"]
-[":type", "Hello World"]
-[":scroll-wheel-down", 5]
-[":wait", 2]
+{
+  "mcpServers": {
+    "rabbitize": {
+      "command": "python",
+      "args": ["/path/to/rabbitize_mcp_server_simple.py"],
+      "env": {
+        "PYTHONPATH": "/path/to/your/project"
+      }
+    }
+  }
+}
 ```
 
-## Real coordinates. Real mouse movement. Real results. No javascript required.
+### Other MCP Clients
 
-## Dashboard
+The server implements the standard MCP protocol and should work with any MCP-compatible client:
 
-Watch automations run live at `http://localhost:3037`:
+1. **Start the server** as a subprocess
+2. **Communicate via stdin/stdout** using JSON-RPC
+3. **Send initialize request** first
+4. **Use tools/list** to get available tools
+5. **Call tools** using tools/call method
+
+## Example Workflow
+
+Here's a typical workflow when using the MCP server:
+
+1. **Initialize Session**:
+   ```
+   LLM calls rabbitize_start_session with URL
+   → Server starts Rabbitize session
+   → Returns screenshot of loaded page
+   ```
+
+2. **Interact with Page**:
+   ```
+   LLM calls rabbitize_execute with mouse/keyboard commands
+   → Server executes command in browser
+   → Returns screenshot showing the result
+   ```
+
+3. **Get Current State**:
+   ```
+   LLM calls rabbitize_get_screenshot
+   → Server returns current page screenshot
+   ```
+
+4. **End Session**:
+   ```
+   LLM calls rabbitize_end_session
+   → Server cleanup and returns session stats
+   ```
+
+## Configuration
+
+### Environment Variables
+
+- `RABBITIZE_URL`: Default Rabbitize server URL (default: `http://localhost:3000`)
+- `LOG_LEVEL`: Logging level (DEBUG, INFO, WARNING, ERROR)
+
+### Command Line Arguments
+
+- `--rabbitize-url`: Set Rabbitize server URL
+- `--log-level`: Set logging level
+
+## Error Handling
+
+The server provides comprehensive error handling:
+
+- **Connection Errors**: When Rabbitize server is unreachable
+- **Session Errors**: When session fails to start or becomes invalid
+- **Command Errors**: When commands fail to execute
+- **Protocol Errors**: When JSON-RPC protocol is violated
+
+All errors are returned as standard JSON-RPC error responses with descriptive messages.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **"Connection refused" errors**:
+   - Ensure Rabbitize server is running on the expected port
+   - Check firewall settings
+   - Verify the URL is correct
+
+2. **"No screenshot available"**:
+   - Session may not have started properly
+   - Check Rabbitize server logs
+   - Ensure sufficient disk space for screenshots
+
+3. **"Session not active"**:
+   - Start a session first using `rabbitize_start_session`
+   - Check if session timed out or crashed
+
+### Debug Mode
+
+Run with debug logging to see detailed information:
+
+```bash
+python rabbitize_mcp_server_simple.py --log-level DEBUG
+```
+
+### Log Files
+
+Logs are written to stderr and include:
+- Session lifecycle events
+- Command execution details
+- Error messages with stack traces
+- Screenshot capture attempts
+
+## Architecture
+
+```
+LLM Client
+    ↓ (MCP Protocol over stdin/stdout)
+MCP Server
+    ↓ (HTTP API calls)
+Rabbitize Server
+    ↓ (Controls)
+Playwright Browser
+```
+
+The MCP server acts as a bridge, translating MCP tool calls into Rabbitize API calls and returning structured responses with screenshots.
+
+## Security Considerations
+
+- The server runs browser automation, which can be security-sensitive
+- Only run in trusted environments
+- Be cautious with URLs and commands from untrusted sources
+- Consider network isolation for production use
+
+## Performance Tips
+
+- Screenshots are automatically compressed to reduce memory usage
+- Session cleanup happens automatically on shutdown
+- Consider screenshot resolution vs. performance trade-offs
+- Monitor disk space usage for screenshot storage
+
+## Contributing
+
+To extend the MCP server:
+
+1. Add new tools in the `_register_tools()` method
+2. Implement tool handlers in `_handle_tools_call()`
+3. Update the documentation
+4. Test with various MCP clients
 
 ## License
 
-MIT
-
----
-
-**Stop writing blind browser automation.** Start seeing what actually happens.
-
-_Ryan Robitaille 2025_
+This project is provided as-is for educational and development purposes.
