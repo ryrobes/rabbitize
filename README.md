@@ -74,7 +74,7 @@ response = requests.post("http://localhost:3000/execute", json={"command": [":cl
 
 ```bash
 # or run the whole thing in one shot (once your commands are nailed down, just run it - process will end on completion)
-node src/index.js \
+rabbitize \
   --stability-detection false \
   --exit-on-end true \
   --process-video true \
@@ -89,7 +89,6 @@ node src/index.js \
     [":wait", 5],
     [":scroll-wheel-up", 3],
     [":move-mouse", ":to", 1600, 75]
-    # ...etc...
   ]'
 ```
 
@@ -152,15 +151,60 @@ rabbitize-runs/
     └── dom_coords/         # All useful DOM info in simple JSON
 ```
 
-## Commands Are Simple
+## Complete Command Reference
 
+### Navigation
 ```json
-[":navigate", "https://rvbbit.com"]
-[":move-mouse", ":to", 150, 200]
-[":click"]
-[":type", "Hello World"]
-[":scroll-wheel-down", 5]
-[":wait", 2]
+[":url", "https://example.com"]         // Navigate to URL
+[":back"]                                // Browser back
+[":forward"]                             // Browser forward
+```
+
+### Mouse Actions
+```json
+[":click", ":at", 100, 200]             // Click at coordinates
+[":move-mouse", ":to", 100, 200]        // Move to position
+[":right-click", ":at", 100, 200]       // Right click
+[":middle-click", ":at", 100, 200]      // Middle click
+[":drag", ":from", 100, 200, ":to", 300, 400]  // Drag from A to B
+[":start-drag", ":from", 100, 200]      // Start drag
+[":end-drag", ":to", 300, 400]          // End drag
+[":click-hold", ":at", 100, 200]        // Mouse down
+[":click-release", ":at", 100, 200]     // Mouse up
+```
+
+### Scrolling
+```json
+[":scroll-wheel-up", 3]                  // Scroll up 3 clicks
+[":scroll-wheel-down", 5]                // Scroll down 5 clicks
+```
+
+### Keyboard Input
+```json
+[":keypress", "Enter"]                   // Single key
+[":keypress", "Control+a"]               // Key combo
+[":type", "Hello World"]                 // Type text
+```
+
+### File Handling
+```json
+[":set-upload-file", "/path/to/file.pdf"]        // Prepare file for upload dialogs
+[":set-upload-file", "file1.pdf", "file2.jpg"]   // Multiple files
+[":set-download-path", "./downloads"]            // Set download directory (default: session dir)
+```
+
+### Page Extraction
+```json
+[":extract", 100, 200, 500, 600]        // Extract text from rectangle
+[":extract-page"]                        // Extract all page content
+```
+
+### Utility
+```json
+[":wait", 2]                             // Wait 2 seconds
+[":width", 1920]                         // Set viewport width
+[":height", 1080]                        // Set viewport height
+[":print-pdf"]                           // Save page as PDF
 ```
 
 ## Real coordinates. Real mouse movement. Real results. No javascript required.

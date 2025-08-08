@@ -133,6 +133,11 @@ class PlaywrightSession {
 
     // Track temporary session IDs for cleanup
     this.temporarySessionIds = new Set();
+    
+    // File handling configuration
+    this.downloadPath = null;
+    this.uploadFilePath = null;
+    this.fileChooserPromise = null;
 
     // Store configuration but don't set up paths yet
     this.showCommandOverlay = options.showCommandOverlay ?? true;
@@ -718,7 +723,8 @@ class PlaywrightSession {
       // });
       // Base context options
       const contextOptions = {
-        viewport: DEFAULT_CONFIG.videoSize
+        viewport: DEFAULT_CONFIG.videoSize,
+        acceptDownloads: true  // Enable download handling
       };
 
       // Enable video recording for non-interactive sessions or when process-video is true
@@ -768,6 +774,12 @@ class PlaywrightSession {
 
       this.firebase.log('PlaywrightSession.initialize - Creating new page');
       this.page = await this.context.newPage();
+      
+      // Set up download handling
+      this.setupDownloadHandling();
+      
+      // Set up file chooser handling
+      this.setupFileChooserHandling();
 
       ///await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
 
@@ -2617,6 +2629,87 @@ class PlaywrightSession {
               return {
                 success: false,
                 error: `Failed to navigate forward: ${error.message}`
+              };
+            }
+            break;
+
+          case ':set-download-path':
+            try {
+              const [_cmd, downloadPath] = command;
+              if (!downloadPath) {
+                return {
+                  success: false,
+                  error: 'Download path is required'
+                };
+              }
+              
+              // Resolve path relative to current working directory if not absolute
+              const resolvedPath = path.isAbsolute(downloadPath) 
+                ? downloadPath 
+                : path.join(process.cwd(), downloadPath);
+              
+              // Create directory if it doesn't exist
+              await fsPromises.mkdir(resolvedPath, { recursive: true });
+              
+              this.downloadPath = resolvedPath;
+              this.firebase.log(`Download path set to: ${resolvedPath}`);
+              
+              return {
+                success: true,
+                message: `Downloads will be saved to: ${resolvedPath}`
+              };
+            } catch (error) {
+              this.firebase.error('Failed to set download path:', error);
+              return {
+                success: false,
+                error: error.message
+              };
+            }
+            break;
+
+          case ':set-upload-file':
+            try {
+              const [_cmd, ...filePaths] = command;
+              if (!filePaths || filePaths.length === 0) {
+                return {
+                  success: false,
+                  error: 'At least one file path is required'
+                };
+              }
+              
+              // Handle both single file and multiple files
+              const resolvedPaths = [];
+              for (const filePath of filePaths) {
+                // Resolve path relative to current working directory if not absolute
+                const resolvedPath = path.isAbsolute(filePath) 
+                  ? filePath 
+                  : path.join(process.cwd(), filePath);
+                
+                // Check if file exists
+                const fileExists = await fsPromises.access(resolvedPath).then(() => true).catch(() => false);
+                if (!fileExists) {
+                  return {
+                    success: false,
+                    error: `File not found: ${resolvedPath}`
+                  };
+                }
+                resolvedPaths.push(resolvedPath);
+              }
+              
+              // Store as array for multiple files or single path for one file
+              this.uploadFilePath = resolvedPaths.length === 1 ? resolvedPaths[0] : resolvedPaths;
+              this.firebase.log(`Upload file(s) set to: ${resolvedPaths.join(', ')}`);
+              
+              return {
+                success: true,
+                message: `${resolvedPaths.length} file(s) ready for upload`,
+                files: resolvedPaths
+              };
+            } catch (error) {
+              this.firebase.error('Failed to set upload file:', error);
+              return {
+                success: false,
+                error: error.message
               };
             }
             break;
@@ -5526,6 +5619,68 @@ const domMarkdown = await this.page.evaluate(() => {
   // Add method to get current async uploads setting
   getAsyncUploads() {
     return this.firebase?.asyncUploads || false;
+  }
+  
+  // Setup download handling to save files locally
+  setupDownloadHandling() {
+    if (!this.page) return;
+    
+    this.page.on('download', async (download) => {
+      try {
+        // Default to session base directory (same as screenshots), or use configured path
+        const downloadDir = this.downloadPath || this.basePath;
+        
+        // Ensure download directory exists
+        await fsPromises.mkdir(downloadDir, { recursive: true });
+        
+        // Get the suggested filename
+        const suggestedFilename = download.suggestedFilename();
+        const downloadPath = path.join(downloadDir, suggestedFilename);
+        
+        // Save the download
+        await download.saveAs(downloadPath);
+        
+        this.firebase.log(`File downloaded: ${downloadPath}`);
+        
+        // If using a custom download path, also save a copy to the session directory
+        if (this.downloadPath && this.downloadPath !== this.basePath) {
+          const sessionDownloadPath = path.join(this.basePath, suggestedFilename);
+          await fsPromises.copyFile(downloadPath, sessionDownloadPath);
+          this.firebase.log(`File also copied to session directory: ${sessionDownloadPath}`);
+        }
+        
+      } catch (error) {
+        this.firebase.error('Failed to handle download:', error);
+      }
+    });
+  }
+  
+  // Setup file chooser handling for upload dialogs
+  setupFileChooserHandling() {
+    if (!this.page) return;
+    
+    this.page.on('filechooser', async (fileChooser) => {
+      try {
+        if (this.uploadFilePath) {
+          // Use the pre-configured file
+          await fileChooser.setFiles(this.uploadFilePath);
+          this.firebase.log(`File uploaded from: ${this.uploadFilePath}`);
+          
+          // Clear the upload file after use (single use)
+          this.uploadFilePath = null;
+        } else {
+          // If no file is configured, log a warning
+          this.firebase.warn('File chooser dialog opened but no file was configured. Use :set-upload-file command first.');
+          
+          // You could also implement a default behavior here, like:
+          // - Upload a placeholder file
+          // - Cancel the dialog
+          // - Look for files in a default directory
+        }
+      } catch (error) {
+        this.firebase.error('Failed to handle file chooser:', error);
+      }
+    });
   }
 
   // Add method to capture DOM elements and their coordinates

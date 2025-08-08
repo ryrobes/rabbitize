@@ -126,6 +126,15 @@
                         </div>
                     </div>
 
+                    <!-- File Handling -->
+                    <div class="command-category">
+                        <h4>File Handling</h4>
+                        <div class="command-buttons">
+                            <button class="cmd-btn" data-command="set-upload-file" disabled>📤 Set Upload File</button>
+                            <button class="cmd-btn" data-command="set-download-path" disabled>📥 Set Download Path</button>
+                        </div>
+                    </div>
+
                     <!-- Timing -->
                     <div class="command-category">
                         <h4>Timing</h4>
@@ -853,7 +862,9 @@
                 'key': 'Press Key',
                 'wait': 'Wait Duration',
                 'viewport': 'Set Viewport Size',
-                'clear': 'Clear Field'
+                'clear': 'Clear Field',
+                'set-upload-file': 'Set Upload File',
+                'set-download-path': 'Set Download Path'
             };
             title.textContent = titles[commandType] || 'Enter Parameters';
 
@@ -927,6 +938,27 @@
                         </div>
                     `;
                     break;
+                case 'set-upload-file':
+                    inputsHTML = `
+                        <div class="param-input-group">
+                            <label>File Path(s)</label>
+                            <input type="text" id="param-file-path" placeholder="/path/to/file.pdf or ./relative/path.txt" autofocus>
+                            <div class="input-hint">Enter the path to the file you want to upload. Can be absolute or relative path.</div>
+                            <div class="input-hint" style="margin-top: 5px;">For multiple files, separate with commas: file1.pdf, file2.jpg</div>
+                            <div class="input-hint" style="margin-top: 5px; color: #0ff;">💡 This will auto-populate file dialogs when they appear!</div>
+                        </div>
+                    `;
+                    break;
+                case 'set-download-path':
+                    inputsHTML = `
+                        <div class="param-input-group">
+                            <label>Download Directory</label>
+                            <input type="text" id="param-download-path" placeholder="./downloads or /absolute/path/to/folder" autofocus>
+                            <div class="input-hint">Where to save downloaded files. Leave empty to use session directory.</div>
+                            <div class="input-hint" style="margin-top: 5px;">Default: rabbitize-runs/[client]/[test]/[session]/</div>
+                        </div>
+                    `;
+                    break;
             }
 
             inputs.innerHTML = inputsHTML;
@@ -997,6 +1029,24 @@
                         ]);
                     }
                     break;
+                case 'set-upload-file':
+                    const filePath = document.getElementById('param-file-path').value.trim();
+                    if (filePath) {
+                        // Split by comma for multiple files and trim each path
+                        const filePaths = filePath.split(',').map(p => p.trim()).filter(p => p);
+                        const command = [':set-upload-file', ...filePaths];
+                        executeCommandWithParams('set-upload-file', [command]);
+                    }
+                    break;
+                case 'set-download-path':
+                    const downloadPath = document.getElementById('param-download-path').value.trim();
+                    if (downloadPath) {
+                        executeCommandWithParams('set-download-path', [[':set-download-path', downloadPath]]);
+                    } else {
+                        // Empty path means use default session directory
+                        executeCommandWithParams('set-download-path', [[':set-download-path', '']]);
+                    }
+                    break;
             }
 
             closeParamModal();
@@ -1011,7 +1061,7 @@
             if (!sessionActive || isExecuting) return;
 
             // Check if command needs parameters
-            const needsParams = ['type', 'key', 'wait', 'viewport', 'clear'].includes(commandType);
+            const needsParams = ['type', 'key', 'wait', 'viewport', 'clear', 'set-upload-file', 'set-download-path'].includes(commandType);
             if (needsParams) {
                 showParamModal(commandType);
                 return;
