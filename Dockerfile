@@ -75,5 +75,15 @@ ENV FIREBASE_DATABASE_URL="https://rabbitize-default-rtdb.firebaseio.com"
 ENV NODE_ENV=production
 ENV UV_THREADPOOL_SIZE=2
 
+# Set RABBITIZE_PASSWORD at deploy time to enable login protection.
+# Example: docker run -e RABBITIZE_PASSWORD=mysecret -p 3037:3037 rabbitize
+# Leave unset (default) to run without auth (local dev).
+ENV RABBITIZE_PASSWORD=""
+
+EXPOSE 3037
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3037/status', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+
 ENTRYPOINT ["node", "src/index.js"]
 

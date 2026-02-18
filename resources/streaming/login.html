@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rabbitize - Login</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      color: #e0e0e0;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      padding: 2rem;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .logo pre {
+      display: inline-block;
+      font-size: 0.6rem;
+      line-height: 1.1;
+      color: #7c3aed;
+      letter-spacing: 0;
+    }
+
+    .logo-subtitle {
+      color: #666;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .card {
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 2rem;
+    }
+
+    .card h2 {
+      font-size: 0.85rem;
+      color: #888;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: #666;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      padding: 0.65rem 0.85rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="password"]:focus {
+      border-color: #7c3aed;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 1.25rem;
+      padding: 0.7rem;
+      background: #7c3aed;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    button:hover { background: #6d28d9; }
+    button:active { background: #5b21b6; }
+    button:disabled { background: #333; cursor: not-allowed; }
+
+    .error {
+      margin-top: 1rem;
+      padding: 0.6rem 0.85rem;
+      background: #2a0a0a;
+      border: 1px solid #5c1a1a;
+      border-radius: 4px;
+      color: #f87171;
+      font-size: 0.8rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <pre>
+ ____  ____  ____  ____  ____  ____  ____  ____
+|    \|    ||    \|    ||  \/  ||  _ \|__  /| ___|
+| |_) ) () || |_) ) () || |\/| || |_) ) / / |  _|
+|_|__/ \__/ |_|__/ \__/ |_|  |_||_|__/ /_/  |___|
+      </pre>
+      <div class="logo-subtitle">Point. Click. Rabbitize.</div>
+    </div>
+
+    <div class="card">
+      <h2>Access Required</h2>
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter password" autofocus>
+      <button id="loginBtn" onclick="login()">Sign In</button>
+      <div class="error" id="error">Incorrect password. Please try again.</div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('password');
+    const btn = document.getElementById('loginBtn');
+    const err = document.getElementById('error');
+
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+    async function login() {
+      const password = input.value;
+      if (!password) return;
+      btn.disabled = true;
+      err.style.display = 'none';
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        if (res.ok) {
+          const params = new URLSearchParams(window.location.search);
+          window.location.href = params.get('next') || '/';
+        } else {
+          err.style.display = 'block';
+          input.value = '';
+          input.focus();
+          btn.disabled = false;
+        }
+      } catch {
+        err.textContent = 'Connection error. Please try again.';
+        err.style.display = 'block';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

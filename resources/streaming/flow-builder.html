@@ -223,6 +223,7 @@
         let sessionActive = false;
         let sessionId = null;
         let sessionPort = PORT; // Start with main port, will change for spawned sessions
+        let sessionBaseUrl = ''; // Proxy URL prefix for child session (keeps all traffic on main port)
         let lastCoordinates = { x: 0, y: 0 };
         let streamConnected = false;
         let pendingCommand = null;
@@ -357,11 +358,12 @@
             
             // Check if the saved session is still valid by attempting to reach it
             try {
-                console.log(`Checking if session on port ${savedState.sessionPort} is still active...`);
+                const savedBaseUrl = `http://${window.location.hostname}:${PORT}/proxy/${savedState.spawnedSessionId}`;
+                console.log(`Checking if session ${savedState.spawnedSessionId} is still active...`);
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 1000);
-                
-                const response = await fetch(`http://${window.location.hostname}:${savedState.sessionPort}/status`, {
+
+                const response = await fetch(`${savedBaseUrl}/status`, {
                     method: 'GET',
                     signal: controller.signal
                 });
@@ -398,6 +400,7 @@
                 sessionActive = true;
                 sessionId = savedState.sessionId;
                 sessionPort = savedState.sessionPort;
+                sessionBaseUrl = `http://${window.location.hostname}:${PORT}/proxy/${savedState.spawnedSessionId}`;
                 spawnedSessionId = savedState.spawnedSessionId;
                 lastCoordinates = savedState.lastCoordinates || { x: 0, y: 0 };
                 streamConnected = false; // Will be set to true when stream connects
@@ -474,6 +477,7 @@
                 sessionActive = false;
                 sessionId = null;
                 sessionPort = PORT;
+                sessionBaseUrl = '';
                 spawnedSessionId = null;
                 urlInput.disabled = false;
                 updateUI();
@@ -567,7 +571,8 @@
             if (existingState && existingState.sessionActive) {
                 // Try to end the existing session
                 try {
-                    await fetch(`http://${window.location.hostname}:${existingState.sessionPort}/end`, {
+                    const existingBaseUrl = `http://${window.location.hostname}:${PORT}/proxy/${existingState.spawnedSessionId}`;
+                    await fetch(`${existingBaseUrl}/end`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' }
                     });
@@ -597,12 +602,13 @@
                 const result = await response.json();
                 spawnedSessionId = result.sessionId;
                 sessionPort = result.port;
+                sessionBaseUrl = `http://${window.location.hostname}:${PORT}/proxy/${spawnedSessionId}`;
 
                 // Wait for the spawned process to be ready
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                // Now start the session on the spawned process
-                const startResponse = await fetch(`http://${window.location.hostname}:${sessionPort}/start`, {
+                // Now start the session on the spawned process (via main-port proxy)
+                const startResponse = await fetch(`${sessionBaseUrl}/start`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -642,7 +648,7 @@
 
             try {
                 // End the session on the spawned process
-                await fetch(`http://${window.location.hostname}:${sessionPort}/end`, {
+                await fetch(`${sessionBaseUrl}/end`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -653,6 +659,7 @@
                 sessionId = null;
                 streamConnected = false;
                 sessionPort = PORT; // Reset to main port
+                sessionBaseUrl = '';
                 spawnedSessionId = null;
 
                 // Reset UI
@@ -685,11 +692,11 @@
                 return;
             }
 
-            console.log(`Connecting to stream on port ${sessionPort}...`);
-            
+            console.log(`Connecting to stream via proxy (session ${spawnedSessionId})...`);
+
             // Force a fresh connection with unique ID and timestamp
             const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            const streamUrl = `http://${window.location.hostname}:${sessionPort}/stream/${CLIENT_ID}/${FLOW_TEST_ID}/${sessionId}?cid=flow-builder-${uniqueId}&t=${Date.now()}`;
+            const streamUrl = `${sessionBaseUrl}/stream/${CLIENT_ID}/${FLOW_TEST_ID}/${sessionId}?cid=flow-builder-${uniqueId}&t=${Date.now()}`;
 
             // Clear any existing stream first
             if (browserStream.src) {
@@ -1134,7 +1141,7 @@
             try {
                 // Execute all commands
                 for (const command of commands) {
-                    const response = await fetch(`http://${window.location.hostname}:${sessionPort}/execute`, {
+                    const response = await fetch(`${sessionBaseUrl}/execute`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ command })
@@ -1266,7 +1273,7 @@
                 try {
                     // End any active session first
                     if (sessionActive) {
-                        await fetch(`http://${window.location.hostname}:${sessionPort}/end`, {
+                        await fetch(`${sessionBaseUrl}/end`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' }
                         }).catch(() => {}); // Ignore errors, just try to end it
@@ -1276,6 +1283,7 @@
                         sessionId = null;
                         streamConnected = false;
                         sessionPort = PORT;
+                        sessionBaseUrl = '';
                         spawnedSessionId = null;
                     }
 
@@ -1359,7 +1367,7 @@
                         continue; // Skip navigate as session already started with URL
                     }
 
-                    const response = await fetch(`http://${window.location.hostname}:${sessionPort}/execute`, {
+                    const response = await fetch(`${sessionBaseUrl}/execute`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ command })

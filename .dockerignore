@@ -1,0 +1,14 @@
+node_modules/
+rabbitize-runs/
+.git/
+.github/
+recon/
+test/
+*.md
+*.sh
+*.py
+*.log
+.env
+.env.*
+jest.config.js
+.eslintrc*

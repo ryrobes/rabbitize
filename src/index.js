@@ -10,10 +10,40 @@ const fsPromises = require('fs').promises;
 const path = require('path');
 const chalk = require('chalk');
 const queueManager = require('./utils/queueManager');
+const imageCompare = require('./utils/imageCompare');
 const os = require('os');
 const { EventEmitter } = require('events');
 const { execFile, spawn } = require('child_process');
 const net = require('net');
+const crypto = require('crypto');
+
+// --- Simple password auth (enabled when RABBITIZE_PASSWORD env var is set) ---
+const RABBITIZE_PASSWORD = process.env.RABBITIZE_PASSWORD || null;
+const validAuthTokens = new Set();
+
+function parseCookies(cookieHeader) {
+  const cookies = {};
+  if (!cookieHeader) return cookies;
+  cookieHeader.split(';').forEach(part => {
+    const [name, ...rest] = part.split('=');
+    if (name) cookies[name.trim()] = rest.join('=').trim();
+  });
+  return cookies;
+}
+
+function authMiddleware(req, res, next) {
+  if (!RABBITIZE_PASSWORD) return next(); // Auth disabled
+  const cookies = parseCookies(req.headers.cookie);
+  if (cookies.rabbitize_auth && validAuthTokens.has(cookies.rabbitize_auth)) {
+    return next();
+  }
+  // API / non-browser clients get a 401
+  const accept = req.headers.accept || '';
+  if (!accept.includes('text/html')) {
+    return res.status(401).json({ error: 'Unauthorized - please log in via the web UI' });
+  }
+  res.redirect('/login');
+}
 
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))
@@ -241,11 +271,78 @@ async function main() {
       next();
     });
 
-    // Serve static files from resources directory
+    // Serve static files from resources directory (public - login page needs themes)
     app.use('/resources', express.static(path.join(__dirname, '..', 'resources')));
 
-    // Serve video files from rabbitize-runs directory
+    // --- Auth: login/logout routes (must be before authMiddleware) ---
+    if (RABBITIZE_PASSWORD) {
+      app.get('/login', (req, res) => {
+        res.sendFile(path.join(__dirname, '..', 'resources', 'streaming', 'login.html'));
+      });
+
+      app.post('/api/login', (req, res) => {
+        const { password } = req.body || {};
+        if (password === RABBITIZE_PASSWORD) {
+          const token = crypto.randomBytes(32).toString('hex');
+          validAuthTokens.add(token);
+          res.setHeader('Set-Cookie', `rabbitize_auth=${token}; HttpOnly; Path=/; Max-Age=${24 * 60 * 60}; SameSite=Lax`);
+          res.json({ success: true });
+        } else {
+          res.status(401).json({ success: false, error: 'Invalid password' });
+        }
+      });
+
+      app.post('/api/logout', (req, res) => {
+        const cookies = parseCookies(req.headers.cookie);
+        if (cookies.rabbitize_auth) validAuthTokens.delete(cookies.rabbitize_auth);
+        res.setHeader('Set-Cookie', 'rabbitize_auth=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax');
+        res.redirect('/login');
+      });
+    }
+
+    // --- Auth middleware: protects everything below this line ---
+    app.use(authMiddleware);
+
+    // Serve video files from rabbitize-runs directory (protected)
     app.use('/rabbitize-runs', express.static(path.join(process.cwd(), 'rabbitize-runs')));
+
+    // HTTP proxy for spawned Flow Builder child sessions.
+    // Routes browser requests through the main port so child ports don't need to be exposed
+    // in Docker / AWS (only port 3037 needs to be open).
+    app.all('/proxy/:proxySessionId/*', (req, res) => {
+      const { proxySessionId } = req.params;
+      const subPath = req.params[0] || '';
+      const qs = req.originalUrl.includes('?') ? req.originalUrl.split('?').slice(1).join('?') : '';
+      const childPath = `/${subPath}${qs ? '?' + qs : ''}`;
+
+      if (!global.spawnedSessions || !global.spawnedSessions.has(proxySessionId)) {
+        return res.status(404).json({ error: 'Session not found or no longer active' });
+      }
+
+      const { port: childPort } = global.spawnedSessions.get(proxySessionId);
+      const bodyBuffer = (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0)
+        ? Buffer.from(JSON.stringify(req.body))
+        : null;
+
+      const proxyHeaders = { 'content-type': 'application/json', host: `127.0.0.1:${childPort}` };
+      if (bodyBuffer) proxyHeaders['content-length'] = bodyBuffer.length;
+
+      const proxyReq = require('http').request(
+        { hostname: '127.0.0.1', port: childPort, path: childPath, method: req.method, headers: proxyHeaders },
+        (proxyRes) => {
+          res.writeHead(proxyRes.statusCode, proxyRes.headers);
+          proxyRes.pipe(res, { end: true });
+        }
+      );
+
+      proxyReq.on('error', () => {
+        if (!res.headersSent) res.status(502).json({ error: 'Child session unavailable' });
+        else res.end();
+      });
+
+      if (bodyBuffer) proxyReq.write(bodyBuffer);
+      proxyReq.end();
+    });
 
     let server;
 
@@ -342,7 +439,10 @@ async function main() {
             FORCE_COLOR: '1',
             TERM: 'xterm-256color',
             CI: 'false',
-            NO_COLOR: undefined
+            NO_COLOR: undefined,
+            // Child sessions run on internal ports proxied through the main server.
+            // They don't need auth since the proxy is already behind auth.
+            RABBITIZE_PASSWORD: ''
           }
         });
 
@@ -1854,6 +1954,349 @@ async function main() {
       html = html.replace(/{{SESSION_ID}}/g, sessionId);
 
       res.type('html').send(html);
+    });
+
+    // Visual regression comparison page
+    app.get('/compare/:clientId/:testId', async (req, res) => {
+      const { clientId, testId } = req.params;
+
+      // Read the template
+      const templatePath = path.join(__dirname, '..', 'resources', 'streaming', 'compare.html');
+      let html = await fsPromises.readFile(templatePath, 'utf8');
+
+      // Replace placeholders
+      html = html.replace(/{{CLIENT_ID}}/g, clientId);
+      html = html.replace(/{{TEST_ID}}/g, testId);
+
+      res.type('html').send(html);
+    });
+
+    // API endpoint for visual regression comparison data
+    app.get('/api/compare/:clientId/:testId', async (req, res) => {
+      const { clientId, testId } = req.params;
+      const testPath = path.join(process.cwd(), 'rabbitize-runs', clientId, testId);
+
+      try {
+        // Check if test directory exists
+        if (!fs.existsSync(testPath)) {
+          return res.status(404).json({ error: 'Test not found', sessionCount: 0 });
+        }
+
+        // Get all session directories
+        const sessionDirs = await fsPromises.readdir(testPath);
+        const sessions = [];
+
+        for (const sessionId of sessionDirs) {
+          const sessionPath = path.join(testPath, sessionId);
+          const stat = await fsPromises.stat(sessionPath);
+          if (!stat.isDirectory()) continue;
+
+          // Try to get session metadata
+          const metadataPath = path.join(sessionPath, 'session-metadata.json');
+          const statusPath = path.join(sessionPath, 'status.json');
+          const commandsPath = path.join(sessionPath, 'commands.json');
+
+          let sessionInfo = {
+            sessionId,
+            startTime: stat.ctimeMs,
+            commandCount: 0
+          };
+
+          // Try metadata first
+          if (fs.existsSync(metadataPath)) {
+            try {
+              const metadata = JSON.parse(await fsPromises.readFile(metadataPath, 'utf8'));
+              sessionInfo.startTime = metadata.startTime || stat.ctimeMs;
+              sessionInfo.commandCount = metadata.commandCount || 0;
+            } catch (e) {}
+          }
+
+          // Try status.json for more recent info
+          if (fs.existsSync(statusPath)) {
+            try {
+              const status = JSON.parse(await fsPromises.readFile(statusPath, 'utf8'));
+              sessionInfo.startTime = status.startTime || sessionInfo.startTime;
+              sessionInfo.commandCount = status.commandCount || sessionInfo.commandCount;
+            } catch (e) {}
+          }
+
+          // Count commands from commands.json if available
+          if (fs.existsSync(commandsPath)) {
+            try {
+              const commands = JSON.parse(await fsPromises.readFile(commandsPath, 'utf8'));
+              sessionInfo.commandCount = commands.length;
+              sessionInfo.commands = commands;
+            } catch (e) {}
+          }
+
+          // Check for screenshots
+          const screenshotsPath = path.join(sessionPath, 'screenshots');
+          sessionInfo.hasScreenshots = fs.existsSync(screenshotsPath);
+
+          sessions.push(sessionInfo);
+        }
+
+        // Sort by startTime descending (newest first)
+        sessions.sort((a, b) => b.startTime - a.startTime);
+
+        // Need at least 2 sessions for comparison
+        if (sessions.length < 2) {
+          return res.json({
+            error: 'Need at least 2 sessions for comparison',
+            sessionCount: sessions.length
+          });
+        }
+
+        // Use the two most recent sessions
+        const latest = sessions[0];
+        const baseline = sessions[1];
+
+        // Compare each step
+        const steps = [];
+        const maxSteps = Math.max(baseline.commandCount, latest.commandCount);
+        let changedSteps = 0;
+        let maxDiffPercent = 0;
+
+        for (let i = 0; i < maxSteps; i++) {
+          const stepData = {
+            index: i,
+            command: null,
+            diffPercent: 0,
+            hasDomChange: false,
+            baselineScreenshot: null,
+            latestScreenshot: null,
+            error: null
+          };
+
+          // Get command name
+          if (baseline.commands && baseline.commands[i]) {
+            stepData.command = JSON.stringify(baseline.commands[i].command);
+          } else if (latest.commands && latest.commands[i]) {
+            stepData.command = JSON.stringify(latest.commands[i].command);
+          }
+
+          // Find screenshots (_crop.jpg files)
+          const baselineScreenshotsPath = path.join(testPath, baseline.sessionId, 'screenshots');
+          const latestScreenshotsPath = path.join(testPath, latest.sessionId, 'screenshots');
+
+          const baselineCrop = `${i}_crop.jpg`;
+          const latestCrop = `${i}_crop.jpg`;
+
+          const baselineCropPath = path.join(baselineScreenshotsPath, baselineCrop);
+          const latestCropPath = path.join(latestScreenshotsPath, latestCrop);
+
+          if (fs.existsSync(baselineCropPath)) {
+            stepData.baselineScreenshot = baselineCrop;
+          }
+          if (fs.existsSync(latestCropPath)) {
+            stepData.latestScreenshot = latestCrop;
+          }
+
+          // Compare images if both exist
+          if (stepData.baselineScreenshot && stepData.latestScreenshot) {
+            const cacheKey = `${clientId}/${testId}/${baseline.sessionId}/${latest.sessionId}/${i}`;
+            const diffResult = await imageCompare.getCachedDiff(
+              cacheKey,
+              baselineCropPath,
+              latestCropPath
+            );
+
+            if (diffResult.error) {
+              stepData.error = diffResult.error;
+              stepData.diffPercent = -1;
+            } else {
+              stepData.diffPercent = diffResult.diffPercent;
+              if (diffResult.diffPercent >= 1) {
+                changedSteps++;
+              }
+              if (diffResult.diffPercent > maxDiffPercent) {
+                maxDiffPercent = diffResult.diffPercent;
+              }
+            }
+          } else if (!stepData.baselineScreenshot || !stepData.latestScreenshot) {
+            // Missing screenshot counts as a change
+            changedSteps++;
+            stepData.diffPercent = 100;
+          }
+
+          // Check for DOM changes
+          const baselineDomPath = path.join(testPath, baseline.sessionId, 'dom_snapshots', `dom_${i}.md`);
+          const latestDomPath = path.join(testPath, latest.sessionId, 'dom_snapshots', `dom_${i}.md`);
+
+          if (fs.existsSync(baselineDomPath) && fs.existsSync(latestDomPath)) {
+            try {
+              const baselineDom = await fsPromises.readFile(baselineDomPath, 'utf8');
+              const latestDom = await fsPromises.readFile(latestDomPath, 'utf8');
+              stepData.hasDomChange = baselineDom !== latestDom;
+            } catch (e) {}
+          }
+
+          steps.push(stepData);
+        }
+
+        // Determine overall status
+        let overallStatus = 'pass';
+        if (maxDiffPercent >= 5) {
+          overallStatus = 'fail';
+        } else if (maxDiffPercent >= 1 || changedSteps > 0) {
+          overallStatus = 'warn';
+        }
+
+        res.json({
+          baseline: {
+            sessionId: baseline.sessionId,
+            startTime: baseline.startTime,
+            commandCount: baseline.commandCount
+          },
+          latest: {
+            sessionId: latest.sessionId,
+            startTime: latest.startTime,
+            commandCount: latest.commandCount
+          },
+          steps,
+          summary: {
+            totalSteps: maxSteps,
+            changedSteps,
+            maxDiffPercent,
+            overallStatus
+          }
+        });
+
+      } catch (error) {
+        logger.error('Error generating comparison:', error);
+        res.status(500).json({ error: 'Failed to generate comparison' });
+      }
+    });
+
+    // API endpoint for diff image
+    app.get('/api/compare/:clientId/:testId/diff/:stepIndex', async (req, res) => {
+      const { clientId, testId, stepIndex } = req.params;
+      const testPath = path.join(process.cwd(), 'rabbitize-runs', clientId, testId);
+      const index = parseInt(stepIndex);
+
+      try {
+        // Get the two most recent sessions
+        const sessionDirs = await fsPromises.readdir(testPath);
+        const sessions = [];
+
+        for (const sessionId of sessionDirs) {
+          const sessionPath = path.join(testPath, sessionId);
+          const stat = await fsPromises.stat(sessionPath);
+          if (!stat.isDirectory()) continue;
+
+          let startTime = stat.ctimeMs;
+          const statusPath = path.join(sessionPath, 'status.json');
+          if (fs.existsSync(statusPath)) {
+            try {
+              const status = JSON.parse(await fsPromises.readFile(statusPath, 'utf8'));
+              startTime = status.startTime || startTime;
+            } catch (e) {}
+          }
+
+          sessions.push({ sessionId, startTime });
+        }
+
+        sessions.sort((a, b) => b.startTime - a.startTime);
+
+        if (sessions.length < 2) {
+          return res.status(404).json({ error: 'Not enough sessions for comparison' });
+        }
+
+        const latest = sessions[0];
+        const baseline = sessions[1];
+
+        // Find screenshot paths
+        const baselineCropPath = path.join(testPath, baseline.sessionId, 'screenshots', `${index}_crop.jpg`);
+        const latestCropPath = path.join(testPath, latest.sessionId, 'screenshots', `${index}_crop.jpg`);
+
+        if (!fs.existsSync(baselineCropPath) || !fs.existsSync(latestCropPath)) {
+          return res.status(404).json({ error: 'Screenshots not found for this step' });
+        }
+
+        // Generate diff image
+        const cacheKey = `${clientId}/${testId}/${baseline.sessionId}/${latest.sessionId}/${index}`;
+        const diffResult = await imageCompare.getCachedDiff(cacheKey, baselineCropPath, latestCropPath);
+
+        if (diffResult.error) {
+          return res.status(500).json({ error: diffResult.error });
+        }
+
+        // Send the diff image
+        res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+        res.send(diffResult.diffImageBuffer);
+
+      } catch (error) {
+        logger.error('Error generating diff image:', error);
+        res.status(500).json({ error: 'Failed to generate diff image' });
+      }
+    });
+
+    // API endpoint for DOM diff
+    app.get('/api/compare/:clientId/:testId/dom-diff/:stepIndex', async (req, res) => {
+      const { clientId, testId, stepIndex } = req.params;
+      const testPath = path.join(process.cwd(), 'rabbitize-runs', clientId, testId);
+      const index = parseInt(stepIndex);
+
+      try {
+        // Get the two most recent sessions
+        const sessionDirs = await fsPromises.readdir(testPath);
+        const sessions = [];
+
+        for (const sessionId of sessionDirs) {
+          const sessionPath = path.join(testPath, sessionId);
+          const stat = await fsPromises.stat(sessionPath);
+          if (!stat.isDirectory()) continue;
+
+          let startTime = stat.ctimeMs;
+          const statusPath = path.join(sessionPath, 'status.json');
+          if (fs.existsSync(statusPath)) {
+            try {
+              const status = JSON.parse(await fsPromises.readFile(statusPath, 'utf8'));
+              startTime = status.startTime || startTime;
+            } catch (e) {}
+          }
+
+          sessions.push({ sessionId, startTime });
+        }
+
+        sessions.sort((a, b) => b.startTime - a.startTime);
+
+        if (sessions.length < 2) {
+          return res.status(404).send('<div class="dom-diff-empty">Not enough sessions for comparison</div>');
+        }
+
+        const latest = sessions[0];
+        const baseline = sessions[1];
+
+        // Find DOM snapshot paths
+        const baselineDomPath = path.join(testPath, baseline.sessionId, 'dom_snapshots', `dom_${index}.md`);
+        const latestDomPath = path.join(testPath, latest.sessionId, 'dom_snapshots', `dom_${index}.md`);
+
+        let baselineDom = '';
+        let latestDom = '';
+
+        if (fs.existsSync(baselineDomPath)) {
+          baselineDom = await fsPromises.readFile(baselineDomPath, 'utf8');
+        }
+        if (fs.existsSync(latestDomPath)) {
+          latestDom = await fsPromises.readFile(latestDomPath, 'utf8');
+        }
+
+        if (!baselineDom && !latestDom) {
+          return res.send('<div class="dom-diff-empty">No DOM snapshots available for this step</div>');
+        }
+
+        // Generate diff
+        const diff = imageCompare.generateTextDiff(baselineDom, latestDom);
+        const html = imageCompare.diffToHtml(diff);
+
+        res.type('html').send(html);
+
+      } catch (error) {
+        logger.error('Error generating DOM diff:', error);
+        res.status(500).send('<div class="dom-diff-empty">Error generating DOM diff</div>');
+      }
     });
 
     // Test endpoint for viewing the stream
