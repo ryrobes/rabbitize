@@ -2176,208 +2176,456 @@ async function main() {
     app.get('/compare/:clientId/:testId', async (req, res) => {
       const { clientId, testId } = req.params;
 
-      // Read the template
       const templatePath = path.join(__dirname, '..', 'resources', 'streaming', 'compare.html');
       let html = await fsPromises.readFile(templatePath, 'utf8');
 
-      // Replace placeholders
       html = html.replace(/{{CLIENT_ID}}/g, clientId);
       html = html.replace(/{{TEST_ID}}/g, testId);
 
       res.type('html').send(html);
     });
 
+    const VISUAL_WARN_THRESHOLD = 1;
+    const VISUAL_FAIL_THRESHOLD = 5;
+    const STRICT_MINOR_THRESHOLD = 0.01;
+
+    function parseBooleanQuery(value, defaultValue = true) {
+      if (value === undefined || value === null || value === '') {
+        return defaultValue;
+      }
+      const normalized = String(value).toLowerCase();
+      if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+      if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+      return defaultValue;
+    }
+
+    function parsePositiveInteger(value, defaultValue = null) {
+      if (value === undefined || value === null || value === '') {
+        return defaultValue;
+      }
+      const parsed = Number.parseInt(value, 10);
+      if (Number.isNaN(parsed) || parsed <= 0) {
+        return defaultValue;
+      }
+      return parsed;
+    }
+
+    function sanitizeSessionId(value) {
+      if (!value) return null;
+      const cleaned = String(value).trim();
+      return cleaned.length > 0 ? cleaned : null;
+    }
+
+    function getCommandAtIndex(commands, index) {
+      if (!Array.isArray(commands) || !commands[index]) {
+        return null;
+      }
+
+      const raw = commands[index];
+      if (Array.isArray(raw)) {
+        return raw;
+      }
+      if (raw && Array.isArray(raw.command)) {
+        return raw.command;
+      }
+      if (raw && raw.command !== undefined) {
+        return raw.command;
+      }
+      return raw;
+    }
+
+    function formatCommandForDisplay(command) {
+      if (command === null || command === undefined) {
+        return null;
+      }
+      if (typeof command === 'string') {
+        return command;
+      }
+      try {
+        return JSON.stringify(command);
+      } catch (error) {
+        return String(command);
+      }
+    }
+
+    function toSessionResponse(session) {
+      return {
+        sessionId: session.sessionId,
+        startTime: session.startTime,
+        commandCount: session.commandCount,
+        hasScreenshots: session.hasScreenshots
+      };
+    }
+
+    async function collectComparisonSessions(testPath) {
+      const sessionDirs = await fsPromises.readdir(testPath);
+      const sessions = [];
+
+      for (const sessionId of sessionDirs) {
+        const sessionPath = path.join(testPath, sessionId);
+        const stat = await fsPromises.stat(sessionPath);
+        if (!stat.isDirectory()) continue;
+
+        const metadataPath = path.join(sessionPath, 'session-metadata.json');
+        const statusPath = path.join(sessionPath, 'status.json');
+        const commandsPath = path.join(sessionPath, 'commands.json');
+        const screenshotsPath = path.join(sessionPath, 'screenshots');
+
+        const sessionInfo = {
+          sessionId,
+          startTime: stat.ctimeMs,
+          commandCount: 0,
+          commands: [],
+          hasScreenshots: fs.existsSync(screenshotsPath)
+        };
+
+        if (fs.existsSync(metadataPath)) {
+          try {
+            const metadata = JSON.parse(await fsPromises.readFile(metadataPath, 'utf8'));
+            sessionInfo.startTime = metadata.startTime || sessionInfo.startTime;
+            sessionInfo.commandCount = metadata.commandCount || sessionInfo.commandCount;
+          } catch (error) {}
+        }
+
+        if (fs.existsSync(statusPath)) {
+          try {
+            const status = JSON.parse(await fsPromises.readFile(statusPath, 'utf8'));
+            sessionInfo.startTime = status.startTime || sessionInfo.startTime;
+            sessionInfo.commandCount = status.commandCount || sessionInfo.commandCount;
+          } catch (error) {}
+        }
+
+        if (fs.existsSync(commandsPath)) {
+          try {
+            const commands = JSON.parse(await fsPromises.readFile(commandsPath, 'utf8'));
+            if (Array.isArray(commands)) {
+              sessionInfo.commands = commands;
+              sessionInfo.commandCount = commands.length;
+            }
+          } catch (error) {}
+        }
+
+        sessions.push(sessionInfo);
+      }
+
+      sessions.sort((a, b) => b.startTime - a.startTime);
+      return sessions;
+    }
+
+    function resolveComparisonPair(sessions, baselineSessionId, latestSessionId) {
+      if (sessions.length < 2) {
+        return { error: 'Need at least 2 sessions for comparison' };
+      }
+
+      let latest = sessions[0];
+      let baseline = sessions[1];
+
+      const requestedLatestId = sanitizeSessionId(latestSessionId);
+      const requestedBaselineId = sanitizeSessionId(baselineSessionId);
+
+      if (requestedLatestId) {
+        latest = sessions.find(session => session.sessionId === requestedLatestId);
+        if (!latest) {
+          return { error: `Requested latest session not found: ${requestedLatestId}` };
+        }
+      }
+
+      if (requestedBaselineId) {
+        baseline = sessions.find(session => session.sessionId === requestedBaselineId);
+        if (!baseline) {
+          return { error: `Requested baseline session not found: ${requestedBaselineId}` };
+        }
+      }
+
+      if (!requestedBaselineId) {
+        baseline = sessions.find(session => session.sessionId !== latest.sessionId) || null;
+      }
+      if (!requestedLatestId) {
+        latest = sessions.find(session => session.sessionId !== baseline.sessionId) || null;
+      }
+
+      if (!baseline || !latest) {
+        return { error: 'Unable to resolve comparison pair from available sessions' };
+      }
+
+      if (baseline.sessionId === latest.sessionId) {
+        return { error: 'Baseline and latest sessions must be different' };
+      }
+
+      return { baseline, latest };
+    }
+
+    function getStepStatus(stepData) {
+      if (stepData.error) return 'error';
+      if (stepData.missingScreenshots) return 'fail';
+      if (stepData.diffPercent >= VISUAL_FAIL_THRESHOLD) return 'fail';
+      if (stepData.diffPercent >= VISUAL_WARN_THRESHOLD || stepData.hasDomChange) return 'warn';
+      if (stepData.strictDiffPercent >= STRICT_MINOR_THRESHOLD) return 'info';
+      return 'pass';
+    }
+
+    async function compareSessionPair({ clientId, testId, testPath, baseline, latest, includeSteps = true }) {
+      const maxSteps = Math.max(baseline.commandCount, latest.commandCount);
+      const steps = [];
+
+      let significantChangedSteps = 0;
+      let visualChangedSteps = 0;
+      let minorChangedSteps = 0;
+      let domChangedSteps = 0;
+      let missingSteps = 0;
+      let erroredSteps = 0;
+      let maxDiffPercent = 0;
+      let maxStrictDiffPercent = 0;
+      let avgDiffSum = 0;
+      let avgStrictDiffSum = 0;
+      let comparedImageSteps = 0;
+
+      for (let i = 0; i < maxSteps; i++) {
+        const stepData = {
+          index: i,
+          command: null,
+          diffPercent: 0,
+          strictDiffPercent: 0,
+          meanDeltaPercent: 0,
+          hasDomChange: false,
+          baselineScreenshot: null,
+          latestScreenshot: null,
+          missingScreenshots: false,
+          imageCompared: false,
+          hasAnyChange: false,
+          stepStatus: 'pass',
+          error: null
+        };
+
+        const baselineCommand = getCommandAtIndex(baseline.commands, i);
+        const latestCommand = getCommandAtIndex(latest.commands, i);
+        stepData.command = formatCommandForDisplay(baselineCommand || latestCommand);
+
+        const baselineScreenshotsPath = path.join(testPath, baseline.sessionId, 'screenshots');
+        const latestScreenshotsPath = path.join(testPath, latest.sessionId, 'screenshots');
+
+        const baselineCrop = `${i}.jpg`;
+        const latestCrop = `${i}.jpg`;
+
+        const baselineCropPath = path.join(baselineScreenshotsPath, baselineCrop);
+        const latestCropPath = path.join(latestScreenshotsPath, latestCrop);
+
+        if (fs.existsSync(baselineCropPath)) {
+          stepData.baselineScreenshot = baselineCrop;
+        }
+        if (fs.existsSync(latestCropPath)) {
+          stepData.latestScreenshot = latestCrop;
+        }
+
+        if (stepData.baselineScreenshot && stepData.latestScreenshot) {
+          const cacheKey = `${clientId}/${testId}/${baseline.sessionId}/${latest.sessionId}/${i}`;
+          const diffResult = await imageCompare.getCachedDiff(cacheKey, baselineCropPath, latestCropPath);
+
+          if (diffResult.error) {
+            stepData.error = diffResult.error;
+            stepData.diffPercent = -1;
+            stepData.strictDiffPercent = -1;
+            erroredSteps++;
+          } else {
+            stepData.diffPercent = diffResult.diffPercent;
+            stepData.strictDiffPercent = diffResult.strictDiffPercent ?? diffResult.diffPercent;
+            stepData.meanDeltaPercent = diffResult.meanDeltaPercent ?? 0;
+            stepData.imageCompared = true;
+
+            comparedImageSteps++;
+            avgDiffSum += stepData.diffPercent;
+            avgStrictDiffSum += stepData.strictDiffPercent;
+
+            maxDiffPercent = Math.max(maxDiffPercent, stepData.diffPercent);
+            maxStrictDiffPercent = Math.max(maxStrictDiffPercent, stepData.strictDiffPercent);
+
+            if (stepData.diffPercent >= VISUAL_WARN_THRESHOLD) {
+              visualChangedSteps++;
+            } else if (stepData.strictDiffPercent >= STRICT_MINOR_THRESHOLD) {
+              minorChangedSteps++;
+            }
+          }
+        } else {
+          stepData.missingScreenshots = true;
+          stepData.diffPercent = 100;
+          stepData.strictDiffPercent = 100;
+          stepData.meanDeltaPercent = 100;
+          missingSteps++;
+          visualChangedSteps++;
+          maxDiffPercent = Math.max(maxDiffPercent, stepData.diffPercent);
+          maxStrictDiffPercent = Math.max(maxStrictDiffPercent, stepData.strictDiffPercent);
+        }
+
+        const baselineDomPath = path.join(testPath, baseline.sessionId, 'dom_snapshots', `dom_${i}.md`);
+        const latestDomPath = path.join(testPath, latest.sessionId, 'dom_snapshots', `dom_${i}.md`);
+
+        if (fs.existsSync(baselineDomPath) && fs.existsSync(latestDomPath)) {
+          try {
+            const baselineDom = await fsPromises.readFile(baselineDomPath, 'utf8');
+            const latestDom = await fsPromises.readFile(latestDomPath, 'utf8');
+            stepData.hasDomChange = baselineDom !== latestDom;
+            if (stepData.hasDomChange) {
+              domChangedSteps++;
+            }
+          } catch (error) {}
+        }
+
+        stepData.stepStatus = getStepStatus(stepData);
+        stepData.hasAnyChange = stepData.stepStatus !== 'pass';
+
+        if (stepData.stepStatus === 'warn' || stepData.stepStatus === 'fail' || stepData.stepStatus === 'error') {
+          significantChangedSteps++;
+        }
+
+        if (includeSteps) {
+          steps.push(stepData);
+        }
+      }
+
+      let overallStatus = 'pass';
+      if (erroredSteps > 0 || missingSteps > 0 || maxDiffPercent >= VISUAL_FAIL_THRESHOLD) {
+        overallStatus = 'fail';
+      } else if (significantChangedSteps > 0) {
+        overallStatus = 'warn';
+      } else if (minorChangedSteps > 0) {
+        overallStatus = 'info';
+      }
+
+      return {
+        baseline: toSessionResponse(baseline),
+        latest: toSessionResponse(latest),
+        steps,
+        summary: {
+          totalSteps: maxSteps,
+          changedSteps: significantChangedSteps,
+          significantChangedSteps,
+          visualChangedSteps,
+          minorChangedSteps,
+          domChangedSteps,
+          missingSteps,
+          erroredSteps,
+          comparedImageSteps,
+          maxDiffPercent,
+          maxStrictDiffPercent,
+          avgDiffPercent: comparedImageSteps > 0 ? avgDiffSum / comparedImageSteps : 0,
+          avgStrictDiffPercent: comparedImageSteps > 0 ? avgStrictDiffSum / comparedImageSteps : 0,
+          overallStatus
+        }
+      };
+    }
+
+    async function buildTimelineSummaries({ clientId, testId, testPath, sessions, timelineLimit = null }) {
+      const chronological = [...sessions].sort((a, b) => a.startTime - b.startTime);
+      const allPairs = [];
+
+      for (let i = 1; i < chronological.length; i++) {
+        allPairs.push({
+          baseline: chronological[i - 1],
+          latest: chronological[i]
+        });
+      }
+
+      const pairsToCompare = timelineLimit ? allPairs.slice(-timelineLimit) : allPairs;
+      const comparisons = [];
+
+      for (const pair of pairsToCompare) {
+        const pairComparison = await compareSessionPair({
+          clientId,
+          testId,
+          testPath,
+          baseline: pair.baseline,
+          latest: pair.latest,
+          includeSteps: false
+        });
+
+        comparisons.push({
+          baselineSessionId: pair.baseline.sessionId,
+          latestSessionId: pair.latest.sessionId,
+          baselineStartTime: pair.baseline.startTime,
+          latestStartTime: pair.latest.startTime,
+          baselineCommandCount: pair.baseline.commandCount,
+          latestCommandCount: pair.latest.commandCount,
+          summary: pairComparison.summary
+        });
+      }
+
+      comparisons.sort((a, b) => b.latestStartTime - a.latestStartTime);
+
+      return {
+        totalPairs: allPairs.length,
+        returnedPairs: comparisons.length,
+        truncated: timelineLimit !== null && allPairs.length > pairsToCompare.length,
+        comparisons
+      };
+    }
+
     // API endpoint for visual regression comparison data
     app.get('/api/compare/:clientId/:testId', async (req, res) => {
       const { clientId, testId } = req.params;
       const testPath = path.join(process.cwd(), 'rabbitize-runs', clientId, testId);
+      const baselineSessionId = sanitizeSessionId(req.query.baselineSessionId);
+      const latestSessionId = sanitizeSessionId(req.query.latestSessionId);
+      const includeSteps = parseBooleanQuery(req.query.includeSteps, true);
+      const includeTimeline = parseBooleanQuery(req.query.includeTimeline, true);
+      const timelineLimit = parsePositiveInteger(req.query.timelineLimit, null);
 
       try {
-        // Check if test directory exists
         if (!fs.existsSync(testPath)) {
           return res.status(404).json({ error: 'Test not found', sessionCount: 0 });
         }
 
-        // Get all session directories
-        const sessionDirs = await fsPromises.readdir(testPath);
-        const sessions = [];
+        const sessions = await collectComparisonSessions(testPath);
 
-        for (const sessionId of sessionDirs) {
-          const sessionPath = path.join(testPath, sessionId);
-          const stat = await fsPromises.stat(sessionPath);
-          if (!stat.isDirectory()) continue;
-
-          // Try to get session metadata
-          const metadataPath = path.join(sessionPath, 'session-metadata.json');
-          const statusPath = path.join(sessionPath, 'status.json');
-          const commandsPath = path.join(sessionPath, 'commands.json');
-
-          let sessionInfo = {
-            sessionId,
-            startTime: stat.ctimeMs,
-            commandCount: 0
-          };
-
-          // Try metadata first
-          if (fs.existsSync(metadataPath)) {
-            try {
-              const metadata = JSON.parse(await fsPromises.readFile(metadataPath, 'utf8'));
-              sessionInfo.startTime = metadata.startTime || stat.ctimeMs;
-              sessionInfo.commandCount = metadata.commandCount || 0;
-            } catch (e) {}
-          }
-
-          // Try status.json for more recent info
-          if (fs.existsSync(statusPath)) {
-            try {
-              const status = JSON.parse(await fsPromises.readFile(statusPath, 'utf8'));
-              sessionInfo.startTime = status.startTime || sessionInfo.startTime;
-              sessionInfo.commandCount = status.commandCount || sessionInfo.commandCount;
-            } catch (e) {}
-          }
-
-          // Count commands from commands.json if available
-          if (fs.existsSync(commandsPath)) {
-            try {
-              const commands = JSON.parse(await fsPromises.readFile(commandsPath, 'utf8'));
-              sessionInfo.commandCount = commands.length;
-              sessionInfo.commands = commands;
-            } catch (e) {}
-          }
-
-          // Check for screenshots
-          const screenshotsPath = path.join(sessionPath, 'screenshots');
-          sessionInfo.hasScreenshots = fs.existsSync(screenshotsPath);
-
-          sessions.push(sessionInfo);
-        }
-
-        // Sort by startTime descending (newest first)
-        sessions.sort((a, b) => b.startTime - a.startTime);
-
-        // Need at least 2 sessions for comparison
         if (sessions.length < 2) {
           return res.json({
             error: 'Need at least 2 sessions for comparison',
-            sessionCount: sessions.length
+            sessionCount: sessions.length,
+            sessions: sessions.map(toSessionResponse)
           });
         }
 
-        // Use the two most recent sessions
-        const latest = sessions[0];
-        const baseline = sessions[1];
-
-        // Compare each step
-        const steps = [];
-        const maxSteps = Math.max(baseline.commandCount, latest.commandCount);
-        let changedSteps = 0;
-        let maxDiffPercent = 0;
-
-        for (let i = 0; i < maxSteps; i++) {
-          const stepData = {
-            index: i,
-            command: null,
-            diffPercent: 0,
-            hasDomChange: false,
-            baselineScreenshot: null,
-            latestScreenshot: null,
-            error: null
-          };
-
-          // Get command name
-          if (baseline.commands && baseline.commands[i]) {
-            stepData.command = JSON.stringify(baseline.commands[i].command);
-          } else if (latest.commands && latest.commands[i]) {
-            stepData.command = JSON.stringify(latest.commands[i].command);
-          }
-
-          // Find screenshots ({index}.jpg files)
-          const baselineScreenshotsPath = path.join(testPath, baseline.sessionId, 'screenshots');
-          const latestScreenshotsPath = path.join(testPath, latest.sessionId, 'screenshots');
-
-          const baselineCrop = `${i}.jpg`;
-          const latestCrop = `${i}.jpg`;
-
-          const baselineCropPath = path.join(baselineScreenshotsPath, baselineCrop);
-          const latestCropPath = path.join(latestScreenshotsPath, latestCrop);
-
-          if (fs.existsSync(baselineCropPath)) {
-            stepData.baselineScreenshot = baselineCrop;
-          }
-          if (fs.existsSync(latestCropPath)) {
-            stepData.latestScreenshot = latestCrop;
-          }
-
-          // Compare images if both exist
-          if (stepData.baselineScreenshot && stepData.latestScreenshot) {
-            const cacheKey = `${clientId}/${testId}/${baseline.sessionId}/${latest.sessionId}/${i}`;
-            const diffResult = await imageCompare.getCachedDiff(
-              cacheKey,
-              baselineCropPath,
-              latestCropPath
-            );
-
-            if (diffResult.error) {
-              stepData.error = diffResult.error;
-              stepData.diffPercent = -1;
-            } else {
-              stepData.diffPercent = diffResult.diffPercent;
-              if (diffResult.diffPercent >= 1) {
-                changedSteps++;
-              }
-              if (diffResult.diffPercent > maxDiffPercent) {
-                maxDiffPercent = diffResult.diffPercent;
-              }
-            }
-          } else if (!stepData.baselineScreenshot || !stepData.latestScreenshot) {
-            // Missing screenshot counts as a change
-            changedSteps++;
-            stepData.diffPercent = 100;
-          }
-
-          // Check for DOM changes
-          const baselineDomPath = path.join(testPath, baseline.sessionId, 'dom_snapshots', `dom_${i}.md`);
-          const latestDomPath = path.join(testPath, latest.sessionId, 'dom_snapshots', `dom_${i}.md`);
-
-          if (fs.existsSync(baselineDomPath) && fs.existsSync(latestDomPath)) {
-            try {
-              const baselineDom = await fsPromises.readFile(baselineDomPath, 'utf8');
-              const latestDom = await fsPromises.readFile(latestDomPath, 'utf8');
-              stepData.hasDomChange = baselineDom !== latestDom;
-            } catch (e) {}
-          }
-
-          steps.push(stepData);
+        const pair = resolveComparisonPair(sessions, baselineSessionId, latestSessionId);
+        if (pair.error) {
+          return res.status(400).json({
+            error: pair.error,
+            sessionCount: sessions.length,
+            sessions: sessions.map(toSessionResponse)
+          });
         }
 
-        // Determine overall status
-        let overallStatus = 'pass';
-        if (maxDiffPercent >= 5) {
-          overallStatus = 'fail';
-        } else if (maxDiffPercent >= 1 || changedSteps > 0) {
-          overallStatus = 'warn';
+        const pairComparison = await compareSessionPair({
+          clientId,
+          testId,
+          testPath,
+          baseline: pair.baseline,
+          latest: pair.latest,
+          includeSteps
+        });
+
+        let timeline = null;
+        if (includeTimeline) {
+          timeline = await buildTimelineSummaries({
+            clientId,
+            testId,
+            testPath,
+            sessions,
+            timelineLimit
+          });
         }
 
         res.json({
-          baseline: {
-            sessionId: baseline.sessionId,
-            startTime: baseline.startTime,
-            commandCount: baseline.commandCount
+          sessionCount: sessions.length,
+          sessions: sessions.map(toSessionResponse),
+          pair: {
+            baselineSessionId: pair.baseline.sessionId,
+            latestSessionId: pair.latest.sessionId
           },
-          latest: {
-            sessionId: latest.sessionId,
-            startTime: latest.startTime,
-            commandCount: latest.commandCount
-          },
-          steps,
-          summary: {
-            totalSteps: maxSteps,
-            changedSteps,
-            maxDiffPercent,
-            overallStatus
-          }
+          baseline: pairComparison.baseline,
+          latest: pairComparison.latest,
+          steps: pairComparison.steps,
+          summary: pairComparison.summary,
+          timeline
         });
-
       } catch (error) {
         logger.error('Error generating comparison:', error);
         res.status(500).json({ error: 'Failed to generate comparison' });
@@ -2388,60 +2636,42 @@ async function main() {
     app.get('/api/compare/:clientId/:testId/diff/:stepIndex', async (req, res) => {
       const { clientId, testId, stepIndex } = req.params;
       const testPath = path.join(process.cwd(), 'rabbitize-runs', clientId, testId);
-      const index = parseInt(stepIndex);
+      const baselineSessionId = sanitizeSessionId(req.query.baselineSessionId);
+      const latestSessionId = sanitizeSessionId(req.query.latestSessionId);
+      const index = Number.parseInt(stepIndex, 10);
+
+      if (!Number.isInteger(index) || index < 0) {
+        return res.status(400).json({ error: 'Invalid step index' });
+      }
 
       try {
-        // Get the two most recent sessions
-        const sessionDirs = await fsPromises.readdir(testPath);
-        const sessions = [];
-
-        for (const sessionId of sessionDirs) {
-          const sessionPath = path.join(testPath, sessionId);
-          const stat = await fsPromises.stat(sessionPath);
-          if (!stat.isDirectory()) continue;
-
-          let startTime = stat.ctimeMs;
-          const statusPath = path.join(sessionPath, 'status.json');
-          if (fs.existsSync(statusPath)) {
-            try {
-              const status = JSON.parse(await fsPromises.readFile(statusPath, 'utf8'));
-              startTime = status.startTime || startTime;
-            } catch (e) {}
-          }
-
-          sessions.push({ sessionId, startTime });
+        if (!fs.existsSync(testPath)) {
+          return res.status(404).json({ error: 'Test not found' });
         }
 
-        sessions.sort((a, b) => b.startTime - a.startTime);
-
-        if (sessions.length < 2) {
-          return res.status(404).json({ error: 'Not enough sessions for comparison' });
+        const sessions = await collectComparisonSessions(testPath);
+        const pair = resolveComparisonPair(sessions, baselineSessionId, latestSessionId);
+        if (pair.error) {
+          return res.status(400).json({ error: pair.error });
         }
 
-        const latest = sessions[0];
-        const baseline = sessions[1];
-
-        // Find screenshot paths
-        const baselineCropPath = path.join(testPath, baseline.sessionId, 'screenshots', `${index}.jpg`);
-        const latestCropPath = path.join(testPath, latest.sessionId, 'screenshots', `${index}.jpg`);
+        const baselineCropPath = path.join(testPath, pair.baseline.sessionId, 'screenshots', `${index}.jpg`);
+        const latestCropPath = path.join(testPath, pair.latest.sessionId, 'screenshots', `${index}.jpg`);
 
         if (!fs.existsSync(baselineCropPath) || !fs.existsSync(latestCropPath)) {
           return res.status(404).json({ error: 'Screenshots not found for this step' });
         }
 
-        // Generate diff image
-        const cacheKey = `${clientId}/${testId}/${baseline.sessionId}/${latest.sessionId}/${index}`;
+        const cacheKey = `${clientId}/${testId}/${pair.baseline.sessionId}/${pair.latest.sessionId}/${index}`;
         const diffResult = await imageCompare.getCachedDiff(cacheKey, baselineCropPath, latestCropPath);
 
         if (diffResult.error) {
           return res.status(500).json({ error: diffResult.error });
         }
 
-        // Send the diff image
         res.set('Content-Type', 'image/png');
-        res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+        res.set('Cache-Control', 'public, max-age=300');
         res.send(diffResult.diffImageBuffer);
-
       } catch (error) {
         logger.error('Error generating diff image:', error);
         res.status(500).json({ error: 'Failed to generate diff image' });
@@ -2452,42 +2682,27 @@ async function main() {
     app.get('/api/compare/:clientId/:testId/dom-diff/:stepIndex', async (req, res) => {
       const { clientId, testId, stepIndex } = req.params;
       const testPath = path.join(process.cwd(), 'rabbitize-runs', clientId, testId);
-      const index = parseInt(stepIndex);
+      const baselineSessionId = sanitizeSessionId(req.query.baselineSessionId);
+      const latestSessionId = sanitizeSessionId(req.query.latestSessionId);
+      const index = Number.parseInt(stepIndex, 10);
+
+      if (!Number.isInteger(index) || index < 0) {
+        return res.status(400).send('<div class="dom-diff-empty">Invalid step index</div>');
+      }
 
       try {
-        // Get the two most recent sessions
-        const sessionDirs = await fsPromises.readdir(testPath);
-        const sessions = [];
-
-        for (const sessionId of sessionDirs) {
-          const sessionPath = path.join(testPath, sessionId);
-          const stat = await fsPromises.stat(sessionPath);
-          if (!stat.isDirectory()) continue;
-
-          let startTime = stat.ctimeMs;
-          const statusPath = path.join(sessionPath, 'status.json');
-          if (fs.existsSync(statusPath)) {
-            try {
-              const status = JSON.parse(await fsPromises.readFile(statusPath, 'utf8'));
-              startTime = status.startTime || startTime;
-            } catch (e) {}
-          }
-
-          sessions.push({ sessionId, startTime });
+        if (!fs.existsSync(testPath)) {
+          return res.status(404).send('<div class="dom-diff-empty">Test not found</div>');
         }
 
-        sessions.sort((a, b) => b.startTime - a.startTime);
-
-        if (sessions.length < 2) {
-          return res.status(404).send('<div class="dom-diff-empty">Not enough sessions for comparison</div>');
+        const sessions = await collectComparisonSessions(testPath);
+        const pair = resolveComparisonPair(sessions, baselineSessionId, latestSessionId);
+        if (pair.error) {
+          return res.status(400).send(`<div class="dom-diff-empty">${pair.error}</div>`);
         }
 
-        const latest = sessions[0];
-        const baseline = sessions[1];
-
-        // Find DOM snapshot paths
-        const baselineDomPath = path.join(testPath, baseline.sessionId, 'dom_snapshots', `dom_${index}.md`);
-        const latestDomPath = path.join(testPath, latest.sessionId, 'dom_snapshots', `dom_${index}.md`);
+        const baselineDomPath = path.join(testPath, pair.baseline.sessionId, 'dom_snapshots', `dom_${index}.md`);
+        const latestDomPath = path.join(testPath, pair.latest.sessionId, 'dom_snapshots', `dom_${index}.md`);
 
         let baselineDom = '';
         let latestDom = '';
@@ -2503,12 +2718,10 @@ async function main() {
           return res.send('<div class="dom-diff-empty">No DOM snapshots available for this step</div>');
         }
 
-        // Generate diff
         const diff = imageCompare.generateTextDiff(baselineDom, latestDom);
         const html = imageCompare.diffToHtml(diff);
 
         res.type('html').send(html);
-
       } catch (error) {
         logger.error('Error generating DOM diff:', error);
         res.status(500).send('<div class="dom-diff-empty">Error generating DOM diff</div>');

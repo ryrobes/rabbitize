@@ -91,6 +91,27 @@ async function compareImages(img1Path, img2Path, options = {}) {
     const totalPixels = targetWidth * targetHeight;
     const diffPercent = (numDiffPixels / totalPixels) * 100;
 
+    // Secondary, strict metrics to surface subtle changes (e.g. compression artifacts)
+    let strictDiffPixels = 0;
+    let sumChannelDelta = 0;
+    for (let i = 0; i < img1Buffer.length; i += 4) {
+      const deltaR = Math.abs(img1Buffer[i] - img2Buffer[i]);
+      const deltaG = Math.abs(img1Buffer[i + 1] - img2Buffer[i + 1]);
+      const deltaB = Math.abs(img1Buffer[i + 2] - img2Buffer[i + 2]);
+      const deltaA = Math.abs(img1Buffer[i + 3] - img2Buffer[i + 3]);
+
+      if (deltaR !== 0 || deltaG !== 0 || deltaB !== 0 || deltaA !== 0) {
+        strictDiffPixels++;
+      }
+
+      sumChannelDelta += deltaR + deltaG + deltaB;
+    }
+
+    const strictDiffPercent = (strictDiffPixels / totalPixels) * 100;
+    const meanDeltaPercent = totalPixels > 0
+      ? (sumChannelDelta / (totalPixels * 3 * 255)) * 100
+      : 0;
+
     // Convert raw diff buffer to PNG using sharp
     const diffImageBuffer = await sharp(Buffer.from(diffBuffer), {
       raw: {
@@ -104,16 +125,21 @@ async function compareImages(img1Path, img2Path, options = {}) {
 
     return {
       diffPercent,
+      strictDiffPercent,
+      meanDeltaPercent,
       diffImageBuffer,
       width: targetWidth,
       height: targetHeight,
       numDiffPixels,
-      totalPixels
+      totalPixels,
+      strictDiffPixels
     };
   } catch (error) {
     return {
       error: error.message,
       diffPercent: -1,
+      strictDiffPercent: -1,
+      meanDeltaPercent: -1,
       diffImageBuffer: null,
       width: 0,
       height: 0

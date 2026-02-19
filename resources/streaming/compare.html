@@ -9,65 +9,132 @@
     <link rel="icon" type="image/x-icon" href="/resources/streaming/favicon.png">
     <style>
         .compare-container {
-            max-width: 1600px;
+            max-width: 1700px;
             margin: 0 auto;
             padding: 20px;
         }
 
+        .back-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: var(--color-primary);
+            text-decoration: none;
+            padding: 10px 20px;
+            border: 1px solid var(--color-primary);
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            font-size: 12px;
+        }
+
+        .back-link:hover {
+            background: var(--color-primary);
+            color: var(--bg-base);
+            box-shadow: 0 0 20px var(--glow-primary);
+        }
+
+        .breadcrumb {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 12px;
+            color: var(--color-primary);
+            background: rgba(0, 0, 0, 0.85);
+            padding: 10px 20px;
+            border: 1px solid var(--color-primary);
+            z-index: 100;
+            max-width: calc(100vw - 280px);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .breadcrumb a {
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 80px 30px;
+            color: var(--color-primary);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 42px;
+            height: 42px;
+            border: 3px solid rgba(0, 255, 255, 0.2);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 14px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .panel {
+            border: 1px solid var(--color-primary);
+            background: rgba(0, 0, 0, 0.35);
+            margin-bottom: 22px;
+            box-shadow: 0 0 18px rgba(0, 255, 255, 0.12);
+        }
+
+        .panel-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            background: rgba(0, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
         .summary-header {
             border: 2px solid var(--color-primary);
-            padding: 20px;
-            margin-bottom: 30px;
-            background: rgba(0, 255, 255, 0.05);
+            padding: 22px;
+            margin-bottom: 24px;
+            background: rgba(0, 255, 255, 0.06);
         }
 
         .summary-header h1 {
             font-size: 24px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
-        .summary-stats {
+        .subtitle {
+            margin-top: 4px;
+        }
+
+        .pair-details {
+            margin-top: 16px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .stat-item {
-            padding: 10px;
-            border: 1px solid var(--color-primary);
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .stat-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            opacity: 0.7;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .overall-pass { color: #0f0; }
-        .overall-warn { color: #ff0; }
-        .overall-fail { color: #f00; }
-
-        .session-info {
-            display: flex;
-            gap: 30px;
-            margin-top: 15px;
-            flex-wrap: wrap;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         }
 
         .session-box {
-            flex: 1;
-            min-width: 300px;
-            padding: 15px;
             border: 1px solid var(--text-muted);
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.25);
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.6;
         }
 
         .session-box.baseline {
@@ -79,59 +146,240 @@
         }
 
         .session-label {
-            font-size: 12px;
             text-transform: uppercase;
-            margin-bottom: 10px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-size: 11px;
         }
 
-        .session-label.baseline { color: #0ff; }
-        .session-label.latest { color: #f0f; }
+        .session-label.baseline {
+            color: #0ff;
+        }
+
+        .session-label.latest {
+            color: #f0f;
+        }
+
+        .summary-stats {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .stat-item {
+            padding: 10px;
+            border: 1px solid var(--color-primary);
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.72;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            margin-top: 4px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .overall-pass { color: #0f0; }
+        .overall-info { color: #0ff; }
+        .overall-warn { color: #ff0; }
+        .overall-fail { color: #f00; }
+
+        .controls-row {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto auto;
+            align-items: end;
+            width: 100%;
+        }
+
+        .control-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-field label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .control-field select,
+        .control-field input {
+            background: var(--bg-base);
+            border: 1px solid var(--color-primary);
+            color: var(--text-primary);
+            padding: 8px 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+
+        .control-btn {
+            border: 1px solid var(--color-primary);
+            background: rgba(0, 0, 0, 0.5);
+            color: var(--color-primary);
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            height: 35px;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 14px var(--glow-primary);
+        }
+
+        .timeline-table-wrap {
+            overflow-x: auto;
+        }
+
+        .timeline-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 880px;
+        }
+
+        .timeline-table th,
+        .timeline-table td {
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .timeline-table th {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            background: rgba(0, 255, 255, 0.06);
+        }
+
+        .timeline-table tr.active-row {
+            background: rgba(0, 255, 255, 0.12);
+        }
+
+        .timeline-table tr:hover {
+            background: rgba(0, 255, 255, 0.07);
+        }
+
+        .timeline-status {
+            font-weight: bold;
+        }
+
+        .status-pass { color: #0f0; }
+        .status-info { color: #0ff; }
+        .status-warn { color: #ff0; }
+        .status-fail { color: #f00; }
+        .status-error { color: #f66; }
+
+        .inspect-btn {
+            border: 1px solid var(--color-primary);
+            background: transparent;
+            color: var(--color-primary);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .inspect-btn:hover {
+            background: rgba(0, 255, 255, 0.15);
+        }
+
+        .meta-note {
+            font-size: 11px;
+            opacity: 0.75;
+            margin-top: 10px;
+            color: var(--text-secondary);
+        }
+
+        .step-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .step-controls input {
+            transform: translateY(1px);
+        }
 
         .steps-container {
-            margin-top: 30px;
+            margin-top: 16px;
         }
 
         .step-card {
             border: 1px solid var(--color-primary);
-            margin-bottom: 30px;
-            background: rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.35);
         }
 
         .step-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--color-primary);
-            background: rgba(0, 255, 255, 0.05);
+            align-items: flex-start;
+            gap: 14px;
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            background: rgba(0, 255, 255, 0.04);
         }
 
         .step-title {
-            font-size: 14px;
+            font-size: 13px;
+            line-height: 1.45;
         }
 
         .step-command {
             font-family: 'JetBrains Mono', monospace;
             color: #0ff;
+            word-break: break-word;
+        }
+
+        .step-badge-wrap {
+            text-align: right;
+            min-width: 180px;
         }
 
         .step-badge {
-            padding: 5px 15px;
+            display: inline-block;
+            padding: 4px 10px;
             font-size: 12px;
             font-weight: bold;
             border-radius: 3px;
+            border: 1px solid transparent;
         }
 
-        .step-pass { background: rgba(0, 255, 0, 0.2); color: #0f0; border: 1px solid #0f0; }
-        .step-warn { background: rgba(255, 255, 0, 0.2); color: #ff0; border: 1px solid #ff0; }
-        .step-fail { background: rgba(255, 0, 0, 0.2); color: #f00; border: 1px solid #f00; }
-        .step-error { background: rgba(128, 128, 128, 0.2); color: #888; border: 1px solid #888; }
+        .step-pass { background: rgba(0, 255, 0, 0.18); color: #0f0; border-color: #0f0; }
+        .step-info { background: rgba(0, 255, 255, 0.16); color: #0ff; border-color: #0ff; }
+        .step-warn { background: rgba(255, 255, 0, 0.16); color: #ff0; border-color: #ff0; }
+        .step-fail { background: rgba(255, 0, 0, 0.18); color: #f00; border-color: #f00; }
+        .step-error { background: rgba(255, 80, 80, 0.16); color: #f66; border-color: #f66; }
+
+        .step-meta {
+            margin-top: 5px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
 
         .step-images {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
-            padding: 15px;
+            padding: 12px;
         }
 
         .image-panel {
@@ -158,14 +406,32 @@
             border-color: var(--color-primary);
         }
 
+        .diff-overlay-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .diff-overlay-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
+        }
+
+        .diff-overlay-img.visible {
+            opacity: 0.68;
+        }
+
         .diff-toggle-container {
-            padding: 10px 15px;
-            border-top: 1px solid var(--text-muted);
-            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 12px;
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.22);
         }
 
         .diff-toggle {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 10px;
             cursor: pointer;
@@ -180,11 +446,11 @@
         .diff-toggle-slider {
             width: 40px;
             height: 20px;
-            background: rgba(0, 255, 255, 0.2);
+            background: rgba(0, 255, 255, 0.16);
             border: 1px solid var(--color-primary);
             border-radius: 10px;
             position: relative;
-            transition: background 0.3s;
+            transition: background 0.25s;
         }
 
         .diff-toggle-slider::before {
@@ -196,11 +462,11 @@
             border-radius: 50%;
             top: 1px;
             left: 2px;
-            transition: transform 0.3s;
+            transition: transform 0.25s;
         }
 
         .diff-toggle input:checked + .diff-toggle-slider {
-            background: rgba(0, 255, 255, 0.4);
+            background: rgba(0, 255, 255, 0.35);
         }
 
         .diff-toggle input:checked + .diff-toggle-slider::before {
@@ -208,27 +474,28 @@
         }
 
         .dom-diff-section {
-            border-top: 1px solid var(--text-muted);
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
         }
 
         .dom-diff-header {
-            padding: 10px 15px;
+            padding: 10px 12px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.18);
+            font-size: 12px;
         }
 
         .dom-diff-header:hover {
-            background: rgba(0, 255, 255, 0.05);
+            background: rgba(0, 255, 255, 0.06);
         }
 
         .dom-diff-content {
             display: none;
-            max-height: 400px;
+            max-height: 420px;
             overflow-y: auto;
-            padding: 15px;
+            padding: 12px;
             background: rgba(0, 0, 0, 0.4);
             font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
@@ -240,11 +507,11 @@
 
         .dom-diff-container {
             white-space: pre-wrap;
-            word-break: break-all;
+            word-break: break-word;
         }
 
         .dom-diff-line {
-            padding: 2px 5px;
+            padding: 2px 6px;
             margin: 1px 0;
         }
 
@@ -269,69 +536,31 @@
         }
 
         .dom-diff-empty {
-            color: #666;
+            color: #777;
             font-style: italic;
         }
 
-        .loading {
+        .step-missing {
+            color: #888;
+            font-style: italic;
+            padding: 16px;
             text-align: center;
-            padding: 50px;
-            color: var(--color-primary);
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0, 255, 255, 0.2);
-            border-top-color: var(--color-primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .no-sessions,
+        .error-message {
+            text-align: center;
+            padding: 60px 30px;
+            border: 1px solid var(--color-primary);
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .error-message {
-            text-align: center;
-            padding: 50px;
-            color: #f00;
-            border: 1px solid #f00;
-            background: rgba(255, 0, 0, 0.1);
+            border-color: #f00;
+            color: #f66;
+            background: rgba(255, 0, 0, 0.08);
         }
 
-        .no-sessions {
-            text-align: center;
-            padding: 50px;
-            color: #ff0;
-            border: 1px solid #ff0;
-            background: rgba(255, 255, 0, 0.1);
-        }
-
-        /* Breadcrumb */
-        .breadcrumb {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            font-size: 12px;
-            color: #0ff;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px 20px;
-            border: 1px solid #0ff;
-            z-index: 100;
-        }
-
-        .breadcrumb a {
-            color: #0ff;
-            text-decoration: none;
-        }
-
-        .breadcrumb a:hover {
-            text-decoration: underline;
-        }
-
-        /* Lightbox for full-size images */
         .lightbox {
             display: none;
             position: fixed;
@@ -364,29 +593,32 @@
             cursor: pointer;
         }
 
-        .diff-overlay-wrapper {
-            position: relative;
-            display: inline-block;
+        @media (max-width: 1100px) {
+            .controls-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .step-images {
+                grid-template-columns: 1fr;
+            }
         }
 
-        .diff-overlay-img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
+        @media (max-width: 760px) {
+            .back-link,
+            .breadcrumb {
+                position: static;
+                display: block;
+                margin: 10px;
+                max-width: none;
+            }
 
-        .diff-overlay-img.visible {
-            opacity: 0.7;
-        }
+            .compare-container {
+                padding-top: 0;
+            }
 
-        .step-missing {
-            color: #888;
-            font-style: italic;
-            padding: 20px;
-            text-align: center;
+            .controls-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -409,7 +641,6 @@
         </div>
     </div>
 
-    <!-- Lightbox for full-size images -->
     <div id="lightbox" class="lightbox" onclick="closeLightbox()">
         <span class="lightbox-close">&times;</span>
         <img id="lightbox-img" src="" alt="Full size">
@@ -419,128 +650,375 @@
         const clientId = '{{CLIENT_ID}}';
         const testId = '{{TEST_ID}}';
 
-        async function loadComparison() {
+        const state = {
+            currentBaselineSessionId: null,
+            currentLatestSessionId: null,
+            onlyChanged: false,
+            timelineCache: null,
+            lastData: null
+        };
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Unknown';
+            return new Date(timestamp).toLocaleString();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text == null ? '' : String(text);
+            return div.innerHTML;
+        }
+
+        function formatPercent(value) {
+            if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
+                return 'n/a';
+            }
+            return `${value.toFixed(3)}%`;
+        }
+
+        function getStatusClass(status, prefix = 'status') {
+            const normalized = ['pass', 'info', 'warn', 'fail', 'error'].includes(status) ? status : 'pass';
+            return `${prefix}-${normalized}`;
+        }
+
+        function buildPairQuery(baselineSessionId, latestSessionId) {
+            const params = new URLSearchParams();
+            if (baselineSessionId) params.set('baselineSessionId', baselineSessionId);
+            if (latestSessionId) params.set('latestSessionId', latestSessionId);
+            return `?${params.toString()}`;
+        }
+
+        async function loadComparison(options = {}) {
+            const {
+                baselineSessionId = state.currentBaselineSessionId,
+                latestSessionId = state.currentLatestSessionId,
+                includeTimeline = true,
+                timelineLimit = null
+            } = options;
+
             const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading comparison data...</p>
+                </div>
+            `;
 
             try {
-                const response = await fetch(`/api/compare/${clientId}/${testId}`);
+                const params = new URLSearchParams();
+                if (baselineSessionId) params.set('baselineSessionId', baselineSessionId);
+                if (latestSessionId) params.set('latestSessionId', latestSessionId);
+                if (!includeTimeline) params.set('includeTimeline', 'false');
+                if (timelineLimit) params.set('timelineLimit', String(timelineLimit));
 
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to load comparison data');
+                const query = params.toString();
+                const url = `/api/compare/${clientId}/${testId}${query ? `?${query}` : ''}`;
+                const response = await fetch(url);
+
+                let payload = null;
+                try {
+                    payload = await response.json();
+                } catch (parseError) {
+                    throw new Error('Failed to parse comparison response');
                 }
 
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.error || 'Failed to load comparison data');
+                }
 
-                if (!data.baseline || !data.latest) {
-                    contentDiv.innerHTML = `
-                        <div class="no-sessions">
-                            <h2>Not Enough Sessions</h2>
-                            <p>At least 2 sessions are required for comparison.</p>
-                            <p>Found: ${data.sessionCount || 0} session(s)</p>
-                        </div>
-                    `;
+                if (!payload.baseline || !payload.latest) {
+                    renderNoSessions(payload);
                     return;
                 }
 
-                renderComparison(data);
+                if (payload.timeline) {
+                    state.timelineCache = payload.timeline;
+                } else if (state.timelineCache) {
+                    payload.timeline = state.timelineCache;
+                }
 
+                state.currentBaselineSessionId = payload.baseline.sessionId;
+                state.currentLatestSessionId = payload.latest.sessionId;
+                state.lastData = payload;
+
+                renderComparison(payload);
             } catch (error) {
                 contentDiv.innerHTML = `
                     <div class="error-message">
                         <h2>Error Loading Comparison</h2>
-                        <p>${error.message}</p>
+                        <p>${escapeHtml(error.message)}</p>
                     </div>
                 `;
             }
         }
 
+        function renderNoSessions(data) {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = `
+                <div class="no-sessions">
+                    <h2>Not Enough Sessions</h2>
+                    <p>At least 2 sessions are required for comparison.</p>
+                    <p>Found: ${data.sessionCount || 0} session(s)</p>
+                </div>
+            `;
+        }
+
         function renderComparison(data) {
             const contentDiv = document.getElementById('content');
-            const summary = data.summary;
+            const summary = data.summary || {};
+            const overallStatus = summary.overallStatus || 'pass';
+            const overallClass = getStatusClass(overallStatus, 'overall');
 
-            let overallClass = 'overall-pass';
-            if (summary.overallStatus === 'warn') overallClass = 'overall-warn';
-            if (summary.overallStatus === 'fail') overallClass = 'overall-fail';
+            const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+            const pairOptions = sessions.map((session) => {
+                const label = `${session.sessionId} | ${new Date(session.startTime).toLocaleString()} | ${session.commandCount} step(s)`;
+                return `<option value="${escapeHtml(session.sessionId)}">${escapeHtml(label)}</option>`;
+            }).join('');
 
-            let html = `
+            const baselineSession = data.baseline || {};
+            const latestSession = data.latest || {};
+
+            const html = `
                 <div class="summary-header">
-                    <h1 class="glitch" data-text="VISUAL REGRESSION COMPARE">VISUAL REGRESSION COMPARE</h1>
-                    <div class="subtitle">${clientId} / ${testId}</div>
+                    <h1 class="glitch" data-text="VISUAL REGRESSION ANALYSIS">VISUAL REGRESSION ANALYSIS</h1>
+                    <div class="subtitle">${escapeHtml(clientId)} / ${escapeHtml(testId)}</div>
 
-                    <div class="session-info">
+                    <div class="pair-details">
                         <div class="session-box baseline">
-                            <div class="session-label baseline">BASELINE</div>
-                            <div><strong>Session:</strong> ${data.baseline.sessionId}</div>
-                            <div><strong>Date:</strong> ${new Date(data.baseline.startTime).toLocaleString()}</div>
-                            <div><strong>Steps:</strong> ${data.baseline.commandCount}</div>
+                            <div class="session-label baseline">Baseline Session</div>
+                            <div><strong>ID:</strong> ${escapeHtml(baselineSession.sessionId)}</div>
+                            <div><strong>Date:</strong> ${escapeHtml(formatDate(baselineSession.startTime))}</div>
+                            <div><strong>Steps:</strong> ${baselineSession.commandCount || 0}</div>
                         </div>
                         <div class="session-box latest">
-                            <div class="session-label latest">LATEST</div>
-                            <div><strong>Session:</strong> ${data.latest.sessionId}</div>
-                            <div><strong>Date:</strong> ${new Date(data.latest.startTime).toLocaleString()}</div>
-                            <div><strong>Steps:</strong> ${data.latest.commandCount}</div>
+                            <div class="session-label latest">Compared Session</div>
+                            <div><strong>ID:</strong> ${escapeHtml(latestSession.sessionId)}</div>
+                            <div><strong>Date:</strong> ${escapeHtml(formatDate(latestSession.startTime))}</div>
+                            <div><strong>Steps:</strong> ${latestSession.commandCount || 0}</div>
                         </div>
                     </div>
 
                     <div class="summary-stats">
                         <div class="stat-item">
-                            <div class="stat-label">Overall Status</div>
-                            <div class="stat-value ${overallClass}">${summary.overallStatus.toUpperCase()}</div>
+                            <div class="stat-label">Selected Pair Status</div>
+                            <div class="stat-value ${overallClass}">${escapeHtml(overallStatus.toUpperCase())}</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-label">Total Steps</div>
-                            <div class="stat-value">${summary.totalSteps}</div>
+                            <div class="stat-label">Significant Changes</div>
+                            <div class="stat-value">${summary.significantChangedSteps ?? summary.changedSteps ?? 0}</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-label">Changed Steps</div>
-                            <div class="stat-value">${summary.changedSteps}</div>
+                            <div class="stat-label">Minor Image Changes</div>
+                            <div class="stat-value">${summary.minorChangedSteps ?? 0}</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-label">Max Diff %</div>
-                            <div class="stat-value">${summary.maxDiffPercent.toFixed(2)}%</div>
+                            <div class="stat-label">DOM Changes</div>
+                            <div class="stat-value">${summary.domChangedSteps ?? 0}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Max Visual Diff</div>
+                            <div class="stat-value">${formatPercent(summary.maxDiffPercent ?? 0)}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Max Strict Diff</div>
+                            <div class="stat-value">${formatPercent(summary.maxStrictDiffPercent ?? 0)}</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="steps-container">
-                    ${data.steps.map((step, idx) => renderStep(step, idx, data)).join('')}
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Pair Selection</h2>
+                        <div class="controls-row">
+                            <div class="control-field">
+                                <label for="pair-baseline">Baseline Session</label>
+                                <select id="pair-baseline">${pairOptions}</select>
+                            </div>
+                            <div class="control-field">
+                                <label for="pair-latest">Compared Session</label>
+                                <select id="pair-latest">${pairOptions}</select>
+                            </div>
+                            <button class="control-btn" onclick="applyPairSelection()">Compare Pair</button>
+                            <button class="control-btn" onclick="refreshComparison()">Refresh Timeline</button>
+                        </div>
+                    </div>
+                    <div style="padding: 12px 18px; font-size: 12px; color: var(--text-secondary);">
+                        Broad view compares each run against its immediately previous run. Deep view below shows per-step image + DOM deltas for the selected pair.
+                    </div>
                 </div>
+
+                ${renderTimelinePanel(data)}
+                ${renderDetailsPanel(data)}
             `;
 
             contentDiv.innerHTML = html;
 
-            // Set up event listeners
-            setupEventListeners();
-        }
-
-        function renderStep(step, idx, data) {
-            let badgeClass = 'step-pass';
-            let badgeText = step.diffPercent.toFixed(2) + '%';
-
-            if (step.error) {
-                badgeClass = 'step-error';
-                badgeText = 'ERROR';
-            } else if (step.diffPercent >= 5) {
-                badgeClass = 'step-fail';
-            } else if (step.diffPercent >= 1) {
-                badgeClass = 'step-warn';
+            const baselineSelect = document.getElementById('pair-baseline');
+            const latestSelect = document.getElementById('pair-latest');
+            if (baselineSelect && latestSelect) {
+                baselineSelect.value = data.baseline.sessionId;
+                latestSelect.value = data.latest.sessionId;
             }
 
-            const baselineUrl = step.baselineScreenshot ?
-                `/rabbitize-runs/${clientId}/${testId}/${data.baseline.sessionId}/screenshots/${step.baselineScreenshot}` : null;
-            const latestUrl = step.latestScreenshot ?
-                `/rabbitize-runs/${clientId}/${testId}/${data.latest.sessionId}/screenshots/${step.latestScreenshot}` : null;
-            const diffUrl = `/api/compare/${clientId}/${testId}/diff/${step.index}`;
+            const changedToggle = document.getElementById('changed-only-toggle');
+            if (changedToggle) {
+                changedToggle.checked = state.onlyChanged;
+            }
+
+            document.addEventListener('keydown', handleEscapeClose, { once: true });
+        }
+
+        function renderTimelinePanel(data) {
+            const timeline = data.timeline;
+            const comparisons = timeline && Array.isArray(timeline.comparisons)
+                ? timeline.comparisons
+                : [];
+
+            if (comparisons.length === 0) {
+                return `
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Run Timeline</h2>
+                        </div>
+                        <div style="padding: 16px; font-size: 12px; color: var(--text-secondary);">
+                            No historical run-to-run comparisons available yet.
+                        </div>
+                    </div>
+                `;
+            }
+
+            const rows = comparisons.map((row) => {
+                const rowStatus = row.summary?.overallStatus || 'pass';
+                const rowStatusClass = getStatusClass(rowStatus);
+                const isActive =
+                    row.baselineSessionId === data.baseline.sessionId &&
+                    row.latestSessionId === data.latest.sessionId;
+
+                return `
+                    <tr class="${isActive ? 'active-row' : ''}">
+                        <td>${escapeHtml(formatDate(row.latestStartTime))}</td>
+                        <td>${escapeHtml(row.baselineSessionId)}</td>
+                        <td>${escapeHtml(row.latestSessionId)}</td>
+                        <td class="timeline-status ${rowStatusClass}">${escapeHtml(rowStatus.toUpperCase())}</td>
+                        <td>${row.summary?.changedSteps ?? 0}</td>
+                        <td>${row.summary?.minorChangedSteps ?? 0}</td>
+                        <td>${formatPercent(row.summary?.maxDiffPercent ?? 0)}</td>
+                        <td>${formatPercent(row.summary?.maxStrictDiffPercent ?? 0)}</td>
+                        <td>${formatPercent(row.summary?.avgDiffPercent ?? 0)}</td>
+                        <td>
+                            <button
+                                class="inspect-btn"
+                                data-baseline="${escapeHtml(row.baselineSessionId)}"
+                                data-latest="${escapeHtml(row.latestSessionId)}"
+                                onclick="inspectPair(this.dataset.baseline, this.dataset.latest)">
+                                [ INSPECT ]
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            return `
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Run Timeline (${comparisons.length} Pair Comparison${comparisons.length !== 1 ? 's' : ''})</h2>
+                    </div>
+                    <div class="timeline-table-wrap">
+                        <table class="timeline-table">
+                            <thead>
+                                <tr>
+                                    <th>Compared Run Time</th>
+                                    <th>Baseline Session</th>
+                                    <th>Compared Session</th>
+                                    <th>Status</th>
+                                    <th>Significant</th>
+                                    <th>Minor</th>
+                                    <th>Max Visual</th>
+                                    <th>Max Strict</th>
+                                    <th>Avg Visual</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                    <div class="meta-note" style="padding: 10px 16px 16px;">
+                        Visual diff uses thresholded pixelmatch. Strict diff counts any pixel-channel changes to expose subtle image drift.
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDetailsPanel(data) {
+            const steps = Array.isArray(data.steps) ? data.steps : [];
+            const visibleSteps = state.onlyChanged
+                ? steps.filter((step) => step.hasAnyChange || step.hasDomChange)
+                : steps;
+
+            const summary = data.summary || {};
+
+            return `
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Deep Dive: Step-Level Diff (${visibleSteps.length}/${steps.length} shown)</h2>
+                        <div class="step-controls">
+                            <label>
+                                <input id="changed-only-toggle" type="checkbox" onchange="toggleChangedOnly(this.checked)">
+                                Show changed steps only
+                            </label>
+                        </div>
+                    </div>
+                    <div style="padding: 12px 16px; font-size: 12px; color: var(--text-secondary); border-bottom: 1px solid rgba(0,255,255,0.2);">
+                        Compared image steps: ${summary.comparedImageSteps ?? 0} | Missing screenshots: ${summary.missingSteps ?? 0} | Error steps: ${summary.erroredSteps ?? 0} |
+                        Avg visual diff: ${formatPercent(summary.avgDiffPercent ?? 0)} | Avg strict diff: ${formatPercent(summary.avgStrictDiffPercent ?? 0)}
+                    </div>
+                    <div class="steps-container" style="padding: 12px;">
+                        ${visibleSteps.length > 0
+                            ? visibleSteps.map((step) => renderStepCard(step, data)).join('')
+                            : '<div class="step-missing">No steps match the current filter.</div>'
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderStepCard(step, data) {
+            const stepStatus = step.stepStatus || 'pass';
+            const badgeClass = getStatusClass(stepStatus, 'step');
+
+            let badgeText = formatPercent(step.diffPercent);
+            if (step.error) {
+                badgeText = 'ERROR';
+            } else if (step.missingScreenshots) {
+                badgeText = 'MISSING';
+            }
+
+            const pairQuery = buildPairQuery(data.baseline.sessionId, data.latest.sessionId);
+            const baselineUrl = step.baselineScreenshot
+                ? `/rabbitize-runs/${clientId}/${testId}/${data.baseline.sessionId}/screenshots/${step.baselineScreenshot}`
+                : null;
+            const latestUrl = step.latestScreenshot
+                ? `/rabbitize-runs/${clientId}/${testId}/${data.latest.sessionId}/screenshots/${step.latestScreenshot}`
+                : null;
+            const diffUrl = `/api/compare/${clientId}/${testId}/diff/${step.index}${pairQuery}`;
+            const domDiffUrl = `/api/compare/${clientId}/${testId}/dom-diff/${step.index}${pairQuery}`;
 
             return `
                 <div class="step-card" data-step="${step.index}">
                     <div class="step-header">
                         <div class="step-title">
                             <strong>Step ${step.index}:</strong>
-                            <span class="step-command">${escapeHtml(step.command || 'Unknown')}</span>
+                            <span class="step-command">${escapeHtml(step.command || 'Unknown command')}</span>
                         </div>
-                        <span class="step-badge ${badgeClass}">${badgeText}</span>
+                        <div class="step-badge-wrap">
+                            <span class="step-badge ${badgeClass}">${escapeHtml(badgeText)}</span>
+                            <div class="step-meta">
+                                visual: ${formatPercent(step.diffPercent)}<br>
+                                strict: ${formatPercent(step.strictDiffPercent)}<br>
+                                mean delta: ${formatPercent(step.meanDeltaPercent)}<br>
+                                DOM: ${step.hasDomChange ? 'changed' : 'same'}
+                            </div>
+                        </div>
                     </div>
 
                     ${(baselineUrl && latestUrl) ? `
@@ -550,36 +1028,36 @@
                             <img src="${baselineUrl}" alt="Baseline" onclick="openLightbox(this.src)" loading="lazy">
                         </div>
                         <div class="image-panel">
-                            <div class="image-label">Diff Overlay</div>
+                            <div class="image-label">Overlay View</div>
                             <div class="diff-overlay-wrapper">
-                                <img src="${latestUrl}" alt="With diff overlay" onclick="openLightbox('${diffUrl}')" loading="lazy">
+                                <img src="${latestUrl}" alt="Latest with optional diff overlay" onclick="openLightbox('${diffUrl}')" loading="lazy">
                                 <img src="${diffUrl}" alt="Diff" class="diff-overlay-img" data-step="${step.index}" loading="lazy">
                             </div>
                         </div>
                         <div class="image-panel">
-                            <div class="image-label">Latest</div>
-                            <img src="${latestUrl}" alt="Latest" onclick="openLightbox(this.src)" loading="lazy">
+                            <div class="image-label">Compared</div>
+                            <img src="${latestUrl}" alt="Compared" onclick="openLightbox(this.src)" loading="lazy">
                         </div>
                     </div>
 
                     <div class="diff-toggle-container">
                         <label class="diff-toggle">
-                            <input type="checkbox" data-step="${step.index}" onchange="toggleDiffOverlay(${step.index}, this.checked)">
+                            <input type="checkbox" onchange="toggleDiffOverlay(${step.index}, this.checked)">
                             <span class="diff-toggle-slider"></span>
-                            Show Diff Overlay
+                            Show diff overlay on compared image
                         </label>
                     </div>
                     ` : `
                     <div class="step-missing">
-                        ${!baselineUrl ? 'Baseline screenshot missing' : ''}
-                        ${!latestUrl ? 'Latest screenshot missing' : ''}
+                        ${!baselineUrl ? 'Baseline screenshot missing. ' : ''}
+                        ${!latestUrl ? 'Compared screenshot missing.' : ''}
                     </div>
                     `}
 
                     <div class="dom-diff-section">
-                        <div class="dom-diff-header" onclick="toggleDomDiff(${step.index})">
-                            <span>DOM Changes ${step.hasDomChange ? '(changes detected)' : '(no changes)'}</span>
-                            <span class="dom-diff-arrow">&#9660;</span>
+                        <div class="dom-diff-header" onclick="toggleDomDiff(${step.index}, '${domDiffUrl}')">
+                            <span>DOM diff ${step.hasDomChange ? '(changes detected)' : '(no changes detected)'}</span>
+                            <span>&#9660;</span>
                         </div>
                         <div class="dom-diff-content" id="dom-diff-${step.index}" data-loaded="false"></div>
                     </div>
@@ -587,63 +1065,102 @@
             `;
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+        window.applyPairSelection = function() {
+            const baseline = document.getElementById('pair-baseline')?.value;
+            const latest = document.getElementById('pair-latest')?.value;
 
-        function toggleDiffOverlay(stepIndex, show) {
+            if (!baseline || !latest) {
+                return;
+            }
+
+            if (baseline === latest) {
+                alert('Baseline and compared sessions must be different.');
+                return;
+            }
+
+            loadComparison({
+                baselineSessionId: baseline,
+                latestSessionId: latest,
+                includeTimeline: false
+            });
+        };
+
+        window.inspectPair = function(baselineSessionId, latestSessionId) {
+            if (!baselineSessionId || !latestSessionId || baselineSessionId === latestSessionId) {
+                return;
+            }
+
+            loadComparison({
+                baselineSessionId,
+                latestSessionId,
+                includeTimeline: false
+            });
+        };
+
+        window.refreshComparison = function() {
+            loadComparison({
+                baselineSessionId: state.currentBaselineSessionId,
+                latestSessionId: state.currentLatestSessionId,
+                includeTimeline: true
+            });
+        };
+
+        window.toggleChangedOnly = function(enabled) {
+            state.onlyChanged = Boolean(enabled);
+            if (state.lastData) {
+                renderComparison(state.lastData);
+            }
+        };
+
+        window.toggleDiffOverlay = function(stepIndex, show) {
             const overlay = document.querySelector(`.diff-overlay-img[data-step="${stepIndex}"]`);
             if (overlay) {
                 overlay.classList.toggle('visible', show);
             }
-        }
+        };
 
-        async function toggleDomDiff(stepIndex) {
+        window.toggleDomDiff = async function(stepIndex, domDiffUrl) {
             const content = document.getElementById(`dom-diff-${stepIndex}`);
+            if (!content) return;
+
             const isExpanded = content.classList.contains('expanded');
 
             if (!isExpanded && content.dataset.loaded === 'false') {
-                // Load DOM diff content
                 content.innerHTML = '<div class="loading">Loading...</div>';
                 content.classList.add('expanded');
 
                 try {
-                    const response = await fetch(`/api/compare/${clientId}/${testId}/dom-diff/${stepIndex}`);
+                    const response = await fetch(domDiffUrl);
                     const html = await response.text();
                     content.innerHTML = html;
                     content.dataset.loaded = 'true';
                 } catch (error) {
-                    content.innerHTML = '<div class="error">Failed to load DOM diff</div>';
+                    content.innerHTML = '<div class="dom-diff-empty">Failed to load DOM diff</div>';
                 }
             } else {
                 content.classList.toggle('expanded');
             }
-        }
+        };
 
-        function openLightbox(src) {
+        window.openLightbox = function(src) {
             const lightbox = document.getElementById('lightbox');
-            const img = document.getElementById('lightbox-img');
-            img.src = src;
+            const image = document.getElementById('lightbox-img');
+            image.src = src;
             lightbox.classList.add('active');
+        };
+
+        function handleEscapeClose(event) {
+            if (event.key === 'Escape') {
+                closeLightbox();
+            }
+            document.addEventListener('keydown', handleEscapeClose, { once: true });
         }
 
-        function closeLightbox() {
+        window.closeLightbox = function() {
             document.getElementById('lightbox').classList.remove('active');
-        }
+        };
 
-        function setupEventListeners() {
-            // Close lightbox with Escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeLightbox();
-                }
-            });
-        }
-
-        // Load comparison on page load
-        loadComparison();
+        loadComparison({ includeTimeline: true });
     </script>
     <script src="/resources/streaming/dock.js"></script>
     <script src="/resources/streaming/themes/theme-switcher.js"></script>
