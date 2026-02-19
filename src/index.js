@@ -332,7 +332,7 @@ async function main() {
         res.sendFile(path.join(__dirname, '..', 'resources', 'streaming', 'login.html'));
       });
 
-      app.post('/api/login', (req, res) => {
+      app.post('/api/login', express.json({ limit: '1mb' }), (req, res) => {
         const { password } = req.body || {};
         if (password === RABBITIZE_PASSWORD) {
           const token = crypto.randomBytes(32).toString('hex');
