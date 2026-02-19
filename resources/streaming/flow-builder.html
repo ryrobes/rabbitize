@@ -124,6 +124,7 @@
                         <h4>Input</h4>
                         <div class="command-buttons">
                             <button class="cmd-btn" data-command="type" disabled>⌨️ Type Text</button>
+                            <button class="cmd-btn" data-command="input" disabled>⌨️ Input Text</button>
                             <button class="cmd-btn" data-command="key" disabled>⌨️ Key Press</button>
                             <button class="cmd-btn" data-command="clear" disabled>🗑️ Clear Field</button>
                         </div>
@@ -869,6 +870,7 @@
             // Set title based on command
             const titles = {
                 'type': 'Type Text',
+                'input': 'Input Text',
                 'key': 'Press Key',
                 'wait': 'Wait Duration',
                 'viewport': 'Set Viewport Size',
@@ -882,11 +884,13 @@
             let inputsHTML = '';
             switch(commandType) {
                 case 'type':
+                case 'input':
+                    const isWholeStringInput = commandType === 'input';
                     inputsHTML = `
                         <div class="param-input-group">
-                            <label>Text to Type</label>
+                            <label>${isWholeStringInput ? 'Text to Input' : 'Text to Type'}</label>
                             <textarea id="param-text" rows="3" placeholder="Enter text to type..." autofocus></textarea>
-                            <div class="input-hint">The text will be typed character by character</div>
+                            <div class="input-hint">${isWholeStringInput ? 'The full string will be entered in one command' : 'The text will be typed character by character'}</div>
                         </div>
                     `;
                     break;
@@ -1004,6 +1008,12 @@
                         executeCommandWithParams('type', commands);
                     }
                     break;
+                case 'input':
+                    const inputText = document.getElementById('param-text').value;
+                    if (inputText) {
+                        executeCommandWithParams('input', [[':type', inputText]]);
+                    }
+                    break;
                 case 'key':
                     const key = document.getElementById('param-key').value;
                     executeCommandWithParams('key', [[':keypress', key]]);
@@ -1071,7 +1081,7 @@
             if (!sessionActive || isExecuting) return;
 
             // Check if command needs parameters
-            const needsParams = ['type', 'key', 'wait', 'viewport', 'clear', 'set-upload-file', 'set-download-path'].includes(commandType);
+            const needsParams = ['type', 'input', 'key', 'wait', 'viewport', 'clear', 'set-upload-file', 'set-download-path'].includes(commandType);
             if (needsParams) {
                 showParamModal(commandType);
                 return;

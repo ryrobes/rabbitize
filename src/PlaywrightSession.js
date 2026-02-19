@@ -1924,23 +1924,49 @@ class PlaywrightSession {
             break;
 
           case ':keypress':
-            const [_keypress, key] = command;
-            if (key.includes('-')) {
-              // Handle key combinations (e.g., "Control-P", "Shift-P")
-              const [modifier, mainKey] = key.split('-');
+            const [_keypress, rawKey] = command;
+            const key = rawKey === undefined || rawKey === null ? '' : String(rawKey);
+            if (!key) {
+              break;
+            }
+
+            const comboMatch = key.match(/^(Control|Ctrl|Alt|Shift|Meta|Command|Cmd|Option)[-+](.+)$/i);
+            if (comboMatch) {
+              const [, rawModifier, mainKey] = comboMatch;
+              const modifierMap = {
+                control: 'Control',
+                ctrl: 'Control',
+                alt: 'Alt',
+                shift: 'Shift',
+                meta: 'Meta',
+                command: 'Meta',
+                cmd: 'Meta',
+                option: 'Alt'
+              };
+              const modifier = modifierMap[rawModifier.toLowerCase()] || rawModifier;
+
               try {
                 await this.page.keyboard.down(modifier);
                 await this.page.keyboard.press(mainKey);
-                await this.page.keyboard.up(modifier);
-              } catch (e) {
-                console.debug('Key combination failed:', e);
-                // Make sure modifier key is released even if there's an error
-                await this.page.keyboard.up(modifier);
+              } finally {
+                try {
+                  await this.page.keyboard.up(modifier);
+                } catch (releaseError) {
+                  console.debug('Modifier release failed:', releaseError);
+                }
               }
             } else {
-              // Handle single keys as before
               await this.page.keyboard.press(key);
             }
+            break;
+
+          case ':type':
+            const [_type, rawText] = command;
+            const text = rawText === undefined || rawText === null ? '' : String(rawText);
+            if (!text) {
+              break;
+            }
+            await this.page.keyboard.type(text);
             break;
 
           case ':click-hold':

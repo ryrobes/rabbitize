@@ -45,6 +45,59 @@ function authMiddleware(req, res, next) {
   res.redirect('/login');
 }
 
+const NUMERIC_STRING_RE = /^-?\d+\.?\d*$/;
+const NUMERIC_ARG_INDEXES_BY_COMMAND = {
+  ':wait': [1],
+  ':move-mouse': [2, 3],
+  ':click': [3, 4],
+  ':right-click': [3, 4],
+  ':middle-click': [3, 4],
+  ':click-hold': [3, 4],
+  ':click-release': [3, 4],
+  ':right-click-hold': [3, 4],
+  ':right-click-release': [3, 4],
+  ':middle-click-hold': [3, 4],
+  ':middle-click-release': [3, 4],
+  ':drag': [2, 3, 5, 6],
+  ':start-drag': [2, 3],
+  ':end-drag': [2, 3],
+  ':scroll-wheel-up': [1],
+  ':scroll-wheel-down': [1],
+  ':width': [1],
+  ':height': [1],
+  ':extract': [1, 2, 3, 4],
+  ':rabbit-eyes': [1, 2, 3, 4],
+  ':rabbit-eyes-DISABLED': [1, 2, 3, 4]
+};
+
+function normalizeCommandTypes(command) {
+  if (!Array.isArray(command) || command.length === 0) {
+    return command;
+  }
+
+  const commandType = command[0];
+  if (typeof commandType !== 'string') {
+    return command;
+  }
+
+  const numericIndexes = NUMERIC_ARG_INDEXES_BY_COMMAND[commandType];
+  if (!numericIndexes) {
+    return command;
+  }
+
+  return command.map((item, index) => {
+    if (!numericIndexes.includes(index)) {
+      return item;
+    }
+
+    if (typeof item === 'string' && NUMERIC_STRING_RE.test(item)) {
+      return Number(item);
+    }
+
+    return item;
+  });
+}
+
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))
   .option('client-id', {
@@ -620,13 +673,7 @@ async function main() {
           if (!Array.isArray(command)) {
             throw new Error('Command must be an array');
           }
-          // Type conversion for numeric values
-          const typedCommand = command.map(item => {
-            if (typeof item === 'string' && item.match(/^-?\d+\.?\d*$/)) {
-              return Number(item);
-            }
-            return item;
-          });
+          const typedCommand = normalizeCommandTypes(command);
           queueManager.enqueue('execute', { command: typedCommand });
         }
 
@@ -655,13 +702,7 @@ async function main() {
           });
         }
 
-        // Type conversion for numeric values
-        const typedCommand = command.map(item => {
-          if (typeof item === 'string' && item.match(/^-?\d+\.?\d*$/)) {
-            return Number(item);
-          }
-          return item;
-        });
+        const typedCommand = normalizeCommandTypes(command);
 
         // Don't await, just queue and respond
         queueManager.enqueue('execute', { command: typedCommand });
@@ -698,13 +739,7 @@ async function main() {
 
         // Queue each command in sequence
         for (const command of commands) {
-          // Type conversion for numeric values
-          const typedCommand = command.map(item => {
-            if (typeof item === 'string' && item.match(/^-?\d+\.?\d*$/)) {
-              return Number(item);
-            }
-            return item;
-          });
+          const typedCommand = normalizeCommandTypes(command);
 
           // Queue the command
           queueManager.enqueue('execute', { command: typedCommand });
@@ -3045,4 +3080,3 @@ main().catch(error => {
   console.error('Application failed:', error);
   process.exit(1);
 });
-
