@@ -3,171 +3,305 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rabbitize - Login</title>
+  <title>RABBITIZE /// LOGIN</title>
+  <link rel="stylesheet" href="/resources/streaming/themes/theme-variables.css">
+  <link rel="stylesheet" href="/resources/streaming/themes/theme-styles.css">
+  <link rel="stylesheet" href="/resources/streaming/cyberpunk.css">
+  <link rel="stylesheet" href="/resources/streaming/themes/theme-switcher.css">
+  <link rel="icon" type="image/x-icon" href="/resources/streaming/favicon.png">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: #0d0d0d;
-      color: #e0e0e0;
-      font-family: 'Courier New', Courier, monospace;
+    body.login-page {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
+      padding: 24px;
     }
 
-    .container {
-      width: 100%;
-      max-width: 400px;
-      padding: 2rem;
+    .login-shell {
+      width: min(980px, 100%);
+      position: relative;
+      z-index: 2;
     }
 
-    .logo {
-      text-align: center;
-      margin-bottom: 2.5rem;
+    .auth-header {
+      margin-bottom: 22px;
     }
 
-    .logo pre {
-      display: inline-block;
-      font-size: 0.6rem;
-      line-height: 1.1;
-      color: #7c3aed;
+    .login-grid {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.3fr) minmax(300px, 1fr);
+      gap: 22px;
+    }
+
+    .brand-panel,
+    .auth-panel {
+      position: relative;
+      border: 1px solid var(--border-primary);
+      background: linear-gradient(165deg, var(--bg-surface), var(--bg-base));
+      box-shadow: 0 0 24px var(--glow-primary);
+      padding: 22px;
+      overflow: hidden;
+    }
+
+    .brand-panel::before,
+    .auth-panel::before {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      width: 22px;
+      height: 22px;
+      border-top: 1px solid var(--color-accent);
+      border-left: 1px solid var(--color-accent);
+      pointer-events: none;
+    }
+
+    .brand-panel::after,
+    .auth-panel::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      bottom: -1px;
+      width: 22px;
+      height: 22px;
+      border-right: 1px solid var(--color-accent);
+      border-bottom: 1px solid var(--color-accent);
+      pointer-events: none;
+    }
+
+    .ascii-wordmark {
+      margin: 0;
+      padding: 14px 16px;
+      border: 1px solid var(--border-primary);
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text-primary);
+      font-family: "Cousine", "Red Hat Mono", "JetBrains Mono", "Ubuntu Sans Mono", "Consolas", "Menlo", monospace;
+      font-size: clamp(0.48rem, 0.92vw, 0.74rem);
+      line-height: 1.08;
       letter-spacing: 0;
+      white-space: pre;
+      overflow-x: auto;
+      overflow-y: hidden;
+      tab-size: 2;
+      font-variant-ligatures: none;
+      text-rendering: optimizeSpeed;
+      text-shadow: 0 0 10px var(--glow-primary);
     }
 
-    .logo-subtitle {
-      color: #666;
-      font-size: 0.75rem;
-      margin-top: 0.5rem;
-      letter-spacing: 0.15em;
+    .ascii-wordmark::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .ascii-wordmark::-webkit-scrollbar-thumb {
+      background: var(--color-primary);
+    }
+
+    .brand-tagline {
+      margin-top: 14px;
+      font-size: 0.82rem;
+      letter-spacing: 0.22em;
+      color: var(--color-secondary);
       text-transform: uppercase;
+      text-align: center;
     }
 
-    .card {
-      background: #161616;
-      border: 1px solid #2a2a2a;
-      border-radius: 8px;
-      padding: 2rem;
+    .brand-copy {
+      margin-top: 14px;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.55;
     }
 
-    .card h2 {
-      font-size: 0.85rem;
-      color: #888;
-      letter-spacing: 0.1em;
+    .auth-panel h2 {
+      margin: 0 0 16px;
       text-transform: uppercase;
-      margin-bottom: 1.5rem;
-    }
-
-    label {
-      display: block;
-      font-size: 0.75rem;
-      color: #666;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 0.4rem;
-    }
-
-    input[type="password"] {
-      width: 100%;
-      background: #0d0d0d;
-      border: 1px solid #2a2a2a;
-      border-radius: 4px;
-      color: #e0e0e0;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 1rem;
-      padding: 0.65rem 0.85rem;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    input[type="password"]:focus {
-      border-color: #7c3aed;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 1.25rem;
-      padding: 0.7rem;
-      background: #7c3aed;
-      border: none;
-      border-radius: 4px;
-      color: #fff;
-      font-family: 'Courier New', Courier, monospace;
+      letter-spacing: 0.14em;
       font-size: 0.9rem;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: background 0.15s;
+      color: var(--text-secondary);
     }
 
-    button:hover { background: #6d28d9; }
-    button:active { background: #5b21b6; }
-    button:disabled { background: #333; cursor: not-allowed; }
+    .field-label {
+      display: block;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
 
-    .error {
-      margin-top: 1rem;
-      padding: 0.6rem 0.85rem;
-      background: #2a0a0a;
-      border: 1px solid #5c1a1a;
-      border-radius: 4px;
-      color: #f87171;
-      font-size: 0.8rem;
+    .password-input {
+      width: 100%;
+      border: 1px solid var(--border-secondary);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      padding: 12px 14px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      font-family: "JetBrains Mono", "Cousine", "Consolas", "Menlo", monospace;
+      letter-spacing: 0.04em;
+    }
+
+    .password-input:focus {
+      border-color: var(--border-primary);
+      box-shadow: 0 0 16px var(--glow-primary);
+    }
+
+    .login-btn {
+      width: 100%;
+      margin-top: 14px;
+      border: 1px solid var(--border-primary);
+      background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+      color: var(--bg-base);
+      padding: 11px 14px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      font-family: "Kanit", "JetBrains Mono", sans-serif;
+    }
+
+    .login-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 0 20px var(--glow-secondary);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-error {
+      margin-top: 14px;
       display: none;
+      border: 1px solid var(--color-error);
+      background: rgba(255, 0, 0, 0.12);
+      color: var(--color-error);
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      letter-spacing: 0.03em;
+    }
+
+    @media (max-width: 900px) {
+      .login-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .auth-header h1 {
+        font-size: clamp(1.2rem, 4.8vw, 1.9rem);
+        letter-spacing: 0.15em;
+      }
+    }
+
+    @media (max-width: 520px) {
+      body.login-page {
+        padding: 14px;
+      }
+
+      .auth-header {
+        padding: 14px;
+      }
+
+      .brand-panel,
+      .auth-panel {
+        padding: 16px;
+      }
+
+      .ascii-wordmark {
+        font-size: clamp(0.42rem, 2.1vw, 0.62rem);
+      }
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="logo">
-      <pre>
- ____  ____  ____  ____  ____  ____  ____  ____
-|    \|    ||    \|    ||  \/  ||  _ \|__  /| ___|
-| |_) ) () || |_) ) () || |\/| || |_) ) / / |  _|
-|_|__/ \__/ |_|__/ \__/ |_|  |_||_|__/ /_/  |___|
-      </pre>
-      <div class="logo-subtitle">Point. Click. Rabbitize.</div>
-    </div>
+<body class="login-page">
+  <main class="login-shell">
+    <header class="header auth-header">
+      <h1 class="glitch" data-text="RABBITIZE /// AUTH">RABBITIZE /// AUTH</h1>
+      <div class="subtitle">SECURE ACCESS FOR ACTIVE SESSIONS</div>
+    </header>
 
-    <div class="card">
-      <h2>Access Required</h2>
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter password" autofocus>
-      <button id="loginBtn" onclick="login()">Sign In</button>
-      <div class="error" id="error">Incorrect password. Please try again.</div>
-    </div>
-  </div>
+    <div class="login-grid">
+      <section class="brand-panel">
+        <pre class="ascii-wordmark" aria-label="Rabbitize wordmark">  ____      _    ____  ____ ___ _____ ___ __________ 
+ |  _ \    / \  | __ )| __ )_ _|_   _|_ _|__  / ____|
+ | |_) |  / _ \ |  _ \|  _ \| |  | |  | |  / /|  _|  
+ |  _ <  / ___ \| |_) | |_) | |  | |  | | / /_| |___ 
+ |_| \_\/_/   \_\____/|____/___| |_| |___/____|_____|</pre>
+        <div class="brand-tagline">Point. Click. Rabbitize.</div>
+        <p class="brand-copy">
+          Enter your access password to continue to streaming, session playback, and flow builder controls.
+        </p>
+      </section>
 
+      <section class="auth-panel" aria-labelledby="login-title">
+        <h2 id="login-title">Access Required</h2>
+        <label for="password" class="field-label">Password</label>
+        <input
+          type="password"
+          id="password"
+          class="password-input"
+          placeholder="Enter password"
+          autofocus
+          autocomplete="current-password"
+          spellcheck="false"
+        >
+        <button id="loginBtn" class="login-btn" type="button">Sign In</button>
+        <div class="login-error" id="error" role="alert">Incorrect password. Please try again.</div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/resources/streaming/themes/theme-switcher.js"></script>
   <script>
     const input = document.getElementById('password');
     const btn = document.getElementById('loginBtn');
     const err = document.getElementById('error');
 
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+    btn.addEventListener('click', login);
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        login();
+      }
+    });
 
     async function login() {
       const password = input.value;
-      if (!password) return;
+      if (!password) {
+        return;
+      }
+
       btn.disabled = true;
+      btn.textContent = 'Signing In...';
       err.style.display = 'none';
+
       try {
-        const res = await fetch('/api/login', {
+        const response = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password })
         });
-        if (res.ok) {
+
+        if (response.ok) {
           const params = new URLSearchParams(window.location.search);
           window.location.href = params.get('next') || '/';
-        } else {
-          err.style.display = 'block';
-          input.value = '';
-          input.focus();
-          btn.disabled = false;
+          return;
         }
-      } catch {
+
+        err.textContent = 'Incorrect password. Please try again.';
+        err.style.display = 'block';
+        input.value = '';
+        input.focus();
+      } catch (error) {
         err.textContent = 'Connection error. Please try again.';
         err.style.display = 'block';
+      } finally {
         btn.disabled = false;
+        btn.textContent = 'Sign In';
       }
     }
   </script>
