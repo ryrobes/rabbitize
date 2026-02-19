@@ -372,12 +372,9 @@ async function main() {
       }
 
       const { port: childPort } = global.spawnedSessions.get(proxySessionId);
-      const bodyBuffer = (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0)
-        ? Buffer.from(JSON.stringify(req.body))
-        : null;
-
-      const proxyHeaders = { 'content-type': 'application/json', host: `127.0.0.1:${childPort}` };
-      if (bodyBuffer) proxyHeaders['content-length'] = bodyBuffer.length;
+      const proxyHeaders = { host: `127.0.0.1:${childPort}` };
+      if (req.headers['content-type']) proxyHeaders['content-type'] = req.headers['content-type'];
+      if (req.headers['content-length']) proxyHeaders['content-length'] = req.headers['content-length'];
 
       const proxyReq = require('http').request(
         { hostname: '127.0.0.1', port: childPort, path: childPath, method: req.method, headers: proxyHeaders },
@@ -392,8 +389,14 @@ async function main() {
         else res.end();
       });
 
-      if (bodyBuffer) proxyReq.write(bodyBuffer);
-      proxyReq.end();
+      req.on('aborted', () => proxyReq.destroy());
+
+      if (req.method === 'GET' || req.method === 'HEAD') {
+        proxyReq.end();
+        return;
+      }
+
+      req.pipe(proxyReq);
     });
 
     let server;

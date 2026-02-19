@@ -222,6 +222,9 @@
         const PORT = {{PORT}};
         let FLOW_TEST_ID = '{{FLOW_TEST_ID}}';
         const CLIENT_ID = 'flow-builder';
+        function buildProxyBaseUrl(proxySessionId) {
+            return `/proxy/${proxySessionId}`;
+        }
 
         // State
         let sessionActive = false;
@@ -362,7 +365,7 @@
             
             // Check if the saved session is still valid by attempting to reach it
             try {
-                const savedBaseUrl = `http://${window.location.hostname}:${PORT}/proxy/${savedState.spawnedSessionId}`;
+                const savedBaseUrl = buildProxyBaseUrl(savedState.spawnedSessionId);
                 console.log(`Checking if session ${savedState.spawnedSessionId} is still active...`);
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 1000);
@@ -404,7 +407,7 @@
                 sessionActive = true;
                 sessionId = savedState.sessionId;
                 sessionPort = savedState.sessionPort;
-                sessionBaseUrl = `http://${window.location.hostname}:${PORT}/proxy/${savedState.spawnedSessionId}`;
+                sessionBaseUrl = buildProxyBaseUrl(savedState.spawnedSessionId);
                 spawnedSessionId = savedState.spawnedSessionId;
                 lastCoordinates = savedState.lastCoordinates || { x: 0, y: 0 };
                 streamConnected = false; // Will be set to true when stream connects
@@ -575,7 +578,7 @@
             if (existingState && existingState.sessionActive) {
                 // Try to end the existing session
                 try {
-                    const existingBaseUrl = `http://${window.location.hostname}:${PORT}/proxy/${existingState.spawnedSessionId}`;
+                    const existingBaseUrl = buildProxyBaseUrl(existingState.spawnedSessionId);
                     await fetch(`${existingBaseUrl}/end`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' }
@@ -591,7 +594,7 @@
                 // Note: We don't kill existing sessions - they'll clean themselves up
 
                 // Spawn a new isolated session
-                const response = await fetch(`http://${window.location.hostname}:${PORT}/spawn-session`, {
+                const response = await fetch('/spawn-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -606,7 +609,7 @@
                 const result = await response.json();
                 spawnedSessionId = result.sessionId;
                 sessionPort = result.port;
-                sessionBaseUrl = `http://${window.location.hostname}:${PORT}/proxy/${spawnedSessionId}`;
+                sessionBaseUrl = buildProxyBaseUrl(spawnedSessionId);
 
                 // Wait for the spawned process to be ready
                 await new Promise(resolve => setTimeout(resolve, 1000));
