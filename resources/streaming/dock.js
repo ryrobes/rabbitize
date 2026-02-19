@@ -229,7 +229,8 @@
                 // Reload the page to show imported tests
                 window.location.reload();
             } else {
-                throw new Error(result.error || 'Import failed');
+                const detailMessage = result.details ? ` (${result.details})` : '';
+                throw new Error((result.error || 'Import failed') + detailMessage);
             }
 
         } catch (error) {

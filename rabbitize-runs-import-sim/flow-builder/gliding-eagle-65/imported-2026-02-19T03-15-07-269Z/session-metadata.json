@@ -1,0 +1,18 @@
+{
+  "clientId": "flow-builder",
+  "testId": "gliding-eagle-65",
+  "sessionId": "imported-2026-02-19T03-15-07-269Z",
+  "status": "imported",
+  "phase": "imported",
+  "startTime": 1771470907271,
+  "endTime": 1771470907271,
+  "duration": 0,
+  "initialUrl": "https://staging.acceleratedacademy.cloud/",
+  "commandCount": 35,
+  "totalCommands": 35,
+  "importedFrom": "2026-02-19T02-25-15-460Z",
+  "importedAt": "2026-02-19T03:15:07.271Z",
+  "originalLastRun": "2026-02-19T02:25:17.161Z",
+  "hasVideo": false,
+  "hasScreenshots": false
+}

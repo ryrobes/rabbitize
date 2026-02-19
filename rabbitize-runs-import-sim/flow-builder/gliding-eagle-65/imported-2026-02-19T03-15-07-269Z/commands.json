@@ -1,0 +1,1641 @@
+[
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      1876,
+      1034
+    ],
+    "timestamp": 1771467927758,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/",
+        "title": "Course Selection - Accelerated Academy",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/0-pre-move-mouse.jpg",
+        "timestamp": 1771467927746
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/",
+        "title": "Course Selection - Accelerated Academy",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/0-post-move-mouse.jpg",
+        "timestamp": 1771467929848
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467927747,
+          "cpu": "74.19",
+          "memory": "211.51",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467929856,
+          "cpu": "70.73",
+          "memory": "230.15",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467927606,
+        "end": 1771467929893,
+        "duration": 2287
+      },
+      "domMarkdown": "Accelerated Academy (844)727-3755 🔧 Development / Testing Mode Select Your Course Browse available courses with dynamic application questions configured. State City Program Term Showing 6 courses Reset Florida · Orlando Florida · Tampa Louisiana · Baton Rouge Louisiana · New Orleans North Carolina · Charlotte Dental Pharmacy Dental Pharmacy Dental Active Active Active Active Active Campus Orlando Dental Campus Campus Tampa Pharmacy Campus Campus Baton Rouge Dental Campus Campus New Orleans Pharmacy Campus Campus Charlotte Dental Campus Term Dental Spring 2026 Term Pharmacy Spring 2026 Term Dental Spring 2026 Term Pharmacy Spring 2026 Term Dental Spring 2026 Start Date Mar 04, 2026 Start Date Mar 04, 2026 Start Date Mar 04, 2026 Start Date Mar 04, 2026 Start Date Mar 04, 2026 End Date Jun 24, 2026 End Date Jun 24, 2026 End Date Jun 24, 2026 End Date Jun 24, 2026 End Date Jun 24, 2026 3599.0 3099.0 3499.0 2999.0 3399.0 Tuition Tuition Tuition Tuition Tuition ✓ 7 dynamic questions configured ✓ 7 dynamic questions configured ✓ 7 dynamic questions configured ✓ 7 dynamic questions configured ✓ 7 dynamic questions configured Start Application → Start Application → Start Application → Start Application → Start Application → North Carolina · Raleigh Pharmacy Active [\":move-mouse\",\":to\",1876,1034] Campus Raleigh Pharmacy Campus Term Pharmacy Spring 2026",
+      "domMarkdown2": "# Select Your Course\n\nBrowse available courses with dynamic application questions configured.\n\n### Dental\n              Active\n\n### Pharmacy\n              Active\n\n### Dental\n              Active\n\n### Pharmacy\n              Active\n\n### Dental\n              Active\n\n### Pharmacy\n              Active"
+    },
+    "endTimestamp": 1771467929893,
+    "duration": 2287
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      1876,
+      1034
+    ],
+    "timestamp": 1771467930480,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/",
+        "title": "Course Selection - Accelerated Academy",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/1-pre-click.jpg",
+        "timestamp": 1771467930476
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/1-post-click.jpg",
+        "timestamp": 1771467932796
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467930477,
+          "cpu": "50.00",
+          "memory": "238.50",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467932796,
+          "cpu": "102.86",
+          "memory": "240.43",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467930248,
+        "end": 1771467932806,
+        "duration": 2558
+      },
+      "domMarkdown": "Accelerated Academy Student & Staff Portal Sign In Enter your email and password to continue Email Password Forgot password? • Sign in with Magic Link Need help? Contact Support",
+      "domMarkdown2": "## Sign In\n\nEnter your email and password to continue\n\nNeed help? Contact Support"
+    },
+    "endTimestamp": 1771467932806,
+    "duration": 2558
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      969,
+      498
+    ],
+    "timestamp": 1771467937312,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/2-pre-move-mouse.jpg",
+        "timestamp": 1771467937301
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/2-post-move-mouse.jpg",
+        "timestamp": 1771467939851
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467937303,
+          "cpu": "47.67",
+          "memory": "234.11",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467939853,
+          "cpu": "75.00",
+          "memory": "232.25",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467937078,
+        "end": 1771467939874,
+        "duration": 2796
+      },
+      "domMarkdown": "Accelerated Academy Student & Staff Portal Sign In Enter your email and password to continue Email Password Forgot password? • Sign in with Magic Link Need help? Contact Support [\":move-mouse\",\":to\",969,498]",
+      "domMarkdown2": "## Sign In\n\nEnter your email and password to continue\n\nNeed help? Contact Support"
+    },
+    "endTimestamp": 1771467939874,
+    "duration": 2796
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      969,
+      498
+    ],
+    "timestamp": 1771467940192,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/3-pre-click.jpg",
+        "timestamp": 1771467940168
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/3-post-click.jpg",
+        "timestamp": 1771467942339
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467940170,
+          "cpu": "121.88",
+          "memory": "252.05",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467942339,
+          "cpu": "53.93",
+          "memory": "267.09",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467939993,
+        "end": 1771467942359,
+        "duration": 2366
+      },
+      "domMarkdown": "Accelerated Academy Student & Staff Portal Sign In Enter your email and password to continue Email Password Forgot password? • Sign in with Magic Link Need help? Contact Support [\":click\",\":at\",969,498]",
+      "domMarkdown2": "## Sign In\n\nEnter your email and password to continue\n\nNeed help? Contact Support"
+    },
+    "endTimestamp": 1771467942359,
+    "duration": 2366
+  },
+  {
+    "command": [
+      ":type",
+      "admin@acceleratedacademy.com"
+    ],
+    "timestamp": 1771467953185,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/4-pre-type.jpg",
+        "timestamp": 1771467953156
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/4-post-type.jpg",
+        "timestamp": 1771467954167
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467953157,
+          "cpu": "61.43",
+          "memory": "255.14",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467954168,
+          "cpu": "52.11",
+          "memory": "264.08",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467952893,
+        "end": 1771467954174,
+        "duration": 1281
+      },
+      "domMarkdown": "Accelerated Academy Student & Staff Portal Sign In Enter your email and password to continue Email Password Forgot password? • Sign in with Magic Link Need help? Contact Support [\":type\",\"admin@acceleratedacademy.com\"]",
+      "domMarkdown2": "## Sign In\n\nEnter your email and password to continue\n\nNeed help? Contact Support"
+    },
+    "endTimestamp": 1771467954174,
+    "duration": 1281
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      925,
+      594
+    ],
+    "timestamp": 1771467957716,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/5-pre-move-mouse.jpg",
+        "timestamp": 1771467957709
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/5-post-move-mouse.jpg",
+        "timestamp": 1771467960148
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467957709,
+          "cpu": "96.00",
+          "memory": "266.92",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467960157,
+          "cpu": "45.71",
+          "memory": "268.00",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467957478,
+        "end": 1771467960164,
+        "duration": 2686
+      },
+      "domMarkdown": "Accelerated Academy Student & Staff Portal Sign In Enter your email and password to continue Email Password Forgot password? • Sign in with Magic Link Need help? Contact Support [\":move-mouse\",\":to\",925,594]",
+      "domMarkdown2": "## Sign In\n\nEnter your email and password to continue\n\nNeed help? Contact Support"
+    },
+    "endTimestamp": 1771467960164,
+    "duration": 2686
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      925,
+      594
+    ],
+    "timestamp": 1771467960508,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/6-pre-click.jpg",
+        "timestamp": 1771467960479
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/6-post-click.jpg",
+        "timestamp": 1771467962433
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467960488,
+          "cpu": "50.00",
+          "memory": "269.16",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467962437,
+          "cpu": "42.27",
+          "memory": "256.31",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467960283,
+        "end": 1771467962443,
+        "duration": 2160
+      },
+      "domMarkdown": "Accelerated Academy Student & Staff Portal Sign In Enter your email and password to continue Email Password Forgot password? • Sign in with Magic Link Need help? Contact Support [\":click\",\":at\",925,594]",
+      "domMarkdown2": "## Sign In\n\nEnter your email and password to continue\n\nNeed help? Contact Support"
+    },
+    "endTimestamp": 1771467962443,
+    "duration": 2160
+  },
+  {
+    "command": [
+      ":type",
+      "admin123"
+    ],
+    "timestamp": 1771467968813,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/7-pre-type.jpg",
+        "timestamp": 1771467968809
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/7-post-type.jpg",
+        "timestamp": 1771467969697
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467968809,
+          "cpu": "54.29",
+          "memory": "259.08",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467969697,
+          "cpu": "73.91",
+          "memory": "271.42",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467968630,
+        "end": 1771467969706,
+        "duration": 1076
+      },
+      "domMarkdown": "Accelerated Academy Student & Staff Portal Sign In Enter your email and password to continue Email Password Forgot password? • Sign in with Magic Link Need help? Contact Support [\":type\",\"admin123\"]",
+      "domMarkdown2": "## Sign In\n\nEnter your email and password to continue\n\nNeed help? Contact Support"
+    },
+    "endTimestamp": 1771467969706,
+    "duration": 1076
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      957,
+      681
+    ],
+    "timestamp": 1771467972759,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/8-pre-move-mouse.jpg",
+        "timestamp": 1771467972750
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/8-post-move-mouse.jpg",
+        "timestamp": 1771467975159
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467972752,
+          "cpu": "60.71",
+          "memory": "274.76",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467975159,
+          "cpu": "47.83",
+          "memory": "271.09",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467972583,
+        "end": 1771467975177,
+        "duration": 2594
+      },
+      "domMarkdown": "Accelerated Academy Student & Staff Portal Sign In Enter your email and password to continue Email Password Forgot password? • Sign in with Magic Link Need help? Contact Support [\":move-mouse\",\":to\",957,681]",
+      "domMarkdown2": "## Sign In\n\nEnter your email and password to continue\n\nNeed help? Contact Support"
+    },
+    "endTimestamp": 1771467975177,
+    "duration": 2594
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      957,
+      681
+    ],
+    "timestamp": 1771467975619,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/login",
+        "title": "Aa Server",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/9-pre-click.jpg",
+        "timestamp": 1771467975608
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/9-post-click.jpg",
+        "timestamp": 1771467978221
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467975610,
+          "cpu": "71.43",
+          "memory": "282.13",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467978229,
+          "cpu": "77.63",
+          "memory": "274.05",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467975457,
+        "end": 1771467978292,
+        "duration": 2835
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Associates Create Instructor Export Associates Applications Record Types: Application Student Instructor MANAGE LEARNING Showing 1-19 of 19 associates Programs ASSOCIATE CONTACT RECORDS ROLE Courses pepperoni pizza PP (555) 555-5555 Instructor Terms pepperoni@test Questions pepperoni pizza PP (555) 555-5555 Instructor pizza@test.com Document Templates pepperoni pizza Campuses PP (555) 123-4567 Student pizza@test States David Roux DR (225) 933-4291 Applicant david@adaa.us MANAGE FINANCES Lisa Primeaux-Redmond Finances LP (555) 555-5555 Student lisa+1@acceleratedacademy.us Audit Log Sara Test ST (555) 123-4567 Student Reconcile sara@test.com Daily Report tester tersting TT (225) 345-6789 Student test@testing.com Promo Codes JoAnn Luckey JL (123) 456-7894 Student jojo123@gmail.com SYSTEM Staff Mindy Yoyo MY (222) 222-2222 Applicant mimi@gmail.com [\":*wait-for-navigation\"] CMT Jeff Jeffy Config Sheet JJ (555) 666-8989 jeff@jeffco.co Student",
+      "domMarkdown2": "# Associates\n\n| ASSOCIATE | CONTACT | RECORDS | ROLE |\n| --- | --- | --- | --- |\n| PP\n                \n                  pepperoni pizza\n                  pepperoni@test | (555) 555-5555 |  | Instructor |\n| PP\n                \n                  pepperoni pizza\n                  pizza@test.com | (555) 555-5555 |  | Instructor |\n| PP\n                \n                  pepperoni pizza\n                  pizza@test | (555) 123-4567 |  | Student |\n| DR\n                \n                  David Roux\n                  david@adaa.us | (225) 933-4291 |  | Applicant |\n| LP\n                \n                  Lisa Primeaux-Redmond\n                  lisa+1@acceleratedacademy.us | (555) 555-5555 |  | Student |\n| ST\n                \n                  Sara Test\n                  sara@test.com | (555) 123-4567 |  | Student |\n| TT\n                \n                  tester tersting\n                  test@testing.com | (225) 345-6789 |  | Student |\n| JL\n                \n                  JoAnn Luckey\n                  jojo123@gmail.com | (123) 456-7894 |  | Student |\n| MY\n                \n                  Mindy Yoyo\n                  mimi@gmail.com | (222) 222-2222 |  | Applicant |\n| JJ\n                \n                  Jeff Jeffy\n                  jeff@jeffco.co | (555) 666-8989 |  | Student |\n| TP\n                \n                  Testing PTTest\n                  test@testing5.com | (225) 323-5432 |  | Student |\n| MR\n                \n                  Mishaux Ramirez\n                  mishaux@acceleratedacademy.us | (123) 456-7891 |  | Student |\n| TH\n                \n                  Taylor Holladau\n                  taylor+test@acceleratedacademy.us | (999) 333-9999 |  | Student |\n| BT\n                \n                  Brittany Test\n                  brittanym@acceleratedacademy.us | (555) 123-4567 |  | Student |\n| LY\n                \n                  Lori Yoyo\n                  yoyo@gmail.com | (222) 222-2222 |  | Instructor |\n| BT\n                \n                  Bob Test\n                  bob@test.com | (555) 123-4567 |  | Student |\n| LR\n                \n                  Lisa Redmond\n                  lisa@acceleratedacademy.us | (555) 555-5555 |  | Student |\n| RR\n                \n                  Ryan Robitaille\n                  ryan.robitaille@gmail.com | (555) 123-2323 |  | Admin |\n| AA\n                \n                  Abby Admin\n                  admin@acceleratedacademy.com | (555) 123-4567 |  | Student |"
+    },
+    "endTimestamp": 1771467978292,
+    "duration": 2835
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      71,
+      215
+    ],
+    "timestamp": 1771467988889,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/10-pre-move-mouse.jpg",
+        "timestamp": 1771467988876
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/10-post-move-mouse.jpg",
+        "timestamp": 1771467991075
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467988882,
+          "cpu": "60.98",
+          "memory": "279.06",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467991076,
+          "cpu": "65.00",
+          "memory": "279.23",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467988706,
+        "end": 1771467991103,
+        "duration": 2397
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Associates Create Instructor Export Associates Applications Record Types: Application Student Instructor MANAGE LEARNING Showing 1-19 of 19 associates Programs ASSOCIATE CONTACT RECORDS ROLE Courses pepperoni pizza PP (555) 555-5555 Instructor Terms pepperoni@test Questions pepperoni pizza PP (555) 555-5555 Instructor pizza@test.com Document Templates pepperoni pizza Campuses PP (555) 123-4567 Student pizza@test States David Roux DR (225) 933-4291 Applicant david@adaa.us MANAGE FINANCES Lisa Primeaux-Redmond Finances LP (555) 555-5555 Student lisa+1@acceleratedacademy.us Audit Log Sara Test ST (555) 123-4567 Student Reconcile sara@test.com Daily Report tester tersting TT (225) 345-6789 Student test@testing.com Promo Codes JoAnn Luckey JL (123) 456-7894 Student jojo123@gmail.com SYSTEM Staff Mindy Yoyo MY (222) 222-2222 Applicant mimi@gmail.com [\":move-mouse\",\":to\",71,215] CMT Jeff Jeffy Config Sheet JJ (555) 666-8989 jeff@jeffco.co Student",
+      "domMarkdown2": "# Associates\n\n| ASSOCIATE | CONTACT | RECORDS | ROLE |\n| --- | --- | --- | --- |\n| PP\n                \n                  pepperoni pizza\n                  pepperoni@test | (555) 555-5555 |  | Instructor |\n| PP\n                \n                  pepperoni pizza\n                  pizza@test.com | (555) 555-5555 |  | Instructor |\n| PP\n                \n                  pepperoni pizza\n                  pizza@test | (555) 123-4567 |  | Student |\n| DR\n                \n                  David Roux\n                  david@adaa.us | (225) 933-4291 |  | Applicant |\n| LP\n                \n                  Lisa Primeaux-Redmond\n                  lisa+1@acceleratedacademy.us | (555) 555-5555 |  | Student |\n| ST\n                \n                  Sara Test\n                  sara@test.com | (555) 123-4567 |  | Student |\n| TT\n                \n                  tester tersting\n                  test@testing.com | (225) 345-6789 |  | Student |\n| JL\n                \n                  JoAnn Luckey\n                  jojo123@gmail.com | (123) 456-7894 |  | Student |\n| MY\n                \n                  Mindy Yoyo\n                  mimi@gmail.com | (222) 222-2222 |  | Applicant |\n| JJ\n                \n                  Jeff Jeffy\n                  jeff@jeffco.co | (555) 666-8989 |  | Student |\n| TP\n                \n                  Testing PTTest\n                  test@testing5.com | (225) 323-5432 |  | Student |\n| MR\n                \n                  Mishaux Ramirez\n                  mishaux@acceleratedacademy.us | (123) 456-7891 |  | Student |\n| TH\n                \n                  Taylor Holladau\n                  taylor+test@acceleratedacademy.us | (999) 333-9999 |  | Student |\n| BT\n                \n                  Brittany Test\n                  brittanym@acceleratedacademy.us | (555) 123-4567 |  | Student |\n| LY\n                \n                  Lori Yoyo\n                  yoyo@gmail.com | (222) 222-2222 |  | Instructor |\n| BT\n                \n                  Bob Test\n                  bob@test.com | (555) 123-4567 |  | Student |\n| LR\n                \n                  Lisa Redmond\n                  lisa@acceleratedacademy.us | (555) 555-5555 |  | Student |\n| RR\n                \n                  Ryan Robitaille\n                  ryan.robitaille@gmail.com | (555) 123-2323 |  | Admin |\n| AA\n                \n                  Abby Admin\n                  admin@acceleratedacademy.com | (555) 123-4567 |  | Student |"
+    },
+    "endTimestamp": 1771467991103,
+    "duration": 2397
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      71,
+      215
+    ],
+    "timestamp": 1771467991545,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/11-pre-click.jpg",
+        "timestamp": 1771467991540
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/applications",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/11-post-click.jpg",
+        "timestamp": 1771467993366
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467991541,
+          "cpu": "128.57",
+          "memory": "289.93",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467993367,
+          "cpu": "70.00",
+          "memory": "279.13",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467991346,
+        "end": 1771467993427,
+        "duration": 2081
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Applications Export Associates Applications All Draft Submitted Approved Prevented Rejected Complete 13 2 0 2 0 0 9 MANAGE LEARNING Showing 1-13 of 13 applications Programs APPLICANT PROGRAM LOCATION STATUS ENROLLMENT SUBMITTED ACTIONS Courses Sara Test ST Baton Rouge, LA Dental Spring 2026 Baton Rouge, Louisiana Not submitted Draft Not Started Terms sara@test.com Questions David Roux DR Baton Rouge, LA Dental Spring 2026 Baton Rouge, Louisiana Approved In Progress 2/18/2026 david@adaa.us Document Templates Lisa Primeaux-Redmond Campuses LP Orlando, FL Dental Spring 2026 Orlando, Florida Complete Enrolled 2/18/2026 lisa+1@acceleratedacademy.us States JoAnn Luckey JL Orlando, FL Dental Spring 2026 Orlando, Florida Complete Enrolled 2/18/2026 jojo123@gmail.com MANAGE FINANCES Finances Mindy Yoyo MY Baton Rouge, LA Dental Spring 2026 Baton Rouge, Louisiana Approved In Progress 2/18/2026 mimi@gmail.com Audit Log Lisa Redmond Reconcile LR Dental Baton Rouge, LA Complete Enrolled 2/18/2026 lisa@acceleratedacademy.us Daily Report Jeff Jeffy JJ Tampa, FL Pharmacy Spring 2026 Tampa, Florida Complete Enrolled 2/18/2026 jeff@jeffco.co Promo Codes Testing PTTest SYSTEM TP Tampa, FL Pharmacy Spring 2026 Tampa, Florida Complete Enrolled 2/18/2026 test@testing5.com Staff Taylor Holladay TH Baton Rouge, LA Dental Spring 2026 Baton Rouge, Louisiana Complete Enrolled 2/18/2026 CMT taylor+test@acceleratedacademy.us Config Sheet",
+      "domMarkdown2": "# Applications\n\n| APPLICANT | PROGRAM | LOCATION | STATUS | ENROLLMENT | SUBMITTED | ACTIONS |\n| --- | --- | --- | --- | --- | --- | --- |\n| ST\n                  \n                  \n                    Sara Test\n                    sara@test.com | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Draft | Not Started | Not submitted | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| DR\n                  \n                  \n                    David Roux\n                    david@adaa.us | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Approved | In Progress | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| LP\n                  \n                  \n                    Lisa Primeaux-Redmond\n                    lisa+1@acceleratedacademy.us | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| JL\n                  \n                  \n                    JoAnn Luckey\n                    jojo123@gmail.com | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| MY\n                  \n                  \n                    Mindy Yoyo\n                    mimi@gmail.com | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Approved | In Progress | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| LR\n                  \n                  \n                    Lisa Redmond\n                    lisa@acceleratedacademy.us | Dental | Baton Rouge, LA | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| JJ\n                  \n                  \n                    Jeff Jeffy\n                    jeff@jeffco.co | Tampa, FL Pharmacy Spring 2026 | Tampa, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| TP\n                  \n                  \n                    Testing PTTest\n                    test@testing5.com | Tampa, FL Pharmacy Spring 2026 | Tampa, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| TH\n                  \n                  \n                    Taylor Holladay\n                    taylor+test@acceleratedacademy.us | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| MR\n                  \n                  \n                    Mishaux Ramirez\n                    mishaux@acceleratedacademy.us | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| BT\n                  \n                  \n                    Brittany Test\n                    brittanym@acceleratedacademy.us | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| BT\n                  \n                  \n                    bob Test\n                    bob@test.com | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| LR\n                  \n                  \n                    Lisa Redmond\n                    lisa@acceleratedacademy.us | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Draft | Not Started | Not submitted | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |"
+    },
+    "endTimestamp": 1771467993427,
+    "duration": 2081
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      105,
+      319
+    ],
+    "timestamp": 1771467997675,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/applications",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/12-pre-move-mouse.jpg",
+        "timestamp": 1771467997668
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/applications",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/12-post-move-mouse.jpg",
+        "timestamp": 1771467999903
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771467997668,
+          "cpu": "73.68",
+          "memory": "280.13",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771467999904,
+          "cpu": "71.43",
+          "memory": "296.28",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771467997475,
+        "end": 1771467999973,
+        "duration": 2498
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Applications Export Associates Applications All Draft Submitted Approved Prevented Rejected Complete 13 2 0 2 0 0 9 MANAGE LEARNING Showing 1-13 of 13 applications Programs APPLICANT PROGRAM LOCATION STATUS ENROLLMENT SUBMITTED ACTIONS Courses Sara Test ST Baton Rouge, LA Dental Spring 2026 Baton Rouge, Louisiana Not submitted Draft Not Started Terms sara@test.com Questions David Roux DR Baton Rouge, LA Dental Spring 2026 Baton Rouge, Louisiana Approved In Progress 2/18/2026 david@adaa.us Document Templates Lisa Primeaux-Redmond Campuses LP Orlando, FL Dental Spring 2026 Orlando, Florida Complete Enrolled 2/18/2026 lisa+1@acceleratedacademy.us States JoAnn Luckey JL Orlando, FL Dental Spring 2026 Orlando, Florida Complete Enrolled 2/18/2026 jojo123@gmail.com MANAGE FINANCES Finances Mindy Yoyo MY Baton Rouge, LA Dental Spring 2026 Baton Rouge, Louisiana Approved In Progress 2/18/2026 mimi@gmail.com Audit Log Lisa Redmond Reconcile LR Dental Baton Rouge, LA Complete Enrolled 2/18/2026 lisa@acceleratedacademy.us Daily Report Jeff Jeffy JJ Tampa, FL Pharmacy Spring 2026 Tampa, Florida Complete Enrolled 2/18/2026 jeff@jeffco.co Promo Codes Testing PTTest SYSTEM TP Tampa, FL Pharmacy Spring 2026 Tampa, Florida Complete Enrolled 2/18/2026 test@testing5.com Staff Taylor Holladay TH Baton Rouge, LA Dental Spring 2026 Baton Rouge, Louisiana Complete Enrolled 2/18/2026 CMT taylor+test@acceleratedacademy.us Config Sheet",
+      "domMarkdown2": "# Applications\n\n| APPLICANT | PROGRAM | LOCATION | STATUS | ENROLLMENT | SUBMITTED | ACTIONS |\n| --- | --- | --- | --- | --- | --- | --- |\n| ST\n                  \n                  \n                    Sara Test\n                    sara@test.com | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Draft | Not Started | Not submitted | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| DR\n                  \n                  \n                    David Roux\n                    david@adaa.us | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Approved | In Progress | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| LP\n                  \n                  \n                    Lisa Primeaux-Redmond\n                    lisa+1@acceleratedacademy.us | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| JL\n                  \n                  \n                    JoAnn Luckey\n                    jojo123@gmail.com | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| MY\n                  \n                  \n                    Mindy Yoyo\n                    mimi@gmail.com | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Approved | In Progress | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| LR\n                  \n                  \n                    Lisa Redmond\n                    lisa@acceleratedacademy.us | Dental | Baton Rouge, LA | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| JJ\n                  \n                  \n                    Jeff Jeffy\n                    jeff@jeffco.co | Tampa, FL Pharmacy Spring 2026 | Tampa, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| TP\n                  \n                  \n                    Testing PTTest\n                    test@testing5.com | Tampa, FL Pharmacy Spring 2026 | Tampa, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| TH\n                  \n                  \n                    Taylor Holladay\n                    taylor+test@acceleratedacademy.us | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| MR\n                  \n                  \n                    Mishaux Ramirez\n                    mishaux@acceleratedacademy.us | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| BT\n                  \n                  \n                    Brittany Test\n                    brittanym@acceleratedacademy.us | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| BT\n                  \n                  \n                    bob Test\n                    bob@test.com | Orlando, FL Dental Spring 2026 | Orlando, Florida | Complete | Enrolled | 2/18/2026 | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |\n| LR\n                  \n                  \n                    Lisa Redmond\n                    lisa@acceleratedacademy.us | Baton Rouge, LA Dental Spring 2026 | Baton Rouge, Louisiana | Draft | Not Started | Not submitted | View Application\n\n                    \n                      \n                      Application Actions\n\n                      \n                        \n                        View Associate |"
+    },
+    "endTimestamp": 1771467999973,
+    "duration": 2498
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      105,
+      319
+    ],
+    "timestamp": 1771468002775,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/applications",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/13-pre-click.jpg",
+        "timestamp": 1771468002772
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/programs",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/13-post-click.jpg",
+        "timestamp": 1771468004369
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468002773,
+          "cpu": "106.90",
+          "memory": "280.48",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468004370,
+          "cpu": "61.11",
+          "memory": "279.59",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468002577,
+        "end": 1771468004396,
+        "duration": 1819
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Associates Programs Add Program Applications You have been logged in MANAGE LEARNING Programs Showing 2 of 2 programs Courses PROGRAM STATUS ACTIONS Terms Dental Active Dental clean-slate program Questions Document Templates Pharmacy Active Pharmacy clean-slate program Campuses States MANAGE FINANCES Finances Audit Log Reconcile Daily Report Promo Codes SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Programs\n\n| PROGRAM | STATUS | ACTIONS |\n| --- | --- | --- |\n| Dental\n                      \n                        Dental clean-slate program | Active | Edit\n                      \n                        \n                           Deactivate |\n| Pharmacy\n                      \n                        Pharmacy clean-slate program | Active | Edit\n                      \n                        \n                           Deactivate |"
+    },
+    "endTimestamp": 1771468004396,
+    "duration": 1819
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      86,
+      360
+    ],
+    "timestamp": 1771468008512,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/programs",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/14-pre-move-mouse.jpg",
+        "timestamp": 1771468008477
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/programs",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/14-post-move-mouse.jpg",
+        "timestamp": 1771468010592
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468008478,
+          "cpu": "0.00",
+          "memory": "279.69",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468010592,
+          "cpu": "127.27",
+          "memory": "279.95",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468008306,
+        "end": 1771468010611,
+        "duration": 2305
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Associates Programs Add Program Applications You have been logged in MANAGE LEARNING Programs Showing 2 of 2 programs Courses PROGRAM STATUS ACTIONS Terms Dental Active Dental clean-slate program Questions Document Templates Pharmacy Active Pharmacy clean-slate program Campuses States MANAGE FINANCES Finances Audit Log Reconcile Daily Report Promo Codes SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Programs\n\n| PROGRAM | STATUS | ACTIONS |\n| --- | --- | --- |\n| Dental\n                      \n                        Dental clean-slate program | Active | Edit\n                      \n                        \n                           Deactivate |\n| Pharmacy\n                      \n                        Pharmacy clean-slate program | Active | Edit\n                      \n                        \n                           Deactivate |"
+    },
+    "endTimestamp": 1771468010611,
+    "duration": 2305
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      86,
+      360
+    ],
+    "timestamp": 1771468011253,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/programs",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/15-pre-click.jpg",
+        "timestamp": 1771468011251
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/courses",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/15-post-click.jpg",
+        "timestamp": 1771468014239
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468011252,
+          "cpu": "66.67",
+          "memory": "290.89",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468014240,
+          "cpu": "88.16",
+          "memory": "281.50",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468011098,
+        "end": 1771468014286,
+        "duration": 3188
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Courses Bulk Add Create Course Associates Applications Showing 1-8 of 8 courses COURSE & LOCATION STATE TYPE STATUS PROGRAM TIMES OPEN TERM DATES ENROLLMENT ACTIONS MANAGE LEARNING Programs Dental Primary - Dental Summer 2026 - Baton Rouge LA Career Active Dental 8:00 AM - Closed Dental Summer 2026 07/04/2026 0 / 12 Baton Rouge Dental Campus 12:00 PM to 12/12/2026 Courses Terms Baton Rouge, LA Dental Spring 2026 LA 8:00 AM - Dental Spring 2026 03/04/2026 4 / 18 Career Active Dental Open 12:00 PM to 06/24/2026 Baton Rouge Dental Campus Questions Charlotte, NC Dental Spring 2026 Document Templates NC Career Active Dental TBD Open Dental Spring 2026 03/04/2026 0 / 18 Charlotte Dental Campus to 06/24/2026 Campuses New Orleans, LA Pharmacy Spring 2026 LA Career Active Pharmacy TBD Open Pharmacy Spring 2026 03/04/2026 1 / 20 States New Orleans Pharmacy Campus to 06/24/2026 MANAGE FINANCES Orlando, FL Dental Spring 2026 FL TBD Dental Spring 2026 03/04/2026 5 / 18 Career Active Dental Open to 06/24/2026 Orlando Dental Campus Finances Audit Log Raleigh, NC Pharmacy Spring 2026 NC Career Active Pharmacy TBD Open Pharmacy Spring 2026 03/04/2026 0 / 20 Raleigh Pharmacy Campus to 06/24/2026 Reconcile Tampa, FL Pharmacy Spring 2026 FL TBD Pharmacy Spring 2026 03/04/2026 2 / 20 Daily Report Career Active Pharmacy Open to 06/24/2026 Tampa Pharmacy Campus Promo Codes Pharmacy Tech LA Career Active Pharmacy TBD Closed Pharmacy Spring 2026 03/01/2026 0 / 20 New Orleans Pharmacy Campus to 05/31/2026 SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Courses\n\n| COURSE & LOCATION | STATE | TYPE | STATUS | PROGRAM | TIMES | OPEN | TERM | DATES | ENROLLMENT | ACTIONS |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| Dental Primary - Dental Summer 2026 - Baton Rouge\n                   Baton Rouge Dental Campus | LA | Career | Active | Dental | 8:00 AM -12:00 PM | Closed | Dental Summer 2026 | 07/04/2026\n              to 12/12/2026 | 0 / 12 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Open Enrollment\n                  \n                     Delete |\n| Baton Rouge, LA Dental Spring 2026\n                   Baton Rouge Dental Campus | LA | Career | Active | Dental | 8:00 AM -12:00 PM | Open | Dental Spring 2026 | 03/04/2026\n              to 06/24/2026 | 4 / 18 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Charlotte, NC Dental Spring 2026\n                   Charlotte Dental Campus | NC | Career | Active | Dental | TBD | Open | Dental Spring 2026 | 03/04/2026\n              to 06/24/2026 | 0 / 18 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| New Orleans, LA Pharmacy Spring 2026\n                   New Orleans Pharmacy Campus | LA | Career | Active | Pharmacy | TBD | Open | Pharmacy Spring 2026 | 03/04/2026\n              to 06/24/2026 | 1 / 20 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Orlando, FL Dental Spring 2026\n                   Orlando Dental Campus | FL | Career | Active | Dental | TBD | Open | Dental Spring 2026 | 03/04/2026\n              to 06/24/2026 | 5 / 18 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Raleigh, NC Pharmacy Spring 2026\n                   Raleigh Pharmacy Campus | NC | Career | Active | Pharmacy | TBD | Open | Pharmacy Spring 2026 | 03/04/2026\n              to 06/24/2026 | 0 / 20 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Tampa, FL Pharmacy Spring 2026\n                   Tampa Pharmacy Campus | FL | Career | Active | Pharmacy | TBD | Open | Pharmacy Spring 2026 | 03/04/2026\n              to 06/24/2026 | 2 / 20 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Pharmacy Tech\n                   New Orleans Pharmacy Campus | LA | Career | Active | Pharmacy | TBD | Closed | Pharmacy Spring 2026 | 03/01/2026\n              to 05/31/2026 | 0 / 20 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Open Enrollment\n                  \n                     Delete |"
+    },
+    "endTimestamp": 1771468014286,
+    "duration": 3188
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      86,
+      411
+    ],
+    "timestamp": 1771468017582,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/courses",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/16-pre-move-mouse.jpg",
+        "timestamp": 1771468017581
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/courses",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/16-post-move-mouse.jpg",
+        "timestamp": 1771468019798
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468017581,
+          "cpu": "90.00",
+          "memory": "286.89",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468019798,
+          "cpu": "65.63",
+          "memory": "288.46",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468017374,
+        "end": 1771468019898,
+        "duration": 2524
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Courses Bulk Add Create Course Associates Applications Showing 1-8 of 8 courses COURSE & LOCATION STATE TYPE STATUS PROGRAM TIMES OPEN TERM DATES ENROLLMENT ACTIONS MANAGE LEARNING Programs Dental Primary - Dental Summer 2026 - Baton Rouge LA Career Active Dental 8:00 AM - Closed Dental Summer 2026 07/04/2026 0 / 12 Baton Rouge Dental Campus 12:00 PM to 12/12/2026 Courses Terms Baton Rouge, LA Dental Spring 2026 LA 8:00 AM - Dental Spring 2026 03/04/2026 4 / 18 Career Active Dental Open 12:00 PM to 06/24/2026 Baton Rouge Dental Campus Questions Charlotte, NC Dental Spring 2026 Document Templates NC Career Active Dental TBD Open Dental Spring 2026 03/04/2026 0 / 18 Charlotte Dental Campus to 06/24/2026 Campuses New Orleans, LA Pharmacy Spring 2026 LA Career Active Pharmacy TBD Open Pharmacy Spring 2026 03/04/2026 1 / 20 States New Orleans Pharmacy Campus to 06/24/2026 MANAGE FINANCES Orlando, FL Dental Spring 2026 FL TBD Dental Spring 2026 03/04/2026 5 / 18 Career Active Dental Open to 06/24/2026 Orlando Dental Campus Finances Audit Log Raleigh, NC Pharmacy Spring 2026 NC Career Active Pharmacy TBD Open Pharmacy Spring 2026 03/04/2026 0 / 20 Raleigh Pharmacy Campus to 06/24/2026 Reconcile Tampa, FL Pharmacy Spring 2026 FL TBD Pharmacy Spring 2026 03/04/2026 2 / 20 Daily Report Career Active Pharmacy Open to 06/24/2026 Tampa Pharmacy Campus Promo Codes Pharmacy Tech LA Career Active Pharmacy TBD Closed Pharmacy Spring 2026 03/01/2026 0 / 20 New Orleans Pharmacy Campus to 05/31/2026 SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Courses\n\n| COURSE & LOCATION | STATE | TYPE | STATUS | PROGRAM | TIMES | OPEN | TERM | DATES | ENROLLMENT | ACTIONS |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| Dental Primary - Dental Summer 2026 - Baton Rouge\n                   Baton Rouge Dental Campus | LA | Career | Active | Dental | 8:00 AM -12:00 PM | Closed | Dental Summer 2026 | 07/04/2026\n              to 12/12/2026 | 0 / 12 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Open Enrollment\n                  \n                     Delete |\n| Baton Rouge, LA Dental Spring 2026\n                   Baton Rouge Dental Campus | LA | Career | Active | Dental | 8:00 AM -12:00 PM | Open | Dental Spring 2026 | 03/04/2026\n              to 06/24/2026 | 4 / 18 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Charlotte, NC Dental Spring 2026\n                   Charlotte Dental Campus | NC | Career | Active | Dental | TBD | Open | Dental Spring 2026 | 03/04/2026\n              to 06/24/2026 | 0 / 18 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| New Orleans, LA Pharmacy Spring 2026\n                   New Orleans Pharmacy Campus | LA | Career | Active | Pharmacy | TBD | Open | Pharmacy Spring 2026 | 03/04/2026\n              to 06/24/2026 | 1 / 20 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Orlando, FL Dental Spring 2026\n                   Orlando Dental Campus | FL | Career | Active | Dental | TBD | Open | Dental Spring 2026 | 03/04/2026\n              to 06/24/2026 | 5 / 18 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Raleigh, NC Pharmacy Spring 2026\n                   Raleigh Pharmacy Campus | NC | Career | Active | Pharmacy | TBD | Open | Pharmacy Spring 2026 | 03/04/2026\n              to 06/24/2026 | 0 / 20 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Tampa, FL Pharmacy Spring 2026\n                   Tampa Pharmacy Campus | FL | Career | Active | Pharmacy | TBD | Open | Pharmacy Spring 2026 | 03/04/2026\n              to 06/24/2026 | 2 / 20 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Close Enrollment\n                  \n                     Delete |\n| Pharmacy Tech\n                   New Orleans Pharmacy Campus | LA | Career | Active | Pharmacy | TBD | Closed | Pharmacy Spring 2026 | 03/01/2026\n              to 05/31/2026 | 0 / 20 | Edit\n                  \n                    \n                       Deactivate\n                    \n                       Open Enrollment\n                  \n                     Delete |"
+    },
+    "endTimestamp": 1771468019898,
+    "duration": 2524
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      86,
+      411
+    ],
+    "timestamp": 1771468020261,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/courses",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/17-pre-click.jpg",
+        "timestamp": 1771468020251
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/terms",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/17-post-click.jpg",
+        "timestamp": 1771468021815
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468020260,
+          "cpu": "110.87",
+          "memory": "285.46",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468021815,
+          "cpu": "54.55",
+          "memory": "284.86",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468020014,
+        "end": 1771468021846,
+        "duration": 1832
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Terms Add Term Associates Applications Showing 4 of 4 terms TERM DATES ACTIONS MANAGE LEARNING Programs Dental Summer 2026 Jul 08, 2026 - Oct 28, 2026 Dental Courses Terms Dental Spring 2026 Mar 04, 2026 - Jun 24, 2026 Dental Questions Pharmacy Spring 2026 Document Templates Mar 04, 2026 - Jun 24, 2026 Pharmacy Campuses Pharmacy Summer 2026 Jan 08, 2026 - Oct 28, 2026 Pharmacy States MANAGE FINANCES Finances Audit Log Reconcile Daily Report Promo Codes SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Terms\n\n| TERM | DATES | ACTIONS |\n| --- | --- | --- |\n| Dental Summer 2026\n                      Dental | Jul 08, 2026 - Oct 28, 2026 | Edit |\n| Dental Spring 2026\n                      Dental | Mar 04, 2026 - Jun 24, 2026 | Edit |\n| Pharmacy Spring 2026\n                      Pharmacy | Mar 04, 2026 - Jun 24, 2026 | Edit |\n| Pharmacy Summer 2026\n                      Pharmacy | Jan 08, 2026 - Oct 28, 2026 | Edit |"
+    },
+    "endTimestamp": 1771468021846,
+    "duration": 1832
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      91,
+      462
+    ],
+    "timestamp": 1771468024668,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/terms",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/18-pre-move-mouse.jpg",
+        "timestamp": 1771468024666
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/terms",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/18-post-move-mouse.jpg",
+        "timestamp": 1771468026682
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468024667,
+          "cpu": "89.47",
+          "memory": "290.72",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468026683,
+          "cpu": "75.00",
+          "memory": "291.47",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468024508,
+        "end": 1771468026717,
+        "duration": 2209
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Terms Add Term Associates Applications Showing 4 of 4 terms TERM DATES ACTIONS MANAGE LEARNING Programs Dental Summer 2026 Jul 08, 2026 - Oct 28, 2026 Dental Courses Terms Dental Spring 2026 Mar 04, 2026 - Jun 24, 2026 Dental Questions Pharmacy Spring 2026 Document Templates Mar 04, 2026 - Jun 24, 2026 Pharmacy Campuses Pharmacy Summer 2026 Jan 08, 2026 - Oct 28, 2026 Pharmacy States MANAGE FINANCES Finances Audit Log Reconcile Daily Report Promo Codes SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Terms\n\n| TERM | DATES | ACTIONS |\n| --- | --- | --- |\n| Dental Summer 2026\n                      Dental | Jul 08, 2026 - Oct 28, 2026 | Edit |\n| Dental Spring 2026\n                      Dental | Mar 04, 2026 - Jun 24, 2026 | Edit |\n| Pharmacy Spring 2026\n                      Pharmacy | Mar 04, 2026 - Jun 24, 2026 | Edit |\n| Pharmacy Summer 2026\n                      Pharmacy | Jan 08, 2026 - Oct 28, 2026 | Edit |"
+    },
+    "endTimestamp": 1771468026717,
+    "duration": 2209
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      91,
+      462
+    ],
+    "timestamp": 1771468029137,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/terms",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/19-pre-click.jpg",
+        "timestamp": 1771468029135
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/questions",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/19-post-click.jpg",
+        "timestamp": 1771468031397
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468029136,
+          "cpu": "67.69",
+          "memory": "307.05",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468031402,
+          "cpu": "84.62",
+          "memory": "307.30",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468028899,
+        "end": 1771468031419,
+        "duration": 2520
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Questions Associates Add Question Manage the question dimension records used by CMT workflows. Applications Filter Showing 7 questions MANAGE LEARNING Programs CODE CATEGORY TEXT ORDER ACTIVE Courses q_additional_001 Additional Questions Race 1 Active Terms Additional Questions Gender 2 q_additional_002 Active Questions q_additional_003 Additional Questions Marital status 3 Active Document Templates q_basic_001 Basic Questions How did you hear about us? 1 Campuses Active States q_basic_002 Basic Questions Are you a military veteran? 2 Active MANAGE FINANCES q_basic_003 Basic Questions Do you have a disability? 3 Active Finances q_criminal_003 Criminal History Questions I have been convicted of a misdemeanor or felony. 1 Active Audit Log This table defines canonical question codes. CMT records should reference these codes only. Reconcile Daily Report Promo Codes SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Questions\n\nManage the question dimension records used by CMT workflows.\n\n| CODE | CATEGORY | TEXT | ORDER | ACTIVE |\n| --- | --- | --- | --- | --- |\n| q_additional_001 | Additional Questions | Race | 1 | Active |\n| q_additional_002 | Additional Questions | Gender | 2 | Active |\n| q_additional_003 | Additional Questions | Marital status | 3 | Active |\n| q_basic_001 | Basic Questions | How did you hear about us? | 1 | Active |\n| q_basic_002 | Basic Questions | Are you a military veteran? | 2 | Active |\n| q_basic_003 | Basic Questions | Do you have a disability? | 3 | Active |\n| q_criminal_003 | Criminal History Questions | I have been convicted of a misdemeanor or felony. | 1 | Active |\n\nThis table defines canonical question codes. CMT records should reference these codes only."
+    },
+    "endTimestamp": 1771468031419,
+    "duration": 2520
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      154,
+      500
+    ],
+    "timestamp": 1771468033633,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/questions",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/20-pre-move-mouse.jpg",
+        "timestamp": 1771468033631
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/questions",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/20-post-move-mouse.jpg",
+        "timestamp": 1771468035820
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468033632,
+          "cpu": "57.14",
+          "memory": "307.71",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468035822,
+          "cpu": "69.70",
+          "memory": "293.93",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468033453,
+        "end": 1771468035842,
+        "duration": 2389
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Questions Associates Add Question Manage the question dimension records used by CMT workflows. Applications Filter Showing 7 questions MANAGE LEARNING Programs CODE CATEGORY TEXT ORDER ACTIVE Courses q_additional_001 Additional Questions Race 1 Active Terms Additional Questions Gender 2 q_additional_002 Active Questions q_additional_003 Additional Questions Marital status 3 Active Document Templates q_basic_001 Basic Questions How did you hear about us? 1 Campuses Active States q_basic_002 Basic Questions Are you a military veteran? 2 Active MANAGE FINANCES q_basic_003 Basic Questions Do you have a disability? 3 Active Finances q_criminal_003 Criminal History Questions I have been convicted of a misdemeanor or felony. 1 Active Audit Log This table defines canonical question codes. CMT records should reference these codes only. Reconcile Daily Report Promo Codes SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Questions\n\nManage the question dimension records used by CMT workflows.\n\n| CODE | CATEGORY | TEXT | ORDER | ACTIVE |\n| --- | --- | --- | --- | --- |\n| q_additional_001 | Additional Questions | Race | 1 | Active |\n| q_additional_002 | Additional Questions | Gender | 2 | Active |\n| q_additional_003 | Additional Questions | Marital status | 3 | Active |\n| q_basic_001 | Basic Questions | How did you hear about us? | 1 | Active |\n| q_basic_002 | Basic Questions | Are you a military veteran? | 2 | Active |\n| q_basic_003 | Basic Questions | Do you have a disability? | 3 | Active |\n| q_criminal_003 | Criminal History Questions | I have been convicted of a misdemeanor or felony. | 1 | Active |\n\nThis table defines canonical question codes. CMT records should reference these codes only."
+    },
+    "endTimestamp": 1771468035842,
+    "duration": 2389
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      154,
+      500
+    ],
+    "timestamp": 1771468036712,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/questions",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/21-pre-click.jpg",
+        "timestamp": 1771468036700
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/document_templates",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/21-post-click.jpg",
+        "timestamp": 1771468038664
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468036709,
+          "cpu": "90.48",
+          "memory": "306.20",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468038665,
+          "cpu": "94.12",
+          "memory": "302.11",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468036527,
+        "end": 1771468038692,
+        "duration": 2165
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Document Templates Associates Add Template Manage template records that power CMT document generation. Applications Filter Showing 2 templates MANAGE LEARNING Programs CODE LABEL ACTIVE STORAGE Courses diploma_copy Diploma or GED Active — Terms id_proof Government ID Active — Questions Document templates should be referenced by code in CMT mappings. Document Templates Campuses States MANAGE FINANCES Finances Audit Log Reconcile Daily Report Promo Codes SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Document Templates\n\nManage template records that power CMT document generation.\n\n| CODE | LABEL | ACTIVE | STORAGE |\n| --- | --- | --- | --- |\n| diploma_copy | Diploma or GED | Active | — |\n| id_proof | Government ID | Active | — |\n\nDocument templates should be referenced by code in CMT mappings."
+    },
+    "endTimestamp": 1771468038692,
+    "duration": 2165
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      99,
+      544
+    ],
+    "timestamp": 1771468041368,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/document_templates",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/22-pre-move-mouse.jpg",
+        "timestamp": 1771468041359
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/document_templates",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/22-post-move-mouse.jpg",
+        "timestamp": 1771468043549
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468041360,
+          "cpu": "50.57",
+          "memory": "305.77",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468043550,
+          "cpu": "116.67",
+          "memory": "292.79",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468041124,
+        "end": 1771468043565,
+        "duration": 2441
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Document Templates Associates Add Template Manage template records that power CMT document generation. Applications Filter Showing 2 templates MANAGE LEARNING Programs CODE LABEL ACTIVE STORAGE Courses diploma_copy Diploma or GED Active — Terms id_proof Government ID Active — Questions Document templates should be referenced by code in CMT mappings. Document Templates Campuses States MANAGE FINANCES Finances Audit Log Reconcile Daily Report Promo Codes SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Document Templates\n\nManage template records that power CMT document generation.\n\n| CODE | LABEL | ACTIVE | STORAGE |\n| --- | --- | --- | --- |\n| diploma_copy | Diploma or GED | Active | — |\n| id_proof | Government ID | Active | — |\n\nDocument templates should be referenced by code in CMT mappings."
+    },
+    "endTimestamp": 1771468043565,
+    "duration": 2441
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      99,
+      544
+    ],
+    "timestamp": 1771468046071,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/document_templates",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/23-pre-click.jpg",
+        "timestamp": 1771468046069
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/campuses",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/23-post-click.jpg",
+        "timestamp": 1771468049074
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468046070,
+          "cpu": "51.72",
+          "memory": "307.19",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468049075,
+          "cpu": "91.23",
+          "memory": "308.88",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468045925,
+        "end": 1771468049126,
+        "duration": 3201
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Campuses Add Campus Associates Applications Showing 6 of 6 campuses MANAGE LEARNING Expand all Collapse all Programs FL 2 campuses Courses Terms Orlando 1 Questions CAMPUS TIMEZONE COURSES STUDENTS ACTIONS Document Templates Orlando Dental Campus America/New_York 1 5 Orlando Dental Campus Campuses States Tampa 1 MANAGE FINANCES CAMPUS TIMEZONE COURSES STUDENTS ACTIONS Finances Tampa Pharmacy Campus America/New_York 1 2 Tampa Pharmacy Campus Audit Log Reconcile Daily Report LA 2 campuses Promo Codes Baton Rouge 1 SYSTEM CAMPUS TIMEZONE COURSES STUDENTS ACTIONS Staff Baton Rouge Dental Campus America/Chicago 2 4 CMT Baton Rouge Dental Campus Config Sheet",
+      "domMarkdown2": "# Campuses\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Orlando Dental Campus\n                              \n                                Orlando Dental Campus | America/New_York | 1 | 5 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Tampa Pharmacy Campus\n                              \n                                Tampa Pharmacy Campus | America/New_York | 1 | 2 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Baton Rouge Dental Campus\n                              \n                                Baton Rouge Dental Campus | America/Chicago | 2 | 4 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| New Orleans Pharmacy Campus\n                              \n                                New Orleans Pharmacy Campus | America/Chicago | 2 | 1 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Charlotte Dental Campus\n                              \n                                Charlotte Dental Campus | America/New_York | 1 | 0 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Raleigh Pharmacy Campus\n                              \n                                Raleigh Pharmacy Campus | America/New_York | 1 | 0 | Edit\n                              \n                              \n                                 Delete |"
+    },
+    "endTimestamp": 1771468049126,
+    "duration": 3201
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      62,
+      595
+    ],
+    "timestamp": 1771468051250,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/campuses",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/24-pre-move-mouse.jpg",
+        "timestamp": 1771468051236
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/campuses",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/24-post-move-mouse.jpg",
+        "timestamp": 1771468053436
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468051237,
+          "cpu": "58.67",
+          "memory": "307.70",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468053442,
+          "cpu": "64.21",
+          "memory": "296.89",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468050926,
+        "end": 1771468053487,
+        "duration": 2561
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Campuses Add Campus Associates Applications Showing 6 of 6 campuses MANAGE LEARNING Expand all Collapse all Programs FL 2 campuses Courses Terms Orlando 1 Questions CAMPUS TIMEZONE COURSES STUDENTS ACTIONS Document Templates Orlando Dental Campus America/New_York 1 5 Orlando Dental Campus Campuses States Tampa 1 MANAGE FINANCES CAMPUS TIMEZONE COURSES STUDENTS ACTIONS Finances Tampa Pharmacy Campus America/New_York 1 2 Tampa Pharmacy Campus Audit Log Reconcile Daily Report LA 2 campuses Promo Codes Baton Rouge 1 SYSTEM CAMPUS TIMEZONE COURSES STUDENTS ACTIONS Staff Baton Rouge Dental Campus America/Chicago 2 4 CMT Baton Rouge Dental Campus Config Sheet",
+      "domMarkdown2": "# Campuses\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Orlando Dental Campus\n                              \n                                Orlando Dental Campus | America/New_York | 1 | 5 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Tampa Pharmacy Campus\n                              \n                                Tampa Pharmacy Campus | America/New_York | 1 | 2 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Baton Rouge Dental Campus\n                              \n                                Baton Rouge Dental Campus | America/Chicago | 2 | 4 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| New Orleans Pharmacy Campus\n                              \n                                New Orleans Pharmacy Campus | America/Chicago | 2 | 1 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Charlotte Dental Campus\n                              \n                                Charlotte Dental Campus | America/New_York | 1 | 0 | Edit\n                              \n                              \n                                 Delete |\n\n| CAMPUS | TIMEZONE | COURSES | STUDENTS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Raleigh Pharmacy Campus\n                              \n                                Raleigh Pharmacy Campus | America/New_York | 1 | 0 | Edit\n                              \n                              \n                                 Delete |"
+    },
+    "endTimestamp": 1771468053487,
+    "duration": 2561
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      62,
+      595
+    ],
+    "timestamp": 1771468058056,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/campuses",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/25-pre-click.jpg",
+        "timestamp": 1771468058023
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/states",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/25-post-click.jpg",
+        "timestamp": 1771468061112
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468058024,
+          "cpu": "67.92",
+          "memory": "314.64",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468061112,
+          "cpu": "86.89",
+          "memory": "299.50",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468057780,
+        "end": 1771468061156,
+        "duration": 3376
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE States Add State Associates Applications Showing 25 of 69 states STATE PROGRAMS STATUS CAMPUSES COURSES ACTIONS MANAGE LEARNING Programs AL — Active 0 0 ALABAMA Courses AK Terms — Active 0 0 ALASKA Questions AS — Active 0 0 Document Templates AMERICAN SAMOA Campuses AZ — Active 0 0 ARIZONA States AR — 0 0 MANAGE FINANCES ARKANSAS Active Finances 81 — 0 0 Active Audit Log BAKER ISLAND Reconcile CA — 0 0 Active CALIFORNIA Daily Report Promo Codes CO — Active 0 0 COLORADO SYSTEM CT — Active 0 0 Staff CONNECTICUT CMT DE — Active 0 0 DELAWARE Config Sheet",
+      "domMarkdown2": "# States\n\n| STATE | PROGRAMS | STATUS | CAMPUSES | COURSES | ACTIONS |\n| --- | --- | --- | --- | --- | --- |\n| AL\n                    ALABAMA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| AK\n                    ALASKA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| AS\n                    AMERICAN SAMOA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| AZ\n                    ARIZONA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| AR\n                    ARKANSAS | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| 81\n                    BAKER ISLAND | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| CA\n                    CALIFORNIA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| CO\n                    COLORADO | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| CT\n                    CONNECTICUT | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| DE\n                    DELAWARE | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| DC\n                    DISTRICT OF COLUMBIA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| FM\n                    FED. STATES OF MICRONESIA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| FL\n                    FLORIDA | Dental\n                      Pharmacy | Active | 2 | 2 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| GA\n                    GEORGIA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| GU\n                    GUAM | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| HI\n                    HAWAII | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| 84\n                    HOWLAND ISLAND | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| ID\n                    IDAHO | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| IL\n                    ILLINOIS | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| IN\n                    INDIANA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| IA\n                    IOWA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| 86\n                    JARVIS ISLAND | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| 67\n                    JOHNSTON ATOLL | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| KS\n                    KANSAS | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| KY\n                    KENTUCKY | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |"
+    },
+    "endTimestamp": 1771468061156,
+    "duration": 3376
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      461,
+      342
+    ],
+    "timestamp": 1771468064766,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/states",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/26-pre-move-mouse.jpg",
+        "timestamp": 1771468064764
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/states",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/26-post-move-mouse.jpg",
+        "timestamp": 1771468067004
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468064765,
+          "cpu": "80.77",
+          "memory": "310.27",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468067004,
+          "cpu": "48.00",
+          "memory": "314.32",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468064580,
+        "end": 1771468067052,
+        "duration": 2472
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE States Add State Associates Applications Showing 25 of 69 states STATE PROGRAMS STATUS CAMPUSES COURSES ACTIONS MANAGE LEARNING Programs AL — Active 0 0 ALABAMA Courses AK Terms — Active 0 0 ALASKA Questions AS — Active 0 0 Document Templates AMERICAN SAMOA Campuses AZ — Active 0 0 ARIZONA States AR — 0 0 MANAGE FINANCES ARKANSAS Active Finances 81 — 0 0 Active Audit Log BAKER ISLAND Reconcile CA — 0 0 Active CALIFORNIA Daily Report Promo Codes CO — Active 0 0 COLORADO SYSTEM CT — Active 0 0 Staff CONNECTICUT CMT DE — Active 0 0 DELAWARE Config Sheet",
+      "domMarkdown2": "# States\n\n| STATE | PROGRAMS | STATUS | CAMPUSES | COURSES | ACTIONS |\n| --- | --- | --- | --- | --- | --- |\n| AL\n                    ALABAMA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| AK\n                    ALASKA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| AS\n                    AMERICAN SAMOA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| AZ\n                    ARIZONA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| AR\n                    ARKANSAS | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| 81\n                    BAKER ISLAND | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| CA\n                    CALIFORNIA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| CO\n                    COLORADO | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| CT\n                    CONNECTICUT | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| DE\n                    DELAWARE | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| DC\n                    DISTRICT OF COLUMBIA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| FM\n                    FED. STATES OF MICRONESIA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| FL\n                    FLORIDA | Dental\n                      Pharmacy | Active | 2 | 2 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| GA\n                    GEORGIA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| GU\n                    GUAM | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| HI\n                    HAWAII | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| 84\n                    HOWLAND ISLAND | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| ID\n                    IDAHO | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| IL\n                    ILLINOIS | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| IN\n                    INDIANA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| IA\n                    IOWA | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| 86\n                    JARVIS ISLAND | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| 67\n                    JOHNSTON ATOLL | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| KS\n                    KANSAS | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |\n| KY\n                    KENTUCKY | — | Active | 0 | 0 | Edit\n                    \n                      \n                         Deactivate\n                    \n                       Delete |"
+    },
+    "endTimestamp": 1771468067052,
+    "duration": 2472
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      461,
+      342
+    ],
+    "timestamp": 1771468068918,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/states",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/27-pre-click.jpg",
+        "timestamp": 1771468068915
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/states/AL#overview",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/27-post-click.jpg",
+        "timestamp": 1771468073046
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468068916,
+          "cpu": "65.85",
+          "memory": "326.25",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468073058,
+          "cpu": "112.73",
+          "memory": "307.42",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468067924,
+        "end": 1771468073075,
+        "duration": 5151
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE ALABAMA Edit State Associates Code: AL Applications Programs Campuses Courses MANAGE LEARNING 0 0 0 Programs Courses Requirements and Policies Campuses Documents Content Terms Questions Program Entrance Requirements Document Templates Configure Campuses States No entrance requirements found for programs in this state. MANAGE FINANCES Finances Audit Log Program Completion Policies Configure Reconcile Daily Report No completion policies found for programs in this state. Promo Codes SYSTEM Staff [\":*wait-for-navigation\"] CMT Config Sheet",
+      "domMarkdown2": "# ALABAMA\n\n### Program Entrance Requirements\n\nNo entrance requirements found for programs in this state.\n\n### Program Completion Policies\n\nNo completion policies found for programs in this state."
+    },
+    "endTimestamp": 1771468073075,
+    "duration": 5151
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      85,
+      699
+    ],
+    "timestamp": 1771468077199,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/states/AL#overview",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/28-pre-move-mouse.jpg",
+        "timestamp": 1771468077195
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/states/AL#overview",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/28-post-move-mouse.jpg",
+        "timestamp": 1771468079239
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468077195,
+          "cpu": "47.06",
+          "memory": "313.55",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468079249,
+          "cpu": "67.12",
+          "memory": "314.08",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468076964,
+        "end": 1771468079264,
+        "duration": 2300
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE ALABAMA Edit State Associates Code: AL Applications Programs Campuses Courses MANAGE LEARNING 0 0 0 Programs Courses Requirements and Policies Campuses Documents Content Terms Questions Program Entrance Requirements Document Templates Configure Campuses States No entrance requirements found for programs in this state. MANAGE FINANCES Finances Audit Log Program Completion Policies Configure Reconcile Daily Report No completion policies found for programs in this state. Promo Codes SYSTEM Staff [\":move-mouse\",\":to\",85,699] CMT Config Sheet",
+      "domMarkdown2": "# ALABAMA\n\n### Program Entrance Requirements\n\nNo entrance requirements found for programs in this state.\n\n### Program Completion Policies\n\nNo completion policies found for programs in this state."
+    },
+    "endTimestamp": 1771468079264,
+    "duration": 2300
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      85,
+      699
+    ],
+    "timestamp": 1771468079577,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/states/AL#overview",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/29-pre-click.jpg",
+        "timestamp": 1771468079575
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/finances#scheduled",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/29-post-click.jpg",
+        "timestamp": 1771468081975
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468079576,
+          "cpu": "100.00",
+          "memory": "321.63",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468081984,
+          "cpu": "91.49",
+          "memory": "321.15",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468079379,
+        "end": 1771468082001,
+        "duration": 2622
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Finance Dashboard Audit Log Reconcile Associates Applications Showing: Last 90 days Date Range Applies to KPI cards and Financial Analytics MANAGE LEARNING From To Programs All Time Last 30d Last 90d Last 6m Last 12m YTD Apply Courses Terms $27.0K 5 12 $14.6K 66% collected with balance active payers outstanding recovery Questions Document Templates Campuses Financial Analytics Last 90 days States Monthly Collections Weekly Payment Activity Collected MANAGE FINANCES Payment collections for last 90 days Payment volume for last 90 days Finances Audit Log Reconcile Daily Report Promo Codes SYSTEM Staff 15 avg payments/wk 12 students/wk CMT Last 3 Months: Total Collected: Outstanding: Config Sheet $27k $27.0K $14.6K",
+      "domMarkdown2": "# Finance Dashboard\n\n### Date Range\n\nApplies to KPI cards and Financial Analytics\n\n### Monthly Collections\n\n### Weekly Payment Activity\n\n### Cash Flow Forecast\n\n### Scheduled Payments\n\n| DUE DATE | STUDENT | AMOUNT | STATUS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Mar 20, 2026 | Testing PTTest\n                    test@testing5.com | $799.67 | Scheduled | View |\n| Mar 20, 2026 | Jeff Jeffy\n                    jeff@jeffco.co | $433.17 | Scheduled | View |\n| Mar 20, 2026 | Taylor Holladay\n                    taylor+test@acceleratedacademy.us | $299.83 | Scheduled | View |\n| Mar 20, 2026 | JoAnn Luckey\n                    jojo123@gmail.com | $516.50 | Scheduled | View |\n| Mar 20, 2026 | Lisa Primeaux-Redmond\n                    lisa+1@acceleratedacademy.us | $258.25 | Scheduled | View |"
+    },
+    "endTimestamp": 1771468082001,
+    "duration": 2622
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      90,
+      883
+    ],
+    "timestamp": 1771468087219,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/finances#scheduled",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/30-pre-move-mouse.jpg",
+        "timestamp": 1771468087206
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/finances#scheduled",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/30-post-move-mouse.jpg",
+        "timestamp": 1771468089404
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468087207,
+          "cpu": "51.43",
+          "memory": "323.38",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468089404,
+          "cpu": "46.07",
+          "memory": "315.11",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468087030,
+        "end": 1771468089417,
+        "duration": 2387
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Finance Dashboard Audit Log Reconcile Associates Applications Showing: Last 90 days Date Range Applies to KPI cards and Financial Analytics MANAGE LEARNING From To Programs All Time Last 30d Last 90d Last 6m Last 12m YTD Apply Courses Terms $27.0K 5 12 $14.6K 66% collected with balance active payers outstanding recovery Questions Document Templates Campuses Financial Analytics Last 90 days States Monthly Collections Weekly Payment Activity Collected MANAGE FINANCES Payment collections for last 90 days Payment volume for last 90 days Finances Audit Log Reconcile Daily Report Promo Codes SYSTEM Staff 15 avg payments/wk 12 students/wk CMT Last 3 Months: Total Collected: Outstanding: Config Sheet $27k $27.0K $14.6K",
+      "domMarkdown2": "# Finance Dashboard\n\n### Date Range\n\nApplies to KPI cards and Financial Analytics\n\n### Monthly Collections\n\n### Weekly Payment Activity\n\n### Cash Flow Forecast\n\n### Scheduled Payments\n\n| DUE DATE | STUDENT | AMOUNT | STATUS | ACTIONS |\n| --- | --- | --- | --- | --- |\n| Mar 20, 2026 | Testing PTTest\n                    test@testing5.com | $799.67 | Scheduled | View |\n| Mar 20, 2026 | Jeff Jeffy\n                    jeff@jeffco.co | $433.17 | Scheduled | View |\n| Mar 20, 2026 | Taylor Holladay\n                    taylor+test@acceleratedacademy.us | $299.83 | Scheduled | View |\n| Mar 20, 2026 | JoAnn Luckey\n                    jojo123@gmail.com | $516.50 | Scheduled | View |\n| Mar 20, 2026 | Lisa Primeaux-Redmond\n                    lisa+1@acceleratedacademy.us | $258.25 | Scheduled | View |"
+    },
+    "endTimestamp": 1771468089417,
+    "duration": 2387
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      90,
+      883
+    ],
+    "timestamp": 1771468090709,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/finances#scheduled",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/31-pre-click.jpg",
+        "timestamp": 1771468090700
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/promo_codes",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/31-post-click.jpg",
+        "timestamp": 1771468092508
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468090701,
+          "cpu": "57.89",
+          "memory": "315.92",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468092509,
+          "cpu": "65.00",
+          "memory": "311.49",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468090536,
+        "end": 1771468092520,
+        "duration": 1984
+      },
+      "domMarkdown": "12 Accelerated Student Pipeline ↑ 0% Academy 90-day average 90 days 0 / day MANAGE PEOPLE Associates Promo Codes Create Promo Code Applications Showing 0 promo codes MANAGE LEARNING CODE SCOPE EFFECTS REDEMPTIONS STATUS ACTIONS Programs Courses No promo codes found Terms Create Your First Promo Code Questions Document Templates Campuses States MANAGE FINANCES Finances Audit Log Reconcile Daily Report Promo Codes SYSTEM Staff CMT Config Sheet",
+      "domMarkdown2": "# Promo Codes\n\n| CODE | SCOPE | EFFECTS | REDEMPTIONS | STATUS | ACTIONS |\n| --- | --- | --- | --- | --- | --- |\n| No promo codes found\n                  \n                     Create Your First Promo Code |"
+    },
+    "endTimestamp": 1771468092520,
+    "duration": 1984
+  },
+  {
+    "command": [
+      ":scroll-wheel-down",
+      5
+    ],
+    "timestamp": 1771468100152,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/promo_codes",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/32-pre-scroll-wheel-down.jpg",
+        "timestamp": 1771468100150
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/promo_codes",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/32-post-scroll-wheel-down.jpg",
+        "timestamp": 1771468101931
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468100151,
+          "cpu": "55.56",
+          "memory": "322.50",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468101937,
+          "cpu": "66.67",
+          "memory": "323.38",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468100003,
+        "end": 1771468101982,
+        "duration": 1979
+      },
+      "domMarkdown": "Courses 12 Terms Student Pipeline ↑ 0% 90-day average 90 days 0 / day Questions Document Templates Promo Codes Campuses Create Promo Code States Showing 0 promo codes CODE SCOPE EFFECTS REDEMPTIONS STATUS ACTIONS MANAGE FINANCES Finances Audit Log No promo codes found Reconcile Create Your First Promo Code Daily Report Promo Codes SYSTEM Staff CMT Config Sheet Config Sync Payments Debug Email Logs Email Templates Email Queue Abby Admin AA Logout",
+      "domMarkdown2": "# Promo Codes\n\n| CODE | SCOPE | EFFECTS | REDEMPTIONS | STATUS | ACTIONS |\n| --- | --- | --- | --- | --- | --- |\n| No promo codes found\n                  \n                     Create Your First Promo Code |"
+    },
+    "endTimestamp": 1771468101982,
+    "duration": 1979
+  },
+  {
+    "command": [
+      ":move-mouse",
+      ":to",
+      104,
+      1038
+    ],
+    "timestamp": 1771468104822,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/promo_codes",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/33-pre-move-mouse.jpg",
+        "timestamp": 1771468104812
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/promo_codes",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/33-post-move-mouse.jpg",
+        "timestamp": 1771468106941
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468104813,
+          "cpu": "67.86",
+          "memory": "312.65",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468106942,
+          "cpu": "73.81",
+          "memory": "323.54",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468104651,
+        "end": 1771468106955,
+        "duration": 2304
+      },
+      "domMarkdown": "Courses 12 Terms Student Pipeline ↑ 0% 90-day average 90 days 0 / day Questions Document Templates Promo Codes Campuses Create Promo Code States Showing 0 promo codes CODE SCOPE EFFECTS REDEMPTIONS STATUS ACTIONS MANAGE FINANCES Finances Audit Log No promo codes found Reconcile Create Your First Promo Code Daily Report Promo Codes SYSTEM Staff CMT Config Sheet Config Sync Payments Debug Email Logs Email Templates Email Queue Abby Admin AA Logout",
+      "domMarkdown2": "# Promo Codes\n\n| CODE | SCOPE | EFFECTS | REDEMPTIONS | STATUS | ACTIONS |\n| --- | --- | --- | --- | --- | --- |\n| No promo codes found\n                  \n                     Create Your First Promo Code |"
+    },
+    "endTimestamp": 1771468106955,
+    "duration": 2304
+  },
+  {
+    "command": [
+      ":click",
+      ":at",
+      104,
+      1038
+    ],
+    "timestamp": 1771468110346,
+    "output": {
+      "success": true,
+      "preState": {
+        "url": "https://staging.acceleratedacademy.cloud/admin/promo_codes",
+        "title": "Accelerated Academy - Admin",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/34-pre-click.jpg",
+        "timestamp": 1771468110277
+      },
+      "postState": {
+        "url": "https://staging.acceleratedacademy.cloud/",
+        "title": "Course Selection - Accelerated Academy",
+        "screenshotPath": "/app/rabbitize-runs/flow-builder/gliding-eagle-65/2026-02-19T02-25-15-460Z/screenshots/34-post-click.jpg",
+        "timestamp": 1771468112764
+      },
+      "metrics": {
+        "pre": {
+          "timestamp": 1771468110282,
+          "cpu": "50.67",
+          "memory": "323.79",
+          "elapsed": 0
+        },
+        "post": {
+          "timestamp": 1771468112765,
+          "cpu": "78.26",
+          "memory": "328.94",
+          "elapsed": 0
+        }
+      },
+      "timing": {
+        "start": 1771468110094,
+        "end": 1771468112784,
+        "duration": 2690
+      },
+      "domMarkdown": "Accelerated Academy (844)727-3755 🔧 Development / Testing Mode Select Your Course Browse available courses with dynamic application questions configured. State City Program Term Showing 6 courses Reset Florida · Orlando Florida · Tampa Louisiana · Baton Rouge Louisiana · New Orleans North Carolina · Charlotte Dental Pharmacy Dental Pharmacy Dental Active Active Active Active Active Campus Orlando Dental Campus Campus Tampa Pharmacy Campus Campus Baton Rouge Dental Campus Campus New Orleans Pharmacy Campus Campus Charlotte Dental Campus Term Dental Spring 2026 Term Pharmacy Spring 2026 Term Dental Spring 2026 Term Pharmacy Spring 2026 Term Dental Spring 2026 Start Date Mar 04, 2026 Start Date Mar 04, 2026 Start Date Mar 04, 2026 Start Date Mar 04, 2026 Start Date Mar 04, 2026 End Date Jun 24, 2026 End Date Jun 24, 2026 End Date Jun 24, 2026 End Date Jun 24, 2026 End Date Jun 24, 2026 3599.0 3099.0 3499.0 2999.0 3399.0 Tuition Tuition Tuition Tuition Tuition ✓ 7 dynamic questions configured ✓ 7 dynamic questions configured ✓ 7 dynamic questions configured ✓ 7 dynamic questions configured ✓ 7 dynamic questions configured Start Application → Start Application → Start Application → Start Application → Start Application → North Carolina · Raleigh Pharmacy Active Campus Raleigh Pharmacy Campus Term Pharmacy Spring 2026",
+      "domMarkdown2": "# Select Your Course\n\nBrowse available courses with dynamic application questions configured.\n\n### Dental\n              Active\n\n### Pharmacy\n              Active\n\n### Dental\n              Active\n\n### Pharmacy\n              Active\n\n### Dental\n              Active\n\n### Pharmacy\n              Active"
+    },
+    "endTimestamp": 1771468112784,
+    "duration": 2690
+  }
+]

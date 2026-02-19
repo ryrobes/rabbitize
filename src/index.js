@@ -416,7 +416,7 @@ async function main() {
     });
 
     app.use(express.json({
-      limit: '10mb',
+      limit: '50mb',
       strict: false,
       type: ['application/json', 'text/plain']
     }));
@@ -428,6 +428,13 @@ async function main() {
         return res.status(400).json({
           error: 'Invalid JSON format',
           details: err.message
+        });
+      }
+      if (err && err.type === 'entity.too.large') {
+        logger.warn('Received oversized JSON payload:', err.message);
+        return res.status(413).json({
+          error: 'Request payload too large',
+          details: 'JSON body exceeds 50MB limit'
         });
       }
       next(err);
@@ -1970,7 +1977,7 @@ async function main() {
     });
 
     // Import test definitions from JSON
-    app.post('/api/import-tests', express.json({ limit: '50mb' }), async (req, res) => {
+    app.post('/api/import-tests', async (req, res) => {
       try {
         const importData = req.body;
 
@@ -1985,6 +1992,11 @@ async function main() {
         let skipped = 0;
 
         for (const [clientId, tests] of Object.entries(importData.tests)) {
+          if (!tests || typeof tests !== 'object') {
+            skipped++;
+            continue;
+          }
+
           for (const [testId, testData] of Object.entries(tests)) {
             if (!testData.commands || !Array.isArray(testData.commands)) {
               skipped++;
