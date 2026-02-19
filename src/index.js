@@ -311,7 +311,6 @@ async function main() {
 
     // Create express app first
     const app = express();
-    app.use(express.json());
 
     // Setup CORS for Flow Builder cross-port requests
     app.use((req, res, next) => {
