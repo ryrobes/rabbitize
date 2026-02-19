@@ -18,7 +18,7 @@
 .flow-header {
     padding: 20px;
     text-align: center;
-    border-bottom: 1px solid #0ff;
+    border-bottom: 1px solid var(--color-primary);
     background: rgba(0, 255, 255, 0.05);
     position: relative;
 }
@@ -27,17 +27,17 @@
     position: absolute;
     left: 20px;
     top: 20px;
-    color: #0ff;
+    color: var(--color-primary);
     text-decoration: none;
     padding: 8px 16px;
-    border: 1px solid #0ff;
+    border: 1px solid var(--color-primary);
     border-radius: 4px;
     transition: all 0.2s;
     font-size: 14px;
 }
 
 .back-to-dashboard:hover {
-    background: #0ff;
+    background: var(--color-primary);
     color: #000;
     transform: translateX(-2px);
 }
@@ -123,7 +123,7 @@
 }
 
 .url-bar:focus {
-    border-color: #0ff;
+    border-color: var(--color-primary);
     background: #0a0a0a;
     box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.2);
 }
@@ -171,7 +171,7 @@
 
 .placeholder-content {
     text-align: center;
-    color: #0ff;
+    color: var(--color-primary);
 }
 
 .placeholder-icon {
@@ -182,7 +182,7 @@
 .placeholder-content h2 {
     font-size: 24px;
     margin-bottom: 10px;
-    text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+    text-shadow: 0 0 20px var(--glow-primary);
 }
 
 .placeholder-content p {
@@ -213,7 +213,7 @@
     position: absolute;
     width: 20px;
     height: 20px;
-    border: 2px solid #0ff;
+    border: 2px solid var(--color-primary);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
@@ -308,7 +308,7 @@
 }
 
 .palette-header h3 {
-    color: #0ff;
+    color: var(--color-primary);
     font-size: 16px;
     font-weight: 600;
     margin: 0;
@@ -327,7 +327,7 @@
 }
 
 .command-category h4 {
-    color: #0ff;
+    color: var(--color-primary);
     font-size: 14px;
     margin: 0 0 8px 0;
     opacity: 0.8;
@@ -353,8 +353,8 @@
 
 .cmd-btn:hover:not(:disabled) {
     background: #333;
-    border-color: #0ff;
-    color: #0ff;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 255, 255, 0.3);
 }
@@ -401,7 +401,7 @@
 }
 
 .editor-header h3 {
-    color: #0ff;
+    color: var(--color-primary);
     font-size: 16px;
     margin: 0;
 }
@@ -424,8 +424,8 @@
 }
 
 .editor-btn:hover {
-    border-color: #0ff;
-    color: #0ff;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
     background: rgba(0, 255, 255, 0.1);
 }
 
@@ -453,7 +453,7 @@
     bottom: 50px;
     right: 16px;
     background: #1a1a1a;
-    border: 1px solid #0ff;
+    border: 1px solid var(--color-primary);
     border-radius: 4px;
     padding: 4px;
     box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
@@ -476,7 +476,7 @@
 
 .export-option:hover {
     background: rgba(0, 255, 255, 0.1);
-    color: #0ff;
+    color: var(--color-primary);
 }
 
 
@@ -526,11 +526,11 @@
 
 .modal-content {
     background: #1a1a1a;
-    border: 2px solid #0ff;
+    border: 2px solid var(--color-primary);
     border-radius: 8px;
     min-width: 400px;
     max-width: 600px;
-    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 30px var(--glow-primary);
 }
 
 .modal-header {
@@ -542,7 +542,7 @@
 }
 
 .modal-header h3 {
-    color: #0ff;
+    color: var(--color-primary);
     font-size: 18px;
     margin: 0;
 }
@@ -568,7 +568,7 @@
 
 .param-input-group label {
     display: block;
-    color: #0ff;
+    color: var(--color-primary);
     font-size: 14px;
     margin-bottom: 8px;
 }
@@ -590,7 +590,7 @@
 .param-input-group textarea:focus,
 .param-input-group select:focus {
     outline: none;
-    border-color: #0ff;
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.2);
 }
 
@@ -620,12 +620,12 @@
 }
 
 .modal-btn.confirm {
-    border-color: #0ff;
-    color: #0ff;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }
 
 .modal-btn.confirm:hover {
-    background: #0ff;
+    background: var(--color-primary);
     color: #000;
 }
 
@@ -651,7 +651,7 @@
     width: 40px;
     height: 40px;
     border: 3px solid #333;
-    border-top-color: #0ff;
+    border-top-color: var(--color-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }

@@ -2,7 +2,10 @@
 <html>
 <head>
     <title>{{CLIENT_ID}}/{{TEST_ID}} - RABBITIZE TEST</title>
+    <link rel="stylesheet" href="/resources/streaming/themes/theme-variables.css">
+    <link rel="stylesheet" href="/resources/streaming/themes/theme-styles.css">
     <link rel="stylesheet" href="/resources/streaming/cyberpunk.css">
+    <link rel="stylesheet" href="/resources/streaming/themes/theme-switcher.css">
     <link rel="icon" type="image/x-icon" href="/resources/streaming/favicon.png">
     <style>
         /* Breadcrumb positioning override for this page */
@@ -11,10 +14,10 @@
             top: 20px;
             right: 20px;
             font-size: 12px;
-            color: #0ff;
+            color: var(--color-primary);
             background: rgba(0, 0, 0, 0.8);
             padding: 10px 20px;
-            border: 1px solid #0ff;
+            border: 1px solid var(--color-primary);
             z-index: 100;
         }
     </style>
@@ -378,5 +381,6 @@
         }
     </script>
     <script src="/resources/streaming/dock.js"></script>
+    <script src="/resources/streaming/themes/theme-switcher.js"></script>
 </body>
 </html>

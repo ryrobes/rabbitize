@@ -1840,6 +1840,176 @@ async function main() {
       }
     });
 
+    // Export all test definitions as JSON
+    app.get('/api/export-tests', async (req, res) => {
+      try {
+        const runsDir = path.join(process.cwd(), 'rabbitize-runs');
+        const exportData = {
+          exportDate: new Date().toISOString(),
+          version: '1.0',
+          tests: {}
+        };
+
+        if (!fs.existsSync(runsDir)) {
+          return res.json(exportData);
+        }
+
+        const clients = await fsPromises.readdir(runsDir);
+
+        for (const clientId of clients) {
+          if (clientId === 'process-tracking.json') continue;
+          const clientPath = path.join(runsDir, clientId);
+          const clientStat = await fsPromises.stat(clientPath);
+          if (!clientStat.isDirectory()) continue;
+
+          exportData.tests[clientId] = {};
+          const tests = await fsPromises.readdir(clientPath);
+
+          for (const testId of tests) {
+            const testPath = path.join(clientPath, testId);
+            const testStat = await fsPromises.stat(testPath);
+            if (!testStat.isDirectory()) continue;
+
+            // Get all sessions for this test, sorted by date (newest first)
+            const sessions = await fsPromises.readdir(testPath);
+            const sessionData = [];
+
+            for (const sessionId of sessions) {
+              const sessionPath = path.join(testPath, sessionId);
+              const sessionStat = await fsPromises.stat(sessionPath);
+              if (!sessionStat.isDirectory()) continue;
+
+              const commandsPath = path.join(sessionPath, 'commands.json');
+              const metadataPath = path.join(sessionPath, 'session-metadata.json');
+
+              if (fs.existsSync(commandsPath)) {
+                try {
+                  const commands = JSON.parse(await fsPromises.readFile(commandsPath, 'utf8'));
+                  let metadata = {};
+                  if (fs.existsSync(metadataPath)) {
+                    metadata = JSON.parse(await fsPromises.readFile(metadataPath, 'utf8'));
+                  }
+                  sessionData.push({
+                    sessionId,
+                    commands,
+                    url: metadata.initialUrl || '',
+                    startTime: metadata.startTime || sessionStat.ctimeMs
+                  });
+                } catch (e) {
+                  // Skip invalid files
+                }
+              }
+            }
+
+            // Sort by startTime descending and take the most recent
+            sessionData.sort((a, b) => b.startTime - a.startTime);
+
+            if (sessionData.length > 0) {
+              const latest = sessionData[0];
+              exportData.tests[clientId][testId] = {
+                commands: latest.commands,
+                url: latest.url,
+                lastSessionId: latest.sessionId,
+                lastRun: new Date(latest.startTime).toISOString(),
+                totalRuns: sessionData.length
+              };
+            }
+          }
+
+          // Remove empty clients
+          if (Object.keys(exportData.tests[clientId]).length === 0) {
+            delete exportData.tests[clientId];
+          }
+        }
+
+        // Set filename for download
+        const filename = `rabbitize-tests-${new Date().toISOString().split('T')[0]}.json`;
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', 'application/json');
+        res.json(exportData);
+
+      } catch (error) {
+        logger.error('Error exporting tests:', error);
+        res.status(500).json({ error: 'Failed to export tests' });
+      }
+    });
+
+    // Import test definitions from JSON
+    app.post('/api/import-tests', express.json({ limit: '50mb' }), async (req, res) => {
+      try {
+        const importData = req.body;
+
+        if (!importData || !importData.tests) {
+          return res.status(400).json({ error: 'Invalid import data format' });
+        }
+
+        const runsDir = path.join(process.cwd(), 'rabbitize-runs');
+        await fsPromises.mkdir(runsDir, { recursive: true });
+
+        let imported = 0;
+        let skipped = 0;
+
+        for (const [clientId, tests] of Object.entries(importData.tests)) {
+          for (const [testId, testData] of Object.entries(tests)) {
+            if (!testData.commands || !Array.isArray(testData.commands)) {
+              skipped++;
+              continue;
+            }
+
+            // Create a new session for this imported test
+            const sessionId = `imported-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+            const sessionPath = path.join(runsDir, clientId, testId, sessionId);
+
+            await fsPromises.mkdir(sessionPath, { recursive: true });
+
+            // Write commands.json
+            await fsPromises.writeFile(
+              path.join(sessionPath, 'commands.json'),
+              JSON.stringify(testData.commands, null, 2)
+            );
+
+            // Write session-metadata.json with all required fields for display
+            const now = Date.now();
+            const metadata = {
+              clientId,
+              testId,
+              sessionId,
+              status: 'imported',
+              phase: 'imported',
+              startTime: now,
+              endTime: now,
+              duration: 0,
+              initialUrl: testData.url || '',
+              commandCount: testData.commands.length,
+              totalCommands: testData.commands.length,
+              importedFrom: testData.lastSessionId || 'unknown',
+              importedAt: new Date().toISOString(),
+              originalLastRun: testData.lastRun || null,
+              hasVideo: false,
+              hasScreenshots: false
+            };
+            await fsPromises.writeFile(
+              path.join(sessionPath, 'session-metadata.json'),
+              JSON.stringify(metadata, null, 2)
+            );
+
+            imported++;
+          }
+        }
+
+        res.json({
+          success: true,
+          imported,
+          skipped,
+          message: `Imported ${imported} test definition(s), skipped ${skipped}`
+        });
+
+      } catch (error) {
+        logger.error('Error importing tests:', error);
+        res.status(500).json({ error: 'Failed to import tests: ' + error.message });
+      }
+    });
+
     // Root redirect to streaming dashboard
     app.get('/', (req, res) => {
       res.redirect('/streaming');
@@ -2075,12 +2245,12 @@ async function main() {
             stepData.command = JSON.stringify(latest.commands[i].command);
           }
 
-          // Find screenshots (_crop.jpg files)
+          // Find screenshots ({index}.jpg files)
           const baselineScreenshotsPath = path.join(testPath, baseline.sessionId, 'screenshots');
           const latestScreenshotsPath = path.join(testPath, latest.sessionId, 'screenshots');
 
-          const baselineCrop = `${i}_crop.jpg`;
-          const latestCrop = `${i}_crop.jpg`;
+          const baselineCrop = `${i}.jpg`;
+          const latestCrop = `${i}.jpg`;
 
           const baselineCropPath = path.join(baselineScreenshotsPath, baselineCrop);
           const latestCropPath = path.join(latestScreenshotsPath, latestCrop);
@@ -2206,8 +2376,8 @@ async function main() {
         const baseline = sessions[1];
 
         // Find screenshot paths
-        const baselineCropPath = path.join(testPath, baseline.sessionId, 'screenshots', `${index}_crop.jpg`);
-        const latestCropPath = path.join(testPath, latest.sessionId, 'screenshots', `${index}_crop.jpg`);
+        const baselineCropPath = path.join(testPath, baseline.sessionId, 'screenshots', `${index}.jpg`);
+        const latestCropPath = path.join(testPath, latest.sessionId, 'screenshots', `${index}.jpg`);
 
         if (!fs.existsSync(baselineCropPath) || !fs.existsSync(latestCropPath)) {
           return res.status(404).json({ error: 'Screenshots not found for this step' });

@@ -152,6 +152,7 @@
                                 <div class="client-stats">
                                     <span>${sessions.length} run${sessions.length !== 1 ? 's' : ''}</span>
                                     ${activeTestSessions > 0 ? `<span style="color: #0f0;">${activeTestSessions} active</span>` : ''}
+                                    ${sessions.length >= 2 ? `<a href="/compare/${clientId}/${testId}" class="action-link" style="margin-left: 15px; font-size: 11px;">[ COMPARE ]</a>` : ''}
                                 </div>
                             </div>
                             <div class="test-content">
@@ -254,6 +255,7 @@
                         testHeader.innerHTML = `
                             <span>${stats.total} run${stats.total !== 1 ? 's' : ''}</span>
                             ${stats.active > 0 ? `<span style="color: #0f0;">${stats.active} active</span>` : ''}
+                            ${stats.total >= 2 ? `<a href="/compare/${clientId}/${testId}" class="action-link" style="margin-left: 15px; font-size: 11px;">[ COMPARE ]</a>` : ''}
                         `;
                     }
                 });

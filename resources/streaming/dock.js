@@ -19,6 +19,15 @@
                     <span class="menu-icon">⊞</span>
                     <span class="menu-label">ALL</span>
                 </a>
+                <button class="dock-menu-item" onclick="exportTests()" title="Export all test definitions">
+                    <span class="menu-icon">↓</span>
+                    <span class="menu-label">EXPORT</span>
+                </button>
+                <button class="dock-menu-item" onclick="importTests()" title="Import test definitions">
+                    <span class="menu-icon">↑</span>
+                    <span class="menu-label">IMPORT</span>
+                </button>
+                <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="handleImportFile(event)">
             </div>
         </div>
     `;
@@ -153,5 +162,82 @@
     // Minimize dock
     window.minimizeDock = function() {
         dock.classList.toggle('minimized');
+    };
+
+    // Export all test definitions
+    window.exportTests = async function() {
+        try {
+            const response = await fetch('/api/export-tests');
+            if (!response.ok) {
+                throw new Error('Export failed');
+            }
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `rabbitize-tests-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Export failed:', error);
+            alert('Failed to export tests: ' + error.message);
+        }
+    };
+
+    // Import test definitions
+    window.importTests = function() {
+        document.getElementById('import-file-input').click();
+    };
+
+    // Handle import file selection
+    window.handleImportFile = async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+
+            // Validate structure
+            if (!data.tests) {
+                throw new Error('Invalid file format: missing "tests" field');
+            }
+
+            // Count tests
+            let testCount = 0;
+            for (const client of Object.values(data.tests)) {
+                testCount += Object.keys(client).length;
+            }
+
+            if (!confirm(`Import ${testCount} test definition(s) from "${file.name}"?\n\nThis will create new sessions with the imported commands.`)) {
+                event.target.value = '';
+                return;
+            }
+
+            const response = await fetch('/api/import-tests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: text
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`Import successful!\n\nImported: ${result.imported} test(s)\nSkipped: ${result.skipped}`);
+                // Reload the page to show imported tests
+                window.location.reload();
+            } else {
+                throw new Error(result.error || 'Import failed');
+            }
+
+        } catch (error) {
+            console.error('Import failed:', error);
+            alert('Failed to import tests: ' + error.message);
+        }
+
+        // Reset file input
+        event.target.value = '';
     };
 })();

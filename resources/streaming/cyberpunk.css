@@ -1286,6 +1286,17 @@ img#stream {
     color: var(--color-primary);
     text-decoration: none;
     transition: all 0.3s ease;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0;
+    outline: none;
+}
+
+button.dock-menu-item {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .dock-menu-item:hover {
